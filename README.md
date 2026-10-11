@@ -38,8 +38,15 @@ Weather comes from Open-Meteo (no key). If eBird returns a CORS error in the bro
 2. SQL Editor → paste `schema.sql` → Run. Creates profiles, posts, likes, listings, bookings, a public `photos` bucket, and row-level security.
 3. Authentication → URL Configuration → Site URL = your Pages URL (e.g. `https://benm5151.github.io/DayBird/`). Add it to Redirect URLs too.
 4. Put the Project URL and anon key in `js/config.js`. The anon key is public by design; RLS decides who can write what.
+5. Run `migration-2.sql` the same way (comments, private listing locations, host bookings).
 
 Sign-in is a magic link by email (no passwords). When signed in: profile, life-list summary, posts, likes, listings and bookings go to the database; photos go to storage. Signed out: everything stays in localStorage like before.
+
+## Also in
+
+- Public profiles (`profile.html?u=<id>`), comments, delete own posts.
+- Hosts store an exact location + directions in `listing_private`; RLS reveals it only to the host and to people with a booking. Host dashboard lists who booked. Birders can cancel.
+- PWA manifest + icon (add to home screen), bottom tab bar on phones, "use my location" in Settings, `about.html` to share.
 
 ## Still faked
 

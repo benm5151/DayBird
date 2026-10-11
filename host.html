@@ -5,6 +5,10 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Daybird — Host your land</title>
 <link rel="stylesheet" href="css/style.css">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#2f6b4f">
+<link rel="icon" href="icon.svg">
+<link rel="apple-touch-icon" href="icon.svg">
 </head>
 <body>
 <div class="wrap">
@@ -20,7 +24,7 @@
   </nav>
 
   <h1>Get paid when your land is at its best.</h1>
-  <p class="lead">You pick the days. We send a small group of birders on mornings the brief calls GO. Exact location is never shown publicly.</p>
+  <p class="lead">You pick the days. We send a small group of birders on mornings the brief calls GO. Your exact location is stored privately and only revealed to people who book.</p>
 
   <div class="card">
     <label>Listing title</label><input id="title" placeholder="e.g. Back Pasture Pond — Dawn Pass">
@@ -31,7 +35,9 @@
     <label>Max birders per morning</label><input id="seats" type="number" value="6">
     <label>Time window</label><input id="window" value="6:30–9:30 AM">
     <label>Available dates (comma separated, YYYY-MM-DD)</label><input id="dates" placeholder="2026-10-25, 2026-11-01">
-    <label>Rules and notes</label><textarea id="host" rows="2" placeholder="Parking, no dogs, stay on mowed paths…"></textarea>
+    <label>Exact location (private — only shown to people who book)</label><input id="location" placeholder="123 River Rd, Plainfield NH — or lat, long">
+    <label>Directions and meeting point (private)</label><textarea id="directions" rows="2" placeholder="Park by the red barn. Meet at the gate at 6:30."></textarea>
+    <label>Rules and notes (public)</label><textarea id="host" rows="2" placeholder="Parking, no dogs, stay on mowed paths…"></textarea>
     <div style="margin-top:12px"><button id="save">Publish listing</button></div>
     <p class="meta" style="margin-top:10px">Signed in: your listing is published for everyone. Signed out: it stays in this browser only. Liability coverage and payouts are not built yet.</p>
   </div>
@@ -50,11 +56,12 @@ document.getElementById('save').onclick = async () => {
   const v = (id) => document.getElementById(id).value.trim();
   const split = (s) => s.split(',').map(x => x.trim()).filter(Boolean);
   if (!v('title')) return alert('Give it a title.');
-  await DB.addListing({
+  try { await DB.addListing({
     id: 'host-' + Date.now(), title: v('title'), area: v('area') + ' (exact location shared after booking)',
     habitat: split(v('habitat')), targets: split(v('targets')), price: +v('price') || 0, seats: +v('seats') || 6,
-    window: v('window'), trigger: 'Host-selected dates', host: v('host'), dates: split(v('dates')), sample: false
-  });
+    window: v('window'), trigger: 'Host-selected dates', host: v('host'), dates: split(v('dates')), sample: false,
+    location: v('location'), directions: v('directions')
+  }); } catch (e) { return alert('Could not publish: ' + e.message); }
   location.href = 'passes.html';
 };
 </script>

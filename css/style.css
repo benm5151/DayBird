@@ -67,3 +67,12 @@ label{display:block;font-size:13px;font-weight:600;color:var(--muted);margin:10p
 footer{color:var(--muted);font-size:12px;margin-top:40px;border-top:1px solid var(--line);padding-top:14px}
 .hidden{display:none !important}
 @media (max-width:600px){h1{font-size:28px}.call .big{font-size:40px}}
+
+/* phone: tabs become a fixed bottom bar */
+@media (max-width:600px){
+  nav.tabs{position:fixed;left:0;right:0;bottom:0;background:var(--card);border-top:1px solid var(--line);border-bottom:0;margin:0;padding:4px 6px calc(4px + env(safe-area-inset-bottom));z-index:50;justify-content:space-around}
+  nav.tabs a{padding:8px 6px;font-size:12px;border-bottom:0;border-top:2px solid transparent}
+  nav.tabs a.active{border-top-color:var(--green)}
+  .wrap{padding-bottom:90px}
+  header.top{flex-direction:column;align-items:flex-start;gap:8px}
+}

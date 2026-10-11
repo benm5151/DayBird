@@ -5,6 +5,10 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Daybird — Feed</title>
 <link rel="stylesheet" href="css/style.css">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#2f6b4f">
+<link rel="icon" href="icon.svg">
+<link rel="apple-touch-icon" href="icon.svg">
 </head>
 <body>
 <div class="wrap">
@@ -27,7 +31,7 @@
     <div style="margin-top:8px;display:flex;gap:10px;align-items:center;flex-wrap:wrap"><button id="postBtn">Post</button><input type="file" id="photo" accept="image/*" style="width:auto"><span class="meta" id="photoMsg"></span></div>
   </div>
   <div id="feed"></div>
-  <footer>Prototype: posts live in this browser only. A real feed needs a backend (see README).</footer>
+  <footer id="foot">Signed out: posts stay in this browser. Sign in (top right) to post to the shared feed.</footer>
 </div>
 
 <script src="data/mock.js"></script>
@@ -42,36 +46,64 @@
   await DB.ready;
   const $ = (id) => document.getElementById(id);
   const likeMap = {};
-  async function render() {
-    const posts = await DB.loadFeed();
-    posts.forEach(p => likeMap[p.id] = p.liked);
-    $('feed').innerHTML = posts.map(p => `
-      <div class="card feed-post">
-        ${p.avatar ? `<img class="avatar" src="${p.avatar}" alt="" style="object-fit:cover">` : `<div class="avatar">${DB.esc((p.who || 'B')[0])}</div>`}
+
+  function postHTML(p) {
+    const who = p.userId ? `<a class="who" href="profile.html?u=${p.userId}">${DB.esc(p.who)}</a>` : `<span class="who">${DB.esc(p.who)}</span>`;
+    const av = p.avatar ? `<img class="avatar" src="${p.avatar}" alt="" style="object-fit:cover">` : `<div class="avatar">${DB.esc((p.who || 'B')[0])}</div>`;
+    const comments = (p.comments || []).map(c => `<div class="row" style="padding:6px 0"><span><b>${DB.esc(c.who)}</b> ${DB.esc(c.text)}</span><span class="r">${DB.ago(c.at)}${c.mine ? ` <button class="small ghost" data-delc="${c.id}" style="padding:1px 6px;font-size:11px">×</button>` : ''}</span></div>`).join('');
+    return `
+      <div class="card feed-post" data-post="${p.id}">
+        ${p.userId ? `<a href="profile.html?u=${p.userId}">${av}</a>` : av}
         <div class="body">
-          <span class="who">${DB.esc(p.who)}</span><span class="when">${DB.ago(p.at)}</span>
+          ${who}<span class="when">${DB.ago(p.at)}</span>
+          ${p.mine ? `<button class="small ghost" data-del="${p.id}" style="float:right;padding:2px 8px;font-size:12px">delete</button>` : ''}
           <div class="text">${DB.esc(p.text)}</div>
           ${p.photo ? `<img src="${p.photo}" alt="" style="max-width:100%;border-radius:10px;margin:4px 0 8px">` : ''}
           <div>${(p.tags||[]).map(t => `<span class="chip">#${DB.esc(t)}</span>`).join('')}</div>
-          <div class="actions" style="margin-top:6px"><button class="${p.liked ? 'liked' : ''}" data-like="${p.id}">♥ ${p.likes}</button></div>
+          <div class="actions" style="margin-top:6px">
+            <button class="${p.liked ? 'liked' : ''}" data-like="${p.id}">♥ ${p.likes}</button>
+            <button data-toggle="${p.id}">💬 ${(p.comments||[]).length}</button>
+          </div>
+          <div class="comments hidden" id="c-${p.id}" style="margin-top:8px">
+            ${comments}
+            ${DB.online() ? `<div style="display:flex;gap:6px;margin-top:6px"><input placeholder="Add a comment" data-cin="${p.id}"><button class="small" data-csend="${p.id}">Send</button></div>` : '<p class="meta">Sign in to comment.</p>'}
+          </div>
         </div>
-      </div>`).join('');
+      </div>`;
+  }
+  async function render() {
+    const posts = await DB.loadFeed();
+    posts.forEach(p => likeMap[p.id] = p.liked);
+    const open = [...document.querySelectorAll('.comments:not(.hidden)')].map(e => e.id);
+    $('feed').innerHTML = posts.map(postHTML).join('') || '<p class="meta">Nothing yet. Be the first.</p>';
+    open.forEach(id => $(id)?.classList.remove('hidden'));
   }
   render();
   document.addEventListener('daybird:refresh', render);
-  if (!DB.online() && CLOUD.ready) $('mystats').insertAdjacentHTML('beforebegin', '<div class="banner">Sign in (top right) to post to the shared feed. Right now you are seeing sample posts.</div>');
+  if (DB.online()) $('foot').textContent = 'Shared feed. Be kind, report real birds, keep exact locations of sensitive species vague.';
+
   const L = await DB.lifeList(), P = await DB.profile();
   if (L) $('mystats').innerHTML = `<div class="card"><div class="stat"><div><b>${L.total}</b><span>life list</span></div><div><b>${L.yearList}</b><span>this year</span></div><div><b>${DB.esc(L.recentLifers[0].name)}</b><span>latest lifer</span></div>${P.favorite ? `<div><b>${DB.esc(P.favorite)}</b><span>favorite</span></div>` : ''}</div><a class="meta" href="profile.html">Edit profile →</a></div>`;
   else $('mystats').innerHTML = `<p class="meta"><a href="profile.html">Import your eBird list</a> to show your life-list stats here.</p>`;
+
   let photo = null;
   $('photo').onchange = async (e) => { if (e.target.files[0]) { photo = await DB.fileToDataURL(e.target.files[0]); $('photoMsg').textContent = 'photo attached'; } };
   $('postBtn').onclick = async () => {
     const t = $('text').value.trim(); if (!t && !photo) return;
     $('postBtn').disabled = true;
-    await DB.post(t, $('tags').value.split(',').map(s => s.trim()).filter(Boolean), photo);
+    try { await DB.post(t, $('tags').value.split(',').map(s => s.trim()).filter(Boolean), photo); }
+    catch (e) { alert('Could not post: ' + e.message); }
     $('text').value = ''; $('tags').value = ''; photo = null; $('photo').value = ''; $('photoMsg').textContent = ''; $('postBtn').disabled = false; render();
   };
-  $('feed').addEventListener('click', async e => { const id = e.target.dataset.like; if (id) { await DB.toggleLike(id, likeMap[id]); render(); } });
+  $('feed').addEventListener('click', async e => {
+    const d = e.target.dataset;
+    if (d.like) { await DB.toggleLike(d.like, likeMap[d.like]); render(); }
+    else if (d.toggle) { $('c-' + d.toggle).classList.toggle('hidden'); }
+    else if (d.del && confirm('Delete this post?')) { await DB.deletePost(d.del); render(); }
+    else if (d.csend) { const inp = document.querySelector(`[data-cin="${d.csend}"]`); const t = inp.value.trim(); if (!t) return; await CLOUD.addComment(d.csend, t); render(); }
+    else if (d.delc) { await CLOUD.deleteComment(d.delc); render(); }
+  });
+  $('feed').addEventListener('keydown', e => { if (e.key === 'Enter' && e.target.dataset.cin) document.querySelector(`[data-csend="${e.target.dataset.cin}"]`).click(); });
 })();
 </script>
 </body>

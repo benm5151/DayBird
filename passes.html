@@ -5,12 +5,15 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Daybird — Land Passes</title>
 <link rel="stylesheet" href="css/style.css">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#2f6b4f">
+<link rel="icon" href="icon.svg">
+<link rel="apple-touch-icon" href="icon.svg">
 </head>
 <body>
 <div class="wrap">
   <header class="top">
     <a class="brand" href="index.html">Daybird<small>Land passes</small></a>
-    <a class="btn ghost" href="host.html">List your land</a>
   </header>
   <nav class="tabs">
     <a href="index.html">Brief</a>
@@ -21,13 +24,14 @@
   </nav>
 
   <h1>Private land, opened on the right mornings.</h1>
-  <p class="lead">Small groups. Exact locations shared after booking. Sample listings are marked.</p>
-  <div class="banner">Prototype: bookings are saved in this browser only. No payment is taken.</div>
+  <p class="lead">Small groups. Exact location and directions unlock after you book.</p>
+  <div id="notice"></div>
 
   <div id="mine"></div>
+  <div id="hosting"></div>
   <div class="grid" id="list"></div>
 
-  <footer>Hosts keep most of the fee. Birders agree to leave no trace and submit a checklist to eBird afterward.</footer>
+  <footer>Hosts keep most of the fee. Birders agree to leave no trace and submit a checklist to eBird afterward. No payment is taken yet.</footer>
 </div>
 
 <script src="data/mock.js"></script>
@@ -40,44 +44,71 @@
 <script>
 (async () => {
   await DB.ready;
-  let passes = await DB.loadPasses();
   const $ = (id) => document.getElementById(id);
+  let passes = [], priv = {};
+
+  async function load() {
+    passes = await DB.loadPasses();
+    priv = DB.online() ? await CLOUD.privateLocations().catch(() => ({})) : {};
+  }
 
   async function renderMine() {
     const b = await DB.bookings();
-    $('mine').innerHTML = b.length ? `<div class="card"><h3>My passes</h3>${b.map(x =>
-      `<div class="row"><span class="l">${DB.esc(x.title)}</span><span class="r">${x.date} · ${x.seats} seat${x.seats>1?'s':''} · ${x.price ? '$' + x.price * x.seats : 'Free'}</span></div>`).join('')}</div>` : '';
+    $('mine').innerHTML = b.length ? `<div class="card"><h3>My passes</h3>${b.map(x => {
+      const p = priv[x.listingId];
+      return `<div class="row"><span class="l">${DB.esc(x.title)}${p ? `<div class="meta" style="font-weight:400;margin-top:4px">📍 ${DB.esc(p.location || '')}<br>${DB.esc(p.directions || '')}</div>` : ''}</span>
+        <span class="r">${x.date} · ${x.seats} seat${x.seats>1?'s':''} · ${x.price ? '$' + x.price * x.seats : 'Free'}<br><button class="small ghost" data-cancel="${x.id}" style="margin-top:4px">cancel</button></span></div>`;
+    }).join('')}</div>` : '';
   }
-  renderMine();
+  async function renderHosting() {
+    if (!DB.online()) return $('hosting').innerHTML = '';
+    const mineL = passes.filter(p => p.mine);
+    if (!mineL.length) return $('hosting').innerHTML = '';
+    const hb = await CLOUD.hostBookings().catch(() => []);
+    $('hosting').innerHTML = `<div class="card"><h3>Hosting</h3>${mineL.map(l => `
+      <div class="row"><span class="l">${DB.esc(l.title)}<div class="meta" style="font-weight:400">${hb.filter(b => b.listingId === l.id).map(b => `${DB.esc(b.who)} · ${b.date} · ${b.seats} seat${b.seats>1?'s':''}`).join('<br>') || 'No bookings yet'}</div></span>
+      <span class="r"><button class="small ghost" data-dellisting="${l.id}">remove</button></span></div>`).join('')}</div>`;
+  }
+  function renderList() {
+    $('list').innerHTML = passes.map(p => `
+      <div class="card">
+        <div class="pass-head">
+          <div><h3>${DB.esc(p.title)}</h3><div class="tagline">${DB.esc(p.area)}</div></div>
+          <div class="price">${p.price ? '$' + p.price : 'Free'}</div>
+        </div>
+        <div style="margin:8px 0">${(p.habitat||[]).map(h => `<span class="chip">${DB.esc(h)}</span>`).join('')}${p.sample ? '<span class="pill info">sample</span>' : p.cloud ? `<span class="pill go">${p.mine ? 'your listing' : 'host: ' + DB.esc(p.hostName || 'birder')}</span>` : '<span class="pill go">your listing (local)</span>'}</div>
+        <p class="meta"><b>Targets:</b> ${(p.targets||[]).map(DB.esc).join(', ')}</p>
+        <p class="meta"><b>Window:</b> ${DB.esc(p.window)} · <b>Seats:</b> ${p.seats}</p>
+        <p class="meta">${DB.esc(p.trigger || '')}</p>
+        <p class="meta">${DB.esc(p.host || '')}</p>
+        ${priv[p.id] ? `<p class="meta" style="color:var(--green)">📍 ${DB.esc(priv[p.id].location || '')}</p>` : ''}
+        <label>Date</label>
+        <select id="d-${p.id}">${(p.dates||[]).map(d => `<option>${d}</option>`).join('') || '<option>Any</option>'}</select>
+        <label>Seats</label>
+        <select id="s-${p.id}">${[1,2,3,4].map(n => `<option>${n}</option>`).join('')}</select>
+        <div style="margin-top:10px"><button data-id="${p.id}" ${p.mine ? 'disabled' : ''}>${p.mine ? 'Your listing' : 'Book'}</button></div>
+      </div>`).join('');
+  }
+  async function all() { await load(); renderList(); await renderMine(); await renderHosting(); }
+  await all();
+  document.addEventListener('daybird:refresh', all);
+  if (CLOUD.ready && !DB.online()) $('notice').innerHTML = '<div class="banner">Sign in (top right) to book real listings and see hosts\' locations. Sample listings can be booked locally.</div>';
 
-  function renderList() { $('list').innerHTML = passes.map(p => `
-    <div class="card">
-      <div class="pass-head">
-        <div><h3>${DB.esc(p.title)}</h3><div class="tagline">${DB.esc(p.area)}</div></div>
-        <div class="price">${p.price ? '$' + p.price : 'Free'}</div>
-      </div>
-      <div style="margin:8px 0">${(p.habitat||[]).map(h => `<span class="chip">${DB.esc(h)}</span>`).join('')}${p.sample ? '<span class="pill info">sample</span>' : p.cloud ? `<span class="pill go">${p.mine ? 'your listing' : 'host: ' + DB.esc(p.hostName || 'birder')}</span>` : '<span class="pill go">your listing (local)</span>'}</div>
-      <p class="meta"><b>Targets:</b> ${(p.targets||[]).map(DB.esc).join(', ')}</p>
-      <p class="meta"><b>Window:</b> ${DB.esc(p.window)} · <b>Seats:</b> ${p.seats}</p>
-      <p class="meta">${DB.esc(p.trigger)}</p>
-      <p class="meta">${DB.esc(p.host)}</p>
-      <label>Date</label>
-      <select id="d-${p.id}">${(p.dates||[]).map(d => `<option>${d}</option>`).join('')}</select>
-      <label>Seats</label>
-      <select id="s-${p.id}">${[1,2,3,4].map(n => `<option>${n}</option>`).join('')}</select>
-      <div style="margin-top:10px"><button data-id="${p.id}">Book</button></div>
-    </div>`).join(''); }
-  renderList();
-  document.addEventListener('daybird:refresh', async () => { passes = await DB.loadPasses(); renderList(); renderMine(); });
-
-  $('list').addEventListener('click', async e => {
-    const id = e.target.dataset.id; if (!id) return;
-    const p = passes.find(x => x.id === id);
-    const date = $('d-' + id).value, seats = +$('s-' + id).value;
-    if (p.cloud && !DB.online()) return alert('Sign in (top right) to book this one.');
-    await DB.book(p, date, seats);
-    await DB.post(`Booked ${p.title} for ${date}. Anyone else going?`, ['passes']);
-    renderMine(); window.scrollTo({ top: 0, behavior: 'smooth' });
+  document.addEventListener('click', async e => {
+    const d = e.target.dataset;
+    if (d.id) {
+      const p = passes.find(x => x.id === d.id);
+      const date = $('d-' + d.id).value, seats = +$('s-' + d.id).value;
+      if (p.cloud && !DB.online()) return alert('Sign in (top right) to book this one.');
+      e.target.disabled = true;
+      try { await DB.book(p, date, seats); await DB.post(`Booked ${p.title} for ${date}. Anyone else going?`, ['passes']); }
+      catch (err) { alert('Could not book: ' + err.message); }
+      await all(); window.scrollTo({ top: 0, behavior: 'smooth' });
+    } else if (d.cancel && confirm('Cancel this pass?')) {
+      const b = (await DB.bookings()).find(x => x.id === d.cancel); await DB.cancelBooking(b); await all();
+    } else if (d.dellisting && confirm('Remove this listing and its bookings?')) {
+      await CLOUD.deleteListing(d.dellisting); await all();
+    }
   });
 })();
 </script>

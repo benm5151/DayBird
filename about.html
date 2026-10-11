@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Daybird — About</title>
+<meta name="description" content="Daybird: a morning birding brief for the Upper Valley, plus passes onto private land on the days that matter.">
+<link rel="stylesheet" href="css/style.css">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#2f6b4f">
+<link rel="icon" href="icon.svg">
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <a class="brand" href="index.html">Daybird<small>About</small></a>
+  </header>
+  <nav class="tabs">
+    <a href="index.html">Brief</a>
+    <a href="passes.html">Passes</a>
+    <a href="feed.html">Feed</a>
+    <a href="profile.html">Profile</a>
+    <a href="host.html">Host land</a>
+  </nav>
+
+  <h1>Should you go birding this morning?</h1>
+  <p class="lead">Daybird answers that in one word for the Upper Valley: GO, MAYBE, or STAY IN. Then it tells you where.</p>
+
+  <div class="grid">
+    <div class="card"><h3>The brief</h3><p class="meta">Every morning: wind, rain, last night's migration, and what's been reported nearby in the last three days, boiled down to a call and a short list of spots. Built on eBird and Open-Meteo data.</p></div>
+    <div class="card"><h3>Land passes</h3><p class="meta">Local landowners open a pond, a pasture, a ridge for a few birders on the mornings it's actually good. Small groups, exact location only after you book. Most listings are free or a few dollars.</p></div>
+    <div class="card"><h3>The feed</h3><p class="meta">What people saw today, with photos. Your profile shows your life list, your latest lifer, and your favorite bird. No algorithm, no ads.</p></div>
+  </div>
+
+  <h2>Who it's for</h2>
+  <p>Beginners who want someone to tell them where to point the binoculars, and anyone who'd rather spend three minutes reading than thirty minutes guessing. It's free to use. Sign in with your email, no password.</p>
+
+  <h2>Hosting your land</h2>
+  <p>If you own land near Lebanon, Hanover, or anywhere in the Upper Valley with water, edges, or open sky, you can list it in two minutes. You pick the days and the group size. Your address stays private until someone books. <a href="host.html">List your land →</a></p>
+
+  <h2>Add it to your phone</h2>
+  <p class="meta">iPhone: open this page in Safari → Share → Add to Home Screen. Android: Chrome menu → Add to Home screen. It opens like an app.</p>
+
+  <p style="margin-top:28px"><a class="btn" href="index.html">See today's brief</a></p>
+
+  <footer>Made in Lebanon, NH by Benjamin Morris. Sightings data © eBird / Cornell Lab of Ornithology. Prototype; not affiliated with Cornell.</footer>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="js/config.js"></script>
+<script src="js/cloud.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>

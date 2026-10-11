@@ -5,6 +5,10 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Daybird — Profile</title>
 <link rel="stylesheet" href="css/style.css">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#2f6b4f">
+<link rel="icon" href="icon.svg">
+<link rel="apple-touch-icon" href="icon.svg">
 <style>
 .hero{display:flex;gap:18px;align-items:center;flex-wrap:wrap}
 .hero img{width:120px;height:120px;border-radius:50%;object-fit:cover;border:3px solid var(--card);box-shadow:var(--shadow)}
@@ -65,6 +69,9 @@
     <div class="card"><h3>Top spots</h3><div id="places"></div></div>
   </div>
 
+  <div class="card" id="postsCard"><h3 id="postsTitle">Posts</h3><div id="posts"></div></div>
+
+  <div id="editWrap">
   <h2>Edit</h2>
   <div class="card">
     <label>Import your eBird data (MyEBirdData.csv — download at ebird.org/downloadMyData)</label>
@@ -80,6 +87,7 @@
     <div style="margin-top:12px"><button id="save">Save profile</button> <button class="ghost" id="share">Share stats to feed</button></div>
     <p class="meta" id="msg"></p>
   </div>
+  </div>
 </div>
 
 <script src="data/mock.js"></script>
@@ -93,16 +101,37 @@
 (async () => {
   await DB.ready;
   const $ = (id) => document.getElementById(id);
-  let prof = await DB.profile(), favPhoto = prof.favPhoto || null, photo = prof.photo || null;
+  const viewId = new URLSearchParams(location.search).get('u');
+  const isPublic = !!viewId && viewId !== CLOUD.user()?.id;
+  let prof, L0 = null;
+  if (isPublic) {
+    const p = CLOUD.ready ? await CLOUD.getProfile(viewId) : null;
+    if (!p) { document.querySelector('.wrap').innerHTML = '<h1>Profile not found</h1><p><a href="feed.html">Back to feed</a></p>'; return; }
+    prof = { name: p.name, bio: p.bio || '', favorite: p.favorite || '', favoriteWhy: p.favorite_why || '', photo: p.photo_url, favPhoto: p.fav_photo_url };
+    L0 = p.life || null;
+    $('editWrap').remove();
+    document.querySelector('header.top small').textContent = 'Birder profile';
+  } else {
+    prof = await DB.profile();
+    if (DB.online()) $('postsCard').insertAdjacentHTML('afterbegin', `<p class="meta">Your public link: <a href="profile.html?u=${CLOUD.user().id}">profile.html?u=${CLOUD.user().id.slice(0,8)}…</a></p>`);
+  }
+  let favPhoto = prof.favPhoto || null, photo = prof.photo || null;
+
+  async function renderPosts() {
+    const uid = isPublic ? viewId : CLOUD.user()?.id;
+    const posts = uid ? await DB.loadFeed(uid) : (await DB.loadFeed()).filter(p => p.mine);
+    $('posts').innerHTML = posts.slice(0, 20).map(p => `<div class="row"><span>${DB.esc(p.text)}${p.photo ? '<br><img src="' + p.photo + '" style="max-width:220px;border-radius:8px;margin-top:4px">' : ''}</span><span class="r">${DB.ago(p.at)} · ♥ ${p.likes}</span></div>`).join('') || '<p class="meta">No posts yet.</p>';
+  }
+  renderPosts();
 
   async function render() {
-    const s = DB.settings(), L = await DB.lifeList();
-    $('name').textContent = prof.name || s.name || 'You';
-    $('nameIn').value = prof.name || s.name || '';
+    const s = DB.settings(), L = isPublic ? L0 : await DB.lifeList();
+    $('name').textContent = prof.name || (isPublic ? 'Birder' : s.name || 'You');
+    if (!isPublic) $('nameIn').value = prof.name || s.name || '';
     $('bio').textContent = prof.bio || '';
-    $('avatarBox').innerHTML = photo ? `<img src="${photo}" alt="">` : `<div class="avatar">${DB.esc((s.name || 'Y')[0])}</div>`;
+    $('avatarBox').innerHTML = photo ? `<img src="${photo}" alt="">` : `<div class="avatar">${DB.esc((prof.name || s.name || 'B')[0])}</div>`;
     if (!L) {
-      $('stats').innerHTML = `<p class="meta">No life list yet — import your eBird CSV below.</p>`;
+      $('stats').innerHTML = `<p class="meta">${isPublic ? 'No life list shared yet.' : 'No life list yet — import your eBird CSV below.'}</p>`;
       ['lifers','most','places'].forEach(id => $(id).innerHTML = '<p class="meta">—</p>');
       $('bars').innerHTML = '';
     } else {
@@ -117,14 +146,15 @@
       $('places').innerHTML = L.topPlaces.map(x => `<div class="row"><span class="l">${DB.esc(x.name)}</span><span class="r">${x.n} obs</span></div>`).join('');
       const mx = Math.max(1, ...L.byMonth);
       $('bars').innerHTML = L.byMonth.map(n => `<div style="height:${Math.round(n / mx * 100)}%"><span>${n || ''}</span></div>`).join('');
-      $('speciesList').innerHTML = L.allSpecies.map(n => `<option value="${DB.esc(n)}">`).join('');
+      if (!isPublic) $('speciesList').innerHTML = L.allSpecies.map(n => `<option value="${DB.esc(n)}">`).join('');
     }
     $('fav').innerHTML = prof.favorite
       ? `${favPhoto ? `<img src="${favPhoto}" alt="">` : ''}<div><b>${DB.esc(prof.favorite)}</b><div class="meta">${DB.esc(prof.favoriteWhy || '')}</div></div>`
-      : `<p class="meta">Pick one below.</p>`;
-    $('bioIn').value = prof.bio || ''; $('favIn').value = prof.favorite || ''; $('favWhy').value = prof.favoriteWhy || '';
+      : `<p class="meta">${isPublic ? 'Not chosen yet.' : 'Pick one below.'}</p>`;
+    if (!isPublic) { $('bioIn').value = prof.bio || ''; $('favIn').value = prof.favorite || ''; $('favWhy').value = prof.favoriteWhy || ''; }
   }
   render();
+  if (isPublic) return;
 
   $('csv').onchange = async (e) => {
     const f = e.target.files[0]; if (!f) return;

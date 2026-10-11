@@ -5,6 +5,10 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Daybird — Settings</title>
 <link rel="stylesheet" href="css/style.css">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#2f6b4f">
+<link rel="icon" href="icon.svg">
+<link rel="apple-touch-icon" href="icon.svg">
 </head>
 <body>
 <div class="wrap">
@@ -23,6 +27,7 @@
   <div class="card">
     <label>Your name (for feed posts)</label><input id="name">
     <label>eBird API key (stays in this browser; never commit it)</label><input id="ebirdKey" type="password" placeholder="get one at ebird.org/api/keygen">
+    <label>Location</label><button class="ghost small" id="geo" type="button">Use my current location</button>
     <label>Latitude</label><input id="lat" type="number" step="0.0001">
     <label>Longitude</label><input id="lng" type="number" step="0.0001">
     <label>Radius (km, max 50)</label><input id="dist" type="number" min="1" max="50">
@@ -54,6 +59,10 @@ document.getElementById('save').onclick = () => {
   fields.forEach(f => { const v = document.getElementById(f).value; n[f] = ['lat','lng','dist','back','migration'].includes(f) ? +v : v.trim(); });
   DB.saveSettings(n);
   document.getElementById('msg').textContent = 'Saved. Go back to the Brief.';
+};
+document.getElementById('geo').onclick = () => {
+  if (!navigator.geolocation) return document.getElementById('msg').textContent = 'No geolocation on this device.';
+  navigator.geolocation.getCurrentPosition(p => { document.getElementById('lat').value = p.coords.latitude.toFixed(4); document.getElementById('lng').value = p.coords.longitude.toFixed(4); document.getElementById('msg').textContent = 'Location filled in — hit Save.'; }, e => document.getElementById('msg').textContent = e.message);
 };
 document.getElementById('reset').onclick = () => {
   ['bookings','posts','likes','hostListings'].forEach(k => localStorage.removeItem('daybird:' + k));

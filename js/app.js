@@ -130,8 +130,9 @@ const DB = (() => {
     const ls = store.get('hostListings', []); ls.unshift(l); store.set('hostListings', ls);
   }
 
-  async function loadFeed() {
-    if (online()) return CLOUD.listPosts();
+  async function loadFeed(userId = null) {
+    if (online()) return CLOUD.listPosts(userId);
+    if (userId) return [];
     const seed = window.DAYBIRD_FEED;
     const mine = store.get('posts', []);
     const likes = store.get('likes', {});
@@ -142,6 +143,14 @@ const DB = (() => {
     const s = settings();
     const p = { id: 'p' + Date.now(), who: s.name || 'You', text, tags, photo, at: new Date().toISOString(), likes: 0, mine: true };
     const ps = store.get('posts', []); ps.unshift(p); store.set('posts', ps); return p;
+  }
+  async function deletePost(id) {
+    if (online()) return CLOUD.deletePost(id);
+    store.set('posts', store.get('posts', []).filter(p => p.id !== id));
+  }
+  async function cancelBooking(b) {
+    if (b.cloud) return CLOUD.cancelBooking(b.id);
+    store.set('bookings', store.get('bookings', []).filter(x => x.id !== b.id));
   }
   async function toggleLike(id, liked) {
     if (online()) return CLOUD.toggleLike(id, liked);
@@ -227,7 +236,7 @@ const DB = (() => {
 
   const ready = CLOUD.ready ? CLOUD.init() : Promise.resolve(null);
 
-  return { ready, online, settings, saveSettings, loadBrief, loadPasses, bookings, book, addListing, loadFeed, post, toggleLike,
+  return { ready, online, settings, saveSettings, loadBrief, loadPasses, bookings, book, cancelBooking, addListing, loadFeed, post, deletePost, toggleLike,
            fileToDataURL, importLifeList, lifeList, profile, saveProfile, esc, fmtDate, ago, dirName };
 })();
 
@@ -244,7 +253,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   const render = () => {
     const u = CLOUD.user();
     box.innerHTML = u
-      ? `<span class="meta">${DB.esc(u.email)}</span><button class="ghost small" id="signout">Sign out</button>`
+      ? `<a class="meta" href="profile.html">${DB.esc(u.email)}</a><button class="ghost small" id="signout">Sign out</button>`
       : `<input id="loginEmail" type="email" placeholder="you@email.com" style="width:190px;padding:7px 10px"><button class="small" id="signin">Sign in</button>`;
     const si = document.getElementById('signin'), so = document.getElementById('signout');
     if (si) si.onclick = async () => {
