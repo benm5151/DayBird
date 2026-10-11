@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Daybird — Morning Brief</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <a class="brand" href="index.html">Daybird<small>Upper Valley morning brief</small></a>
+    <a class="btn ghost" href="settings.html">Settings</a>
+  </header>
+  <nav class="tabs">
+    <a href="index.html">Brief</a>
+    <a href="passes.html">Passes</a>
+    <a href="feed.html">Feed</a>
+    <a href="profile.html">Profile</a>
+    <a href="host.html">Host land</a>
+  </nav>
+
+  <div id="banner"></div>
+  <p class="meta" id="date"></p>
+  <h1 id="headline">Loading the morning…</h1>
+  <p class="lead" id="sub"></p>
+
+  <div class="card">
+    <div class="call">
+      <div class="big" id="callword">…</div>
+      <div>
+        <div id="why" class="meta"></div>
+        <div class="stat" id="wx"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid">
+    <div class="card">
+      <h3>Where to go</h3>
+      <p class="tagline">Most species reported in the last few days, within <span id="dist"></span> km.</p>
+      <div id="spots"></div>
+    </div>
+    <div class="card">
+      <h3>Notable nearby</h3>
+      <p class="tagline">eBird "notable" reports (rare or out-of-season).</p>
+      <div id="notable"></div>
+    </div>
+  </div>
+
+  <div class="card" id="passcard">
+    <h3>Open passes for the next GO day</h3>
+    <div id="passes"></div>
+    <a class="btn ghost" href="passes.html" style="margin-top:8px">See all passes</a>
+  </div>
+
+  <div class="card">
+    <h3>Share today's call</h3>
+    <textarea id="shareText" rows="2" placeholder="Where are you headed?"></textarea>
+    <div style="margin-top:8px"><button id="shareBtn">Post to feed</button></div>
+  </div>
+
+  <footer>Sightings via eBird (Cornell Lab of Ornithology). Weather via Open-Meteo. Migration rating is entered by hand from <a id="bcLink" href="#" target="_blank" rel="noopener">BirdCast</a>. Prototype — not for commercial use without eBird permission.</footer>
+</div>
+
+<script src="data/mock.js"></script>
+<script src="data/passes.js"></script>
+<script src="data/feed.js"></script>
+<script src="js/app.js"></script>
+<script>
+(async () => {
+  const b = await DB.loadBrief();
+  const $ = (id) => document.getElementById(id);
+  $('date').textContent = DB.fmtDate(new Date());
+  $('dist').textContent = b.s.dist;
+  $('bcLink').href = b.s.birdcastUrl;
+
+  $('banner').innerHTML = b.errors.map(e => `<div class="banner">${DB.esc(e)}</div>`).join('') +
+    (b.source === 'live' ? `<div class="banner ok">Live eBird data for your area.</div>` : '');
+
+  const c = b.call;
+  $('callword').textContent = c.word; $('callword').className = 'big ' + c.grade;
+  $('headline').textContent = { go: 'Get out there.', maybe: 'Worth a look.', stay: 'Coffee first.' }[c.grade];
+  $('sub').textContent = c.why.length ? c.why.join(' · ') : 'Average conditions. Pick the closest spot and go.';
+  $('why').innerHTML = `<span class="pill ${c.grade}">score ${c.score}</span> <span class="pill info">migration ${b.s.migration ? b.s.migration + '/5' : 'not set'}</span>`;
+  $('wx').innerHTML = `
+    <div><b>${b.wx.temp}°</b><span>6–9am</span></div>
+    <div><b>${b.wx.wind} mph ${DB.dirName(b.wx.windDir)}</b><span>wind</span></div>
+    <div><b>${b.wx.rain}%</b><span>rain</span></div>
+    <div><b>${b.wx.sunrise}</b><span>sunrise</span></div>`;
+
+  $('spots').innerHTML = b.spots.map(s => `<div class="row"><span class="l">${DB.esc(s.name)}</span><span class="r">${s.species} species</span></div>`).join('') || '<p class="meta">No recent reports.</p>';
+  $('notable').innerHTML = b.notable.map(o => `<div class="row"><span class="l">${DB.esc(o.comName)}${o.howMany ? ' ×' + o.howMany : ''}</span><span class="r">${DB.esc(o.locName)}<br>${DB.esc(o.obsDt || '')}</span></div>`).join('') || '<p class="meta">Nothing notable in range.</p>';
+
+  const passes = (await DB.loadPasses()).filter(p => p.price >= 0).slice(0, 3);
+  $('passes').innerHTML = passes.map(p => `<div class="row"><span class="l">${DB.esc(p.title)}</span><span class="r">${p.price ? '$' + p.price : 'Free'} · ${p.seats} seats</span></div>`).join('');
+
+  $('shareBtn').onclick = () => {
+    const t = $('shareText').value.trim(); if (!t) return;
+    DB.post(`${c.word} today (score ${c.score}). ${t}`, [c.word]);
+    location.href = 'feed.html';
+  };
+})();
+</script>
+</body>
+</html>

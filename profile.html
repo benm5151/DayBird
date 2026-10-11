@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Daybird — Profile</title>
+<link rel="stylesheet" href="css/style.css">
+<style>
+.hero{display:flex;gap:18px;align-items:center;flex-wrap:wrap}
+.hero img{width:120px;height:120px;border-radius:50%;object-fit:cover;border:3px solid var(--card);box-shadow:var(--shadow)}
+.hero .avatar{width:120px;height:120px;font-size:44px}
+.bars{display:flex;gap:4px;align-items:flex-end;height:80px;margin-top:8px}
+.bars div{flex:1;background:var(--green);border-radius:3px 3px 0 0;min-height:2px;position:relative}
+.bars div span{position:absolute;top:-18px;left:0;right:0;text-align:center;font-size:11px;color:var(--muted)}
+.months{display:flex;gap:4px;font-size:10px;color:var(--muted)}
+.months span{flex:1;text-align:center}
+.fav{display:flex;gap:14px;align-items:center}
+.fav img{width:90px;height:90px;border-radius:12px;object-fit:cover}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <a class="brand" href="index.html">Daybird<small>Profile</small></a>
+    <a class="btn ghost" href="settings.html">Settings</a>
+  </header>
+  <nav class="tabs">
+    <a href="index.html">Brief</a>
+    <a href="passes.html">Passes</a>
+    <a href="feed.html">Feed</a>
+    <a href="profile.html">Profile</a>
+    <a href="host.html">Host land</a>
+  </nav>
+
+  <div class="card">
+    <div class="hero">
+      <div id="avatarBox"></div>
+      <div style="flex:1">
+        <h1 id="name" style="margin:0"></h1>
+        <p class="meta" id="bio"></p>
+        <div class="stat" id="stats"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid">
+    <div class="card">
+      <h3>Favorite bird</h3>
+      <div class="fav" id="fav"></div>
+    </div>
+    <div class="card">
+      <h3>Recent lifers</h3>
+      <div id="lifers"></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>Lifers by month (first-ever sighting)</h3>
+    <div class="bars" id="bars"></div>
+    <div class="months"><span>J</span><span>F</span><span>M</span><span>A</span><span>M</span><span>J</span><span>J</span><span>A</span><span>S</span><span>O</span><span>N</span><span>D</span></div>
+  </div>
+
+  <div class="grid">
+    <div class="card"><h3>Most-logged species</h3><div id="most"></div></div>
+    <div class="card"><h3>Top spots</h3><div id="places"></div></div>
+  </div>
+
+  <h2>Edit</h2>
+  <div class="card">
+    <label>Import your eBird data (MyEBirdData.csv — download at ebird.org/downloadMyData)</label>
+    <input type="file" id="csv" accept=".csv,text/csv">
+    <p class="meta" id="csvMsg">Parsed in your browser. Nothing is uploaded.</p>
+    <label>Profile photo</label><input type="file" id="photo" accept="image/*">
+    <label>Short bio</label><input id="bioIn" placeholder="Beginner birder, Upper Valley. Big Year 2027.">
+    <label>Favorite bird</label><input id="favIn" list="speciesList" placeholder="Start typing a species from your list">
+    <datalist id="speciesList"></datalist>
+    <label>Why?</label><input id="favWhy" placeholder="One line">
+    <label>Favorite bird photo</label><input type="file" id="favPhoto" accept="image/*">
+    <div style="margin-top:12px"><button id="save">Save profile</button> <button class="ghost" id="share">Share stats to feed</button></div>
+    <p class="meta" id="msg"></p>
+  </div>
+</div>
+
+<script src="data/mock.js"></script>
+<script src="data/passes.js"></script>
+<script src="data/feed.js"></script>
+<script src="js/app.js"></script>
+<script>
+(() => {
+  const $ = (id) => document.getElementById(id);
+  let prof = DB.profile(), favPhoto = prof.favPhoto || null, photo = prof.photo || null;
+
+  function render() {
+    const s = DB.settings(), L = DB.lifeList();
+    $('name').textContent = s.name || 'You';
+    $('bio').textContent = prof.bio || '';
+    $('avatarBox').innerHTML = photo ? `<img src="${photo}" alt="">` : `<div class="avatar">${DB.esc((s.name || 'Y')[0])}</div>`;
+    if (!L) {
+      $('stats').innerHTML = `<p class="meta">No life list yet — import your eBird CSV below.</p>`;
+      ['lifers','most','places'].forEach(id => $(id).innerHTML = '<p class="meta">—</p>');
+      $('bars').innerHTML = '';
+    } else {
+      $('stats').innerHTML = `
+        <div><b>${L.total}</b><span>life list</span></div>
+        <div><b>${L.yearList}</b><span>this year</span></div>
+        <div><b>${L.thisYear}</b><span>lifers ${new Date().getFullYear()}</span></div>
+        <div><b>${L.checklists}</b><span>checklists</span></div>
+        <div><b>${L.observations}</b><span>observations</span></div>`;
+      $('lifers').innerHTML = L.recentLifers.map(x => `<div class="row"><span class="l">${DB.esc(x.name)}</span><span class="r">${x.first}<br>${DB.esc(x.loc)}</span></div>`).join('');
+      $('most').innerHTML = L.mostSeen.map(x => `<div class="row"><span class="l">${DB.esc(x.name)}</span><span class="r">${x.sightings}×</span></div>`).join('');
+      $('places').innerHTML = L.topPlaces.map(x => `<div class="row"><span class="l">${DB.esc(x.name)}</span><span class="r">${x.n} obs</span></div>`).join('');
+      const mx = Math.max(1, ...L.byMonth);
+      $('bars').innerHTML = L.byMonth.map(n => `<div style="height:${Math.round(n / mx * 100)}%"><span>${n || ''}</span></div>`).join('');
+      $('speciesList').innerHTML = L.allSpecies.map(n => `<option value="${DB.esc(n)}">`).join('');
+    }
+    $('fav').innerHTML = prof.favorite
+      ? `${favPhoto ? `<img src="${favPhoto}" alt="">` : ''}<div><b>${DB.esc(prof.favorite)}</b><div class="meta">${DB.esc(prof.favoriteWhy || '')}</div></div>`
+      : `<p class="meta">Pick one below.</p>`;
+    $('bioIn').value = prof.bio || ''; $('favIn').value = prof.favorite || ''; $('favWhy').value = prof.favoriteWhy || '';
+  }
+  render();
+
+  $('csv').onchange = async (e) => {
+    const f = e.target.files[0]; if (!f) return;
+    try { const L = DB.importLifeList(await f.text()); $('csvMsg').textContent = `Imported ${L.observations} observations · ${L.total} species · ${L.firstDate} to ${L.lastDate}.`; render(); }
+    catch (err) { $('csvMsg').textContent = 'Could not parse that file. Is it MyEBirdData.csv? ' + err.message; }
+  };
+  $('photo').onchange = async (e) => { if (e.target.files[0]) { photo = await DB.fileToDataURL(e.target.files[0], 400); render(); } };
+  $('favPhoto').onchange = async (e) => { if (e.target.files[0]) { favPhoto = await DB.fileToDataURL(e.target.files[0], 600); render(); } };
+  $('save').onclick = () => {
+    prof = { bio: $('bioIn').value.trim(), favorite: $('favIn').value.trim(), favoriteWhy: $('favWhy').value.trim(), photo, favPhoto };
+    DB.saveProfile(prof); render(); $('msg').textContent = 'Saved.';
+  };
+  $('share').onclick = () => {
+    const L = DB.lifeList(); if (!L) return $('msg').textContent = 'Import your CSV first.';
+    const newest = L.recentLifers[0];
+    DB.post(`Life list: ${L.total} species (${L.thisYear} lifers this year). Latest lifer: ${newest.name} at ${newest.loc}.${prof.favorite ? ' Favorite bird: ' + prof.favorite + '.' : ''}`, ['lifelist'], favPhoto);
+    location.href = 'feed.html';
+  };
+})();
+</script>
+</body>
+</html>

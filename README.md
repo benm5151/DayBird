@@ -1,0 +1,60 @@
+# Daybird — prototype
+
+A static, client-side prototype of a birding morning brief + private-land passes + a small feed. No build step, no backend. Open `index.html` in a browser or publish on GitHub Pages.
+
+## Run it locally
+
+Double-click `index.html`. No server, no install. (Sample data ships as `data/*.js` so it loads from disk.)
+
+## Publish on GitHub Pages
+
+```bash
+git init && git add . && git commit -m "Daybird prototype"
+gh repo create daybird --public --source=. --push
+gh api -X POST repos/{owner}/daybird/pages -f build_type=legacy -f source[branch]=main -f source[path]=/
+```
+
+Your site will be at `https://<your-username>.github.io/daybird/`.
+
+## Live data
+
+1. Get an eBird API key at https://ebird.org/api/keygen (free, personal/non-commercial).
+2. Open **Settings** in the app and paste it. It is stored in your browser's localStorage only. **Never commit it.**
+3. Check BirdCast's dashboard for Grafton County each morning and set the migration rating (1–5). BirdCast has no public API, so this is manual for now.
+
+Weather comes from Open-Meteo (no key). If eBird returns a CORS error in the browser, the fallback is a tiny proxy (a Cloudflare Worker or a GitHub Action that writes `data/live.json` each morning) — that's the first thing to add if you want the brief to update itself.
+
+## What works
+
+- **Brief**: GO / MAYBE / STAY call from wind, rain, wind direction vs. season, your migration rating, and the count of nearby notable reports. Top spots by species reported, notable birds, open passes, one-tap share to feed.
+- **Passes**: sample listings + any you create on **Host land**. Booking is saved locally and posts to the feed.
+- **Feed**: seed posts + your posts and likes, local only.
+- **Profile**: import MyEBirdData.csv (parsed in-browser) → life list, year list, recent lifers, lifers-by-month, most-logged species, top spots; favorite bird + photos; one-tap share of stats to the feed.
+- **Settings**: name, key, location, radius, migration rating.
+
+## What is faked (needs a backend)
+
+- Accounts, other people's posts, real bookings, payments, host payouts, insurance, messaging.
+- Shared state of any kind — everything is per-browser localStorage.
+
+Suggested next stack when you outgrow this: Supabase (auth + Postgres + storage) with the same HTML, or move to Lovable/Next.js.
+
+## Data terms
+
+eBird API data is for non-commercial use without written permission from the Cornell Lab (https://www.birds.cornell.edu/home/ebird-api-terms-of-use/). Get permission before charging anyone for anything that uses it. Attribute eBird wherever its data is shown.
+
+## Files
+
+```
+index.html     brief
+passes.html    marketplace
+feed.html      social
+host.html      landowner listing form
+profile.html   life list stats + favorite bird
+settings.html  key + location + migration
+js/app.js      data layer + scoring
+css/style.css
+data/mock.js     sample sightings/weather (fallback)
+data/passes.js   sample listings
+data/feed.js     seed posts
+```

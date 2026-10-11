@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Daybird — Land Passes</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <a class="brand" href="index.html">Daybird<small>Land passes</small></a>
+    <a class="btn ghost" href="host.html">List your land</a>
+  </header>
+  <nav class="tabs">
+    <a href="index.html">Brief</a>
+    <a href="passes.html">Passes</a>
+    <a href="feed.html">Feed</a>
+    <a href="profile.html">Profile</a>
+    <a href="host.html">Host land</a>
+  </nav>
+
+  <h1>Private land, opened on the right mornings.</h1>
+  <p class="lead">Small groups. Exact locations shared after booking. Sample listings are marked.</p>
+  <div class="banner">Prototype: bookings are saved in this browser only. No payment is taken.</div>
+
+  <div id="mine"></div>
+  <div class="grid" id="list"></div>
+
+  <footer>Hosts keep most of the fee. Birders agree to leave no trace and submit a checklist to eBird afterward.</footer>
+</div>
+
+<script src="data/mock.js"></script>
+<script src="data/passes.js"></script>
+<script src="data/feed.js"></script>
+<script src="js/app.js"></script>
+<script>
+(async () => {
+  const passes = await DB.loadPasses();
+  const $ = (id) => document.getElementById(id);
+
+  function renderMine() {
+    const b = DB.bookings();
+    $('mine').innerHTML = b.length ? `<div class="card"><h3>My passes</h3>${b.map(x =>
+      `<div class="row"><span class="l">${DB.esc(x.title)}</span><span class="r">${x.date} · ${x.seats} seat${x.seats>1?'s':''} · ${x.price ? '$' + x.price * x.seats : 'Free'}</span></div>`).join('')}</div>` : '';
+  }
+  renderMine();
+
+  $('list').innerHTML = passes.map(p => `
+    <div class="card">
+      <div class="pass-head">
+        <div><h3>${DB.esc(p.title)}</h3><div class="tagline">${DB.esc(p.area)}</div></div>
+        <div class="price">${p.price ? '$' + p.price : 'Free'}</div>
+      </div>
+      <div style="margin:8px 0">${(p.habitat||[]).map(h => `<span class="chip">${DB.esc(h)}</span>`).join('')}${p.sample ? '<span class="pill info">sample</span>' : '<span class="pill go">your listing</span>'}</div>
+      <p class="meta"><b>Targets:</b> ${(p.targets||[]).map(DB.esc).join(', ')}</p>
+      <p class="meta"><b>Window:</b> ${DB.esc(p.window)} · <b>Seats:</b> ${p.seats}</p>
+      <p class="meta">${DB.esc(p.trigger)}</p>
+      <p class="meta">${DB.esc(p.host)}</p>
+      <label>Date</label>
+      <select id="d-${p.id}">${(p.dates||[]).map(d => `<option>${d}</option>`).join('')}</select>
+      <label>Seats</label>
+      <select id="s-${p.id}">${[1,2,3,4].map(n => `<option>${n}</option>`).join('')}</select>
+      <div style="margin-top:10px"><button data-id="${p.id}">Book</button></div>
+    </div>`).join('');
+
+  $('list').addEventListener('click', e => {
+    const id = e.target.dataset.id; if (!id) return;
+    const p = passes.find(x => x.id === id);
+    const date = $('d-' + id).value, seats = +$('s-' + id).value;
+    DB.book(p, date, seats);
+    DB.post(`Booked ${p.title} for ${date}. Anyone else going?`, ['passes']);
+    renderMine(); window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
+})();
+</script>
+</body>
+</html>
