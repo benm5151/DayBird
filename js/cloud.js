@@ -119,6 +119,18 @@ const CLOUD = (() => {
     if (error) throw error;
   }
 
-  return { ready, init, user, signIn, signOut, getProfile, saveProfile, uploadPhoto, listPosts, createPost, deletePost, addComment, deleteComment, toggleLike,
+  // ---- photo ID (edge function 'bird-id') ----
+  async function photoId(payload) {
+    const { data, error } = await sb.functions.invoke('bird-id', { body: payload });
+    if (error) {
+      let msg = error.message || String(error);
+      try { const ctx = error.context; if (ctx && ctx.json) { const j = await ctx.json(); if (j.error) msg = j.error; } } catch {}
+      if (/not found|404/i.test(msg)) msg = 'bird-id function is not deployed yet';
+      throw new Error(msg);
+    }
+    return data;
+  }
+
+  return { ready, init, user, signIn, signOut, photoId, getProfile, saveProfile, uploadPhoto, listPosts, createPost, deletePost, addComment, deleteComment, toggleLike,
            listListings, createListing, deleteListing, privateLocations, hostBookings, cancelBooking, myBookings, book };
 })();

@@ -37,6 +37,13 @@
   <div id="pool" class="banner"></div>
 
   <div class="card">
+    <h3>Have a photo?</h3>
+    <p class="tagline">Upload it and Claude will ID it using the photo, your notes below, and the local candidate list. Photos are resized before upload and not stored.</p>
+    <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap"><input type="file" id="photo" accept="image/*" capture="environment" style="width:auto"><button id="photoGo" disabled>ID this photo</button><span class="meta" id="photoMsg"></span></div>
+    <img id="preview" alt="" class="hidden" style="max-width:260px;border-radius:10px;margin-top:10px">
+  </div>
+
+  <div class="card">
     <label>Size</label>
     <div class="opts" data-group="size"><button data-v="tiny">hummingbird / kinglet</button><button data-v="sparrow">sparrow / warbler</button><button data-v="robin">robin / cardinal</button><button data-v="jay">jay / dove</button><button data-v="crow">crow</button><button data-v="hawk">hawk / duck</button><button data-v="goose">goose / heron or bigger</button></div>
     <label>Main colors (pick up to 3)</label>
@@ -123,6 +130,35 @@
       </div>`).join('') + `<p class="meta">Not it? Add a detail above and rank again, or <a href="feed.html">ask the feed</a> with a photo.</p>`;
     $('results').scrollIntoView({ behavior: 'smooth' });
   };
+  // ---- photo ID via edge function ----
+  let photoData = null;
+  $('photo').onchange = async (e) => {
+    const f = e.target.files[0]; if (!f) return;
+    photoData = await DB.fileToDataURL(f, 1400);
+    $('preview').src = photoData; $('preview').classList.remove('hidden'); $('photoGo').disabled = false; $('photoMsg').textContent = '';
+  };
+  $('photoGo').onclick = async () => {
+    if (!photoData) return;
+    if (!CLOUD.ready) return $('photoMsg').textContent = 'Photo ID needs the online backend.';
+    $('photoGo').disabled = true; $('photoMsg').textContent = 'Asking Claude…';
+    const candidates = Object.entries(freq).sort((a, b) => b[1] - a[1]).map(([name, f]) => ({ name, freq: f }));
+    const desc = [sel.size && ('size: ' + sel.size), sel.colors.length && ('colors: ' + sel.colors.join(', ')), sel.hab && ('habitat: ' + sel.hab), sel.beh && ('behavior: ' + sel.beh), $('notes').value].filter(Boolean).join('; ');
+    try {
+      const res = await CLOUD.photoId({ image: photoData.split(',')[1], media_type: 'image/jpeg', description: desc, candidates, place: `near ${s.lat.toFixed(2)}, ${s.lng.toFixed(2)} (Upper Valley, NH/VT)`, date: new Date().toDateString() });
+      if (res.error) throw new Error(res.error);
+      const cands = res.candidates || [];
+      $('results').innerHTML = `<h2>Photo ID</h2>` + (res.safety ? `<div class="banner">${DB.esc(res.safety)}</div>` : '') + cands.map((c, i) => `
+        <div class="card"><div class="cand"><div><div class="n">${i + 1}. ${DB.esc(c.name)} <span class="pill ${c.confidence >= 60 ? 'go' : c.confidence >= 30 ? 'maybe' : 'info'}">${c.confidence}%</span></div><div class="meta">${DB.esc(c.why || '')}</div>
+          ${freq[c.name] ? `<div style="margin-top:6px"><span class="chip">reported at ${freq[c.name]} spot${freq[c.name] > 1 ? 's' : ''} nearby</span></div>` : ''}</div>
+          <div style="text-align:right;flex:none"><a class="btn ghost small" href="https://ebird.org/species/${codes[c.name] || ''}${codes[c.name] ? '' : '?q=' + encodeURIComponent(c.name)}" target="_blank" rel="noopener" style="padding:5px 10px;font-size:13px">eBird</a></div></div>
+          <div class="bar"><div style="width:${Math.max(4, c.confidence)}%"></div></div></div>`).join('') +
+        (res.quality ? `<p class="meta">${DB.esc(res.quality)}</p>` : '') + `<p class="meta">Agree? <a href="feed.html">Post it to the feed</a> with the photo.</p>`;
+      $('photoMsg').textContent = '';
+      $('results').scrollIntoView({ behavior: 'smooth' });
+    } catch (err) { $('photoMsg').textContent = 'Photo ID failed: ' + err.message; }
+    $('photoGo').disabled = false;
+  };
+
   $('clear').onclick = () => { sel.size = sel.hab = sel.beh = null; sel.colors = []; $('notes').value = ''; document.querySelectorAll('.opts .on').forEach(b => b.classList.remove('on')); $('results').innerHTML = ''; };
 })();
 </script>

@@ -50,6 +50,10 @@ Sign-in is a magic link by email (no passwords). When signed in: profile, life-l
 
 - **ID helper** (`id.html`): describe a bird (size, colors, habitat, behavior, free text); candidates start from every species reported within ~30 km in the last 14 days via eBird, scored against a hand-written trait table of ~120 Northeast species (`data/traits.js`). A shortlist, not a classifier. Next step: an LLM re-rank once there's a backend to hold the key.
 
+## Photo ID (Claude vision)
+
+`supabase/functions/bird-id/index.ts` is a Supabase Edge Function. Deploy it from the dashboard: Edge Functions → Deploy a new function → via Editor → name `bird-id` → paste the file → Deploy. Then Edge Functions → Secrets → add `ANTHROPIC_API_KEY` (from console.anthropic.com). The browser never sees the key. Each ID is one Claude call with one resized photo (cents). The function is callable by anyone with the site's anon key, so add rate limiting or require sign-in before sharing widely.
+
 ## Still faked
 
 - Payments, host payouts, insurance, messaging, moderation.
