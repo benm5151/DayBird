@@ -66,9 +66,13 @@
 <script src="data/mock.js"></script>
 <script src="data/passes.js"></script>
 <script src="data/feed.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="js/config.js"></script>
+<script src="js/cloud.js"></script>
 <script src="js/app.js"></script>
 <script>
 (async () => {
+  await DB.ready;
   const b = await DB.loadBrief();
   const $ = (id) => document.getElementById(id);
   $('date').textContent = DB.fmtDate(new Date());
@@ -95,9 +99,9 @@
   const passes = (await DB.loadPasses()).filter(p => p.price >= 0).slice(0, 3);
   $('passes').innerHTML = passes.map(p => `<div class="row"><span class="l">${DB.esc(p.title)}</span><span class="r">${p.price ? '$' + p.price : 'Free'} · ${p.seats} seats</span></div>`).join('');
 
-  $('shareBtn').onclick = () => {
+  $('shareBtn').onclick = async () => {
     const t = $('shareText').value.trim(); if (!t) return;
-    DB.post(`${c.word} today (score ${c.score}). ${t}`, [c.word]);
+    await DB.post(`${c.word} today (score ${c.score}). ${t}`, [c.word]);
     location.href = 'feed.html';
   };
 })();

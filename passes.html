@@ -33,26 +33,30 @@
 <script src="data/mock.js"></script>
 <script src="data/passes.js"></script>
 <script src="data/feed.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="js/config.js"></script>
+<script src="js/cloud.js"></script>
 <script src="js/app.js"></script>
 <script>
 (async () => {
-  const passes = await DB.loadPasses();
+  await DB.ready;
+  let passes = await DB.loadPasses();
   const $ = (id) => document.getElementById(id);
 
-  function renderMine() {
-    const b = DB.bookings();
+  async function renderMine() {
+    const b = await DB.bookings();
     $('mine').innerHTML = b.length ? `<div class="card"><h3>My passes</h3>${b.map(x =>
       `<div class="row"><span class="l">${DB.esc(x.title)}</span><span class="r">${x.date} · ${x.seats} seat${x.seats>1?'s':''} · ${x.price ? '$' + x.price * x.seats : 'Free'}</span></div>`).join('')}</div>` : '';
   }
   renderMine();
 
-  $('list').innerHTML = passes.map(p => `
+  function renderList() { $('list').innerHTML = passes.map(p => `
     <div class="card">
       <div class="pass-head">
         <div><h3>${DB.esc(p.title)}</h3><div class="tagline">${DB.esc(p.area)}</div></div>
         <div class="price">${p.price ? '$' + p.price : 'Free'}</div>
       </div>
-      <div style="margin:8px 0">${(p.habitat||[]).map(h => `<span class="chip">${DB.esc(h)}</span>`).join('')}${p.sample ? '<span class="pill info">sample</span>' : '<span class="pill go">your listing</span>'}</div>
+      <div style="margin:8px 0">${(p.habitat||[]).map(h => `<span class="chip">${DB.esc(h)}</span>`).join('')}${p.sample ? '<span class="pill info">sample</span>' : p.cloud ? `<span class="pill go">${p.mine ? 'your listing' : 'host: ' + DB.esc(p.hostName || 'birder')}</span>` : '<span class="pill go">your listing (local)</span>'}</div>
       <p class="meta"><b>Targets:</b> ${(p.targets||[]).map(DB.esc).join(', ')}</p>
       <p class="meta"><b>Window:</b> ${DB.esc(p.window)} · <b>Seats:</b> ${p.seats}</p>
       <p class="meta">${DB.esc(p.trigger)}</p>
@@ -62,14 +66,17 @@
       <label>Seats</label>
       <select id="s-${p.id}">${[1,2,3,4].map(n => `<option>${n}</option>`).join('')}</select>
       <div style="margin-top:10px"><button data-id="${p.id}">Book</button></div>
-    </div>`).join('');
+    </div>`).join(''); }
+  renderList();
+  document.addEventListener('daybird:refresh', async () => { passes = await DB.loadPasses(); renderList(); renderMine(); });
 
-  $('list').addEventListener('click', e => {
+  $('list').addEventListener('click', async e => {
     const id = e.target.dataset.id; if (!id) return;
     const p = passes.find(x => x.id === id);
     const date = $('d-' + id).value, seats = +$('s-' + id).value;
-    DB.book(p, date, seats);
-    DB.post(`Booked ${p.title} for ${date}. Anyone else going?`, ['passes']);
+    if (p.cloud && !DB.online()) return alert('Sign in (top right) to book this one.');
+    await DB.book(p, date, seats);
+    await DB.post(`Booked ${p.title} for ${date}. Anyone else going?`, ['passes']);
     renderMine(); window.scrollTo({ top: 0, behavior: 'smooth' });
   });
 })();

@@ -107,32 +107,46 @@ const DB = (() => {
     return { s, source, wx, spots, notable, call, errors, speciesCount: Object.keys(byLoc).length ? new Set((sightings.recent||[]).map(o=>o.comName)).size : 0 };
   }
 
+  const online = () => CLOUD.ready && !!CLOUD.user();
+
   async function loadPasses() {
     const base = window.DAYBIRD_PASSES;
+    const cloud = online() ? await CLOUD.listListings().catch(() => []) : [];
     const mine = store.get('hostListings', []);
-    return [...mine, ...base];
+    return [...cloud, ...mine, ...base];
   }
-  const bookings = () => store.get('bookings', []);
-  function book(pass, date, seats) {
-    const b = bookings();
+  async function bookings() {
+    const local = store.get('bookings', []);
+    return online() ? [...await CLOUD.myBookings().catch(() => []), ...local] : local;
+  }
+  async function book(pass, date, seats) {
+    if (online() && pass.cloud) return CLOUD.book(pass.id, date, seats);
+    const b = store.get('bookings', []);
     b.unshift({ id: 'b' + Date.now(), passId: pass.id, title: pass.title, date, seats, price: pass.price, at: new Date().toISOString() });
     store.set('bookings', b);
-    return b[0];
   }
-  function addListing(l) { const ls = store.get('hostListings', []); ls.unshift(l); store.set('hostListings', ls); }
+  async function addListing(l) {
+    if (online()) return CLOUD.createListing(l);
+    const ls = store.get('hostListings', []); ls.unshift(l); store.set('hostListings', ls);
+  }
 
   async function loadFeed() {
+    if (online()) return CLOUD.listPosts();
     const seed = window.DAYBIRD_FEED;
     const mine = store.get('posts', []);
     const likes = store.get('likes', {});
     return [...mine, ...seed].map(p => ({ ...p, liked: !!likes[p.id], likes: (p.likes || 0) + (likes[p.id] ? 1 : 0) }));
   }
-  function post(text, tags = [], photo = null) {
+  async function post(text, tags = [], photo = null) {
+    if (online()) return CLOUD.createPost(text, tags, photo);
     const s = settings();
     const p = { id: 'p' + Date.now(), who: s.name || 'You', text, tags, photo, at: new Date().toISOString(), likes: 0, mine: true };
     const ps = store.get('posts', []); ps.unshift(p); store.set('posts', ps); return p;
   }
-  function toggleLike(id) { const l = store.get('likes', {}); l[id] = !l[id]; store.set('likes', l); return l[id]; }
+  async function toggleLike(id, liked) {
+    if (online()) return CLOUD.toggleLike(id, liked);
+    const l = store.get('likes', {}); l[id] = !l[id]; store.set('likes', l); return l[id];
+  }
 
   // ---------- photos (resized to keep localStorage small) ----------
   function fileToDataURL(file, max = 1000) {
@@ -187,18 +201,59 @@ const DB = (() => {
       byMonth: Array.from({ length: 12 }, (_, m) => species.filter(s => +s.first.slice(5, 7) === m + 1).length),
       allSpecies: species.map(s => s.name).sort(),
     };
-    store.set('life', life); return life;
+    store.set('life', life);
+    if (online()) CLOUD.saveProfile({ life }).catch(() => {});
+    return life;
   }
-  const lifeList = () => store.get('life', null);
-  const profile = () => store.get('profile', { favorite: '', favoriteWhy: '', photo: null, bio: '' });
-  const saveProfile = (p) => store.set('profile', p);
+  async function lifeList() {
+    if (online()) { const p = await CLOUD.getProfile().catch(() => null); if (p?.life) return p.life; }
+    return store.get('life', null);
+  }
+  async function profile() {
+    const local = store.get('profile', { favorite: '', favoriteWhy: '', photo: null, bio: '', name: settings().name });
+    if (!online()) return local;
+    const p = await CLOUD.getProfile().catch(() => null);
+    return p ? { name: p.name, bio: p.bio || '', favorite: p.favorite || '', favoriteWhy: p.favorite_why || '', photo: p.photo_url, favPhoto: p.fav_photo_url, online: true } : local;
+  }
+  async function saveProfile(p) {
+    store.set('profile', p);
+    if (!online()) return;
+    const up = { ...p };
+    if (p.photo && p.photo.startsWith('data:')) up.photo = await CLOUD.uploadPhoto(p.photo, 'avatar');
+    if (p.favPhoto && p.favPhoto.startsWith('data:')) up.favPhoto = await CLOUD.uploadPhoto(p.favPhoto, 'fav');
+    await CLOUD.saveProfile(up);
+    store.set('profile', up);
+  }
 
-  return { settings, saveSettings, loadBrief, loadPasses, bookings, book, addListing, loadFeed, post, toggleLike,
+  const ready = CLOUD.ready ? CLOUD.init() : Promise.resolve(null);
+
+  return { ready, online, settings, saveSettings, loadBrief, loadPasses, bookings, book, addListing, loadFeed, post, toggleLike,
            fileToDataURL, importLifeList, lifeList, profile, saveProfile, esc, fmtDate, ago, dirName };
 })();
 
-// nav highlight
-document.addEventListener('DOMContentLoaded', () => {
+// nav highlight + sign-in widget
+document.addEventListener('DOMContentLoaded', async () => {
   const here = location.pathname.split('/').pop() || 'index.html';
   document.querySelectorAll('nav.tabs a').forEach(a => { if (a.getAttribute('href') === here) a.classList.add('active'); });
+
+  const head = document.querySelector('header.top'); if (!head) return;
+  const box = document.createElement('div'); box.id = 'authbox'; box.style.cssText = 'display:flex;gap:8px;align-items:center;flex-wrap:wrap';
+  head.appendChild(box);
+  if (!CLOUD.ready) { box.innerHTML = '<span class="meta">offline mode</span>'; return; }
+  await CLOUD.init();
+  const render = () => {
+    const u = CLOUD.user();
+    box.innerHTML = u
+      ? `<span class="meta">${DB.esc(u.email)}</span><button class="ghost small" id="signout">Sign out</button>`
+      : `<input id="loginEmail" type="email" placeholder="you@email.com" style="width:190px;padding:7px 10px"><button class="small" id="signin">Sign in</button>`;
+    const si = document.getElementById('signin'), so = document.getElementById('signout');
+    if (si) si.onclick = async () => {
+      const e = document.getElementById('loginEmail').value.trim(); if (!e) return;
+      si.disabled = true; try { await CLOUD.signIn(e); box.innerHTML = '<span class="meta">Check your email for a sign-in link.</span>'; }
+      catch (err) { box.innerHTML = `<span class="meta">${DB.esc(err.message)}</span>`; }
+    };
+    if (so) so.onclick = async () => { await CLOUD.signOut(); location.reload(); };
+  };
+  render();
+  document.addEventListener('daybird:auth', () => { render(); document.dispatchEvent(new Event('daybird:refresh')); });
 });

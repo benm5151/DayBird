@@ -71,6 +71,7 @@
     <input type="file" id="csv" accept=".csv,text/csv">
     <p class="meta" id="csvMsg">Parsed in your browser. Nothing is uploaded.</p>
     <label>Profile photo</label><input type="file" id="photo" accept="image/*">
+    <label>Display name</label><input id="nameIn" placeholder="Ben">
     <label>Short bio</label><input id="bioIn" placeholder="Beginner birder, Upper Valley. Big Year 2027.">
     <label>Favorite bird</label><input id="favIn" list="speciesList" placeholder="Start typing a species from your list">
     <datalist id="speciesList"></datalist>
@@ -84,15 +85,20 @@
 <script src="data/mock.js"></script>
 <script src="data/passes.js"></script>
 <script src="data/feed.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="js/config.js"></script>
+<script src="js/cloud.js"></script>
 <script src="js/app.js"></script>
 <script>
-(() => {
+(async () => {
+  await DB.ready;
   const $ = (id) => document.getElementById(id);
-  let prof = DB.profile(), favPhoto = prof.favPhoto || null, photo = prof.photo || null;
+  let prof = await DB.profile(), favPhoto = prof.favPhoto || null, photo = prof.photo || null;
 
-  function render() {
-    const s = DB.settings(), L = DB.lifeList();
-    $('name').textContent = s.name || 'You';
+  async function render() {
+    const s = DB.settings(), L = await DB.lifeList();
+    $('name').textContent = prof.name || s.name || 'You';
+    $('nameIn').value = prof.name || s.name || '';
     $('bio').textContent = prof.bio || '';
     $('avatarBox').innerHTML = photo ? `<img src="${photo}" alt="">` : `<div class="avatar">${DB.esc((s.name || 'Y')[0])}</div>`;
     if (!L) {
@@ -122,19 +128,22 @@
 
   $('csv').onchange = async (e) => {
     const f = e.target.files[0]; if (!f) return;
-    try { const L = DB.importLifeList(await f.text()); $('csvMsg').textContent = `Imported ${L.observations} observations · ${L.total} species · ${L.firstDate} to ${L.lastDate}.`; render(); }
+    try { const L = DB.importLifeList(await f.text()); await new Promise(r => setTimeout(r, 300)); $('csvMsg').textContent = `Imported ${L.observations} observations · ${L.total} species · ${L.firstDate} to ${L.lastDate}.`; render(); }
     catch (err) { $('csvMsg').textContent = 'Could not parse that file. Is it MyEBirdData.csv? ' + err.message; }
   };
   $('photo').onchange = async (e) => { if (e.target.files[0]) { photo = await DB.fileToDataURL(e.target.files[0], 400); render(); } };
   $('favPhoto').onchange = async (e) => { if (e.target.files[0]) { favPhoto = await DB.fileToDataURL(e.target.files[0], 600); render(); } };
-  $('save').onclick = () => {
-    prof = { bio: $('bioIn').value.trim(), favorite: $('favIn').value.trim(), favoriteWhy: $('favWhy').value.trim(), photo, favPhoto };
-    DB.saveProfile(prof); render(); $('msg').textContent = 'Saved.';
+  $('save').onclick = async () => {
+    $('save').disabled = true;
+    prof = { name: $('nameIn').value.trim(), bio: $('bioIn').value.trim(), favorite: $('favIn').value.trim(), favoriteWhy: $('favWhy').value.trim(), photo, favPhoto };
+    try { await DB.saveProfile(prof); prof = await DB.profile(); photo = prof.photo; favPhoto = prof.favPhoto; render(); $('msg').textContent = DB.online() ? 'Saved online.' : 'Saved in this browser.'; }
+    catch (e) { $('msg').textContent = 'Could not save: ' + e.message; }
+    $('save').disabled = false;
   };
-  $('share').onclick = () => {
-    const L = DB.lifeList(); if (!L) return $('msg').textContent = 'Import your CSV first.';
+  $('share').onclick = async () => {
+    const L = await DB.lifeList(); if (!L) return $('msg').textContent = 'Import your CSV first.';
     const newest = L.recentLifers[0];
-    DB.post(`Life list: ${L.total} species (${L.thisYear} lifers this year). Latest lifer: ${newest.name} at ${newest.loc}.${prof.favorite ? ' Favorite bird: ' + prof.favorite + '.' : ''}`, ['lifelist'], favPhoto);
+    await DB.post(`Life list: ${L.total} species (${L.thisYear} lifers this year). Latest lifer: ${newest.name} at ${newest.loc}.${prof.favorite ? ' Favorite bird: ' + prof.favorite + '.' : ''}`, ['lifelist'], favPhoto);
     location.href = 'feed.html';
   };
 })();

@@ -33,15 +33,21 @@
 <script src="data/mock.js"></script>
 <script src="data/passes.js"></script>
 <script src="data/feed.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="js/config.js"></script>
+<script src="js/cloud.js"></script>
 <script src="js/app.js"></script>
 <script>
 (async () => {
+  await DB.ready;
   const $ = (id) => document.getElementById(id);
+  const likeMap = {};
   async function render() {
     const posts = await DB.loadFeed();
+    posts.forEach(p => likeMap[p.id] = p.liked);
     $('feed').innerHTML = posts.map(p => `
       <div class="card feed-post">
-        <div class="avatar">${DB.esc(p.who[0])}</div>
+        ${p.avatar ? `<img class="avatar" src="${p.avatar}" alt="" style="object-fit:cover">` : `<div class="avatar">${DB.esc((p.who || 'B')[0])}</div>`}
         <div class="body">
           <span class="who">${DB.esc(p.who)}</span><span class="when">${DB.ago(p.at)}</span>
           <div class="text">${DB.esc(p.text)}</div>
@@ -52,17 +58,20 @@
       </div>`).join('');
   }
   render();
-  const L = DB.lifeList(), P = DB.profile();
+  document.addEventListener('daybird:refresh', render);
+  if (!DB.online() && CLOUD.ready) $('mystats').insertAdjacentHTML('beforebegin', '<div class="banner">Sign in (top right) to post to the shared feed. Right now you are seeing sample posts.</div>');
+  const L = await DB.lifeList(), P = await DB.profile();
   if (L) $('mystats').innerHTML = `<div class="card"><div class="stat"><div><b>${L.total}</b><span>life list</span></div><div><b>${L.yearList}</b><span>this year</span></div><div><b>${DB.esc(L.recentLifers[0].name)}</b><span>latest lifer</span></div>${P.favorite ? `<div><b>${DB.esc(P.favorite)}</b><span>favorite</span></div>` : ''}</div><a class="meta" href="profile.html">Edit profile →</a></div>`;
   else $('mystats').innerHTML = `<p class="meta"><a href="profile.html">Import your eBird list</a> to show your life-list stats here.</p>`;
   let photo = null;
   $('photo').onchange = async (e) => { if (e.target.files[0]) { photo = await DB.fileToDataURL(e.target.files[0]); $('photoMsg').textContent = 'photo attached'; } };
-  $('postBtn').onclick = () => {
+  $('postBtn').onclick = async () => {
     const t = $('text').value.trim(); if (!t && !photo) return;
-    DB.post(t, $('tags').value.split(',').map(s => s.trim()).filter(Boolean), photo);
-    $('text').value = ''; $('tags').value = ''; photo = null; $('photo').value = ''; $('photoMsg').textContent = ''; render();
+    $('postBtn').disabled = true;
+    await DB.post(t, $('tags').value.split(',').map(s => s.trim()).filter(Boolean), photo);
+    $('text').value = ''; $('tags').value = ''; photo = null; $('photo').value = ''; $('photoMsg').textContent = ''; $('postBtn').disabled = false; render();
   };
-  $('feed').addEventListener('click', e => { const id = e.target.dataset.like; if (id) { DB.toggleLike(id); render(); } });
+  $('feed').addEventListener('click', async e => { const id = e.target.dataset.like; if (id) { await DB.toggleLike(id, likeMap[id]); render(); } });
 })();
 </script>
 </body>

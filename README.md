@@ -32,12 +32,18 @@ Weather comes from Open-Meteo (no key). If eBird returns a CORS error in the bro
 - **Profile**: import MyEBirdData.csv (parsed in-browser) → life list, year list, recent lifers, lifers-by-month, most-logged species, top spots; favorite bird + photos; one-tap share of stats to the feed.
 - **Settings**: name, key, location, radius, migration rating.
 
-## What is faked (needs a backend)
+## Accounts and the shared feed (Supabase)
 
-- Accounts, other people's posts, real bookings, payments, host payouts, insurance, messaging.
-- Shared state of any kind — everything is per-browser localStorage.
+1. Create a free project at supabase.com.
+2. SQL Editor → paste `schema.sql` → Run. Creates profiles, posts, likes, listings, bookings, a public `photos` bucket, and row-level security.
+3. Authentication → URL Configuration → Site URL = your Pages URL (e.g. `https://benm5151.github.io/DayBird/`). Add it to Redirect URLs too.
+4. Put the Project URL and anon key in `js/config.js`. The anon key is public by design; RLS decides who can write what.
 
-Suggested next stack when you outgrow this: Supabase (auth + Postgres + storage) with the same HTML, or move to Lovable/Next.js.
+Sign-in is a magic link by email (no passwords). When signed in: profile, life-list summary, posts, likes, listings and bookings go to the database; photos go to storage. Signed out: everything stays in localStorage like before.
+
+## Still faked
+
+- Payments, host payouts, insurance, messaging, moderation.
 
 ## Data terms
 
