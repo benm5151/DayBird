@@ -99,12 +99,30 @@ const DB = (() => {
     }
     // group hotspots by activity (eBird gives numSpeciesAllTime; recent list gives locations)
     const byLoc = {};
-    (sightings.recent || []).forEach(o => { byLoc[o.locName] = (byLoc[o.locName] || 0) + 1; });
-    const spots = Object.entries(byLoc).sort((a, b) => b[1] - a[1]).slice(0, 5)
-      .map(([name, n]) => ({ name, species: n }));
+    (sightings.recent || []).forEach(o => { const k = o.locId || o.locName; byLoc[k] = byLoc[k] || { name: o.locName, locId: o.locId, species: 0 }; byLoc[k].species++; });
+    const spots = Object.values(byLoc).sort((a, b) => b.species - a.species).slice(0, 5);
     const notable = (sightings.notable || []).slice(0, 8);
     const call = makeCall(wx, s.migration, notable.length);
-    return { s, source, wx, spots, notable, call, errors, speciesCount: Object.keys(byLoc).length ? new Set((sightings.recent||[]).map(o=>o.comName)).size : 0 };
+    // call history: one entry per day, kept 60 days, with optional "was it right?" verdict
+    const today = new Date().toISOString().slice(0, 10);
+    const hist = store.get('calls', []).filter(h => h.date >= new Date(Date.now() - 60 * 864e5).toISOString().slice(0, 10));
+    const idx = hist.findIndex(h => h.date === today);
+    if (idx < 0) hist.unshift({ date: today, word: call.word, score: call.score, verdict: null });
+    store.set('calls', hist);
+    return { s, source, wx, spots, notable, call, errors, history: hist, speciesCount: new Set((sightings.recent || []).map(o => o.comName)).size };
+  }
+  function gradeCall(date, verdict) {
+    const h = store.get('calls', []); const e = h.find(x => x.date === date); if (e) e.verdict = verdict; store.set('calls', h); return h;
+  }
+  function briefText(b) {
+    const d = new Date().toLocaleDateString(undefined, { weekday: 'long', month: 'short', day: 'numeric' });
+    const lines = [`Daybird — ${d}: ${b.call.word}`,
+      `${b.wx.temp}°, wind ${b.wx.wind} mph ${dirName(b.wx.windDir)}, rain ${b.wx.rain}%, sunrise ${b.wx.sunrise}${b.s.migration ? `, migration ${b.s.migration}/5` : ''}`,
+      b.call.why.length ? b.call.why.join(', ') : ''];
+    if (b.spots.length) lines.push('', 'Where: ' + b.spots.map(x => `${x.name} (${x.species} spp)`).join('; '));
+    if (b.notable.length) lines.push('Notable: ' + b.notable.map(o => `${o.comName} @ ${o.locName}`).join('; '));
+    lines.push('', 'Full brief: ' + location.href.split('?')[0]);
+    return lines.filter(l => l !== undefined).join('\n');
   }
 
   const online = () => CLOUD.ready && !!CLOUD.user();
@@ -236,7 +254,7 @@ const DB = (() => {
 
   const ready = CLOUD.ready ? CLOUD.init() : Promise.resolve(null);
 
-  return { ready, online, settings, saveSettings, loadBrief, loadPasses, bookings, book, cancelBooking, addListing, loadFeed, post, deletePost, toggleLike,
+  return { ready, online, settings, saveSettings, loadBrief, gradeCall, briefText, loadPasses, bookings, book, cancelBooking, addListing, loadFeed, post, deletePost, toggleLike,
            fileToDataURL, importLifeList, lifeList, profile, saveProfile, esc, fmtDate, ago, dirName };
 })();
 

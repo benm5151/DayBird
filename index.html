@@ -58,10 +58,23 @@
     <a class="btn ghost" href="passes.html" style="margin-top:8px">See all passes</a>
   </div>
 
+  <div class="grid">
+    <div class="card">
+      <h3>Going out?</h3>
+      <p class="tagline">Post a roll call. Others can tap "I'm in" on the feed.</p>
+      <label>Where</label><select id="goSpot"></select>
+      <label>When</label><input id="goTime" value="7:00 AM">
+      <div style="margin-top:10px"><button id="goBtn">Post roll call</button></div>
+    </div>
+    <div class="card">
+      <h3>Track the call</h3>
+      <div id="history"></div>
+    </div>
+  </div>
   <div class="card">
-    <h3>Share today's call</h3>
-    <textarea id="shareText" rows="2" placeholder="Where are you headed?"></textarea>
-    <div style="margin-top:8px"><button id="shareBtn">Post to feed</button></div>
+    <h3>Share today's brief</h3>
+    <p class="tagline">Copies a plain-text version for the Facebook group or a text thread.</p>
+    <button class="ghost" id="copyBtn">Copy brief</button> <span class="meta" id="copyMsg"></span>
   </div>
 
   <footer>Sightings via eBird (Cornell Lab of Ornithology). Weather via Open-Meteo. Migration rating is entered by hand from <a id="bcLink" href="#" target="_blank" rel="noopener">BirdCast</a>. <a href="about.html">About Daybird</a>. Prototype — not for commercial use without eBird permission.</footer>
@@ -97,17 +110,35 @@
     <div><b>${b.wx.rain}%</b><span>rain</span></div>
     <div><b>${b.wx.sunrise}</b><span>sunrise</span></div>`;
 
-  $('spots').innerHTML = b.spots.map(s => `<div class="row"><span class="l">${DB.esc(s.name)}</span><span class="r">${s.species} species</span></div>`).join('') || '<p class="meta">No recent reports.</p>';
-  $('notable').innerHTML = b.notable.map(o => `<div class="row"><span class="l">${DB.esc(o.comName)}${o.howMany ? ' ×' + o.howMany : ''}</span><span class="r">${DB.esc(o.locName)}<br>${DB.esc(o.obsDt || '')}</span></div>`).join('') || '<p class="meta">Nothing notable in range.</p>';
+  $('spots').innerHTML = b.spots.map(s => `<div class="row"><span class="l">${s.locId ? `<a href="https://ebird.org/hotspot/${s.locId}" target="_blank" rel="noopener">${DB.esc(s.name)}</a>` : DB.esc(s.name)}</span><span class="r">${s.species} species</span></div>`).join('') || '<p class="meta">No recent reports.</p>';
+  $('notable').innerHTML = b.notable.map(o => `<div class="row"><span class="l">${o.subId ? `<a href="https://ebird.org/checklist/${o.subId}" target="_blank" rel="noopener">${DB.esc(o.comName)}</a>` : DB.esc(o.comName)}${o.howMany ? ' ×' + o.howMany : ''}</span><span class="r">${DB.esc(o.locName)}<br>${DB.esc(o.obsDt || '')}</span></div>`).join('') || '<p class="meta">Nothing notable in range.</p>';
+
+  // roll call
+  $('goSpot').innerHTML = [...b.spots.map(x => x.name), 'Somewhere else'].map(n => `<option>${DB.esc(n)}</option>`).join('');
+  $('goBtn').onclick = async () => {
+    $('goBtn').disabled = true;
+    await DB.post(`Going out: ${$('goSpot').value} at ${$('goTime').value}. ${c.word} day (score ${c.score}). Join me?`, ['going']);
+    location.href = 'feed.html';
+  };
+  // history + grading
+  function renderHistory(h) {
+    const graded = h.filter(x => x.verdict !== null), right = graded.filter(x => x.verdict === 'right').length;
+    const rows = h.slice(0, 7).map(x => `<div class="row"><span class="l">${x.date === new Date().toISOString().slice(0,10) ? 'Today' : x.date.slice(5)} · <span class="pill ${x.word === 'GO' ? 'go' : x.word === 'MAYBE' ? 'maybe' : 'stay'}">${x.word}</span></span>
+      <span class="r">${x.verdict ? (x.verdict === 'right' ? '✓ right' : '✗ wrong') : `<button class="small ghost" data-grade="right" data-date="${x.date}">right</button> <button class="small ghost" data-grade="wrong" data-date="${x.date}">wrong</button>`}</span></div>`).join('');
+    $('history').innerHTML = (graded.length ? `<p class="meta">Accuracy so far: <b>${Math.round(right / graded.length * 100)}%</b> over ${graded.length} graded day${graded.length > 1 ? 's' : ''}.</p>` : '<p class="meta">After you bird, grade the call. Builds an accuracy score over time.</p>') + rows;
+  }
+  renderHistory(b.history);
+  $('history').addEventListener('click', e => { const d = e.target.dataset; if (d.grade) renderHistory(DB.gradeCall(d.date, d.grade)); });
+  // copy
+  $('copyBtn').onclick = async () => {
+    const t = DB.briefText(b);
+    try { await navigator.clipboard.writeText(t); $('copyMsg').textContent = 'Copied.'; }
+    catch { prompt('Copy this:', t); }
+  };
 
   const passes = (await DB.loadPasses()).filter(p => p.price >= 0).slice(0, 3);
   $('passes').innerHTML = passes.map(p => `<div class="row"><span class="l">${DB.esc(p.title)}</span><span class="r">${p.price ? '$' + p.price : 'Free'} · ${p.seats} seats</span></div>`).join('');
 
-  $('shareBtn').onclick = async () => {
-    const t = $('shareText').value.trim(); if (!t) return;
-    await DB.post(`${c.word} today (score ${c.score}). ${t}`, [c.word]);
-    location.href = 'feed.html';
-  };
 })();
 </script>
 </body>

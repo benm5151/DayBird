@@ -52,7 +52,7 @@
     const av = p.avatar ? `<img class="avatar" src="${p.avatar}" alt="" style="object-fit:cover">` : `<div class="avatar">${DB.esc((p.who || 'B')[0])}</div>`;
     const comments = (p.comments || []).map(c => `<div class="row" style="padding:6px 0"><span><b>${DB.esc(c.who)}</b> ${DB.esc(c.text)}</span><span class="r">${DB.ago(c.at)}${c.mine ? ` <button class="small ghost" data-delc="${c.id}" style="padding:1px 6px;font-size:11px">×</button>` : ''}</span></div>`).join('');
     return `
-      <div class="card feed-post" data-post="${p.id}">
+      <div class="card feed-post" data-post="${p.id}" ${(p.tags||[]).includes('going') ? 'style="border-color:var(--green)"' : ''}>
         ${p.userId ? `<a href="profile.html?u=${p.userId}">${av}</a>` : av}
         <div class="body">
           ${who}<span class="when">${DB.ago(p.at)}</span>
@@ -61,6 +61,7 @@
           ${p.photo ? `<img src="${p.photo}" alt="" style="max-width:100%;border-radius:10px;margin:4px 0 8px">` : ''}
           <div>${(p.tags||[]).map(t => `<span class="chip">#${DB.esc(t)}</span>`).join('')}</div>
           <div class="actions" style="margin-top:6px">
+            ${(p.tags||[]).includes('going') && DB.online() && !p.mine ? `<button data-join="${p.id}" style="color:var(--green);font-weight:600">I'm in</button>` : ''}
             <button class="${p.liked ? 'liked' : ''}" data-like="${p.id}">♥ ${p.likes}</button>
             <button data-toggle="${p.id}">💬 ${(p.comments||[]).length}</button>
           </div>
@@ -102,6 +103,7 @@
     else if (d.del && confirm('Delete this post?')) { await DB.deletePost(d.del); render(); }
     else if (d.csend) { const inp = document.querySelector(`[data-cin="${d.csend}"]`); const t = inp.value.trim(); if (!t) return; await CLOUD.addComment(d.csend, t); render(); }
     else if (d.delc) { await CLOUD.deleteComment(d.delc); render(); }
+    else if (d.join) { await CLOUD.addComment(d.join, "I'm in."); $('c-' + d.join)?.classList.remove('hidden'); render(); }
   });
   $('feed').addEventListener('keydown', e => { if (e.key === 'Enter' && e.target.dataset.cin) document.querySelector(`[data-csend="${e.target.dataset.cin}"]`).click(); });
 })();
