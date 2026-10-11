@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Daybird — What was that?</title>
+<link rel="stylesheet" href="css/style.css">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#2f6b4f">
+<link rel="icon" href="icon.svg">
+<style>
+.opts{display:flex;flex-wrap:wrap;gap:6px;margin:4px 0 8px}
+.opts button{background:var(--bg);color:var(--ink);border:1px solid var(--line);padding:6px 11px;border-radius:999px;font-weight:500;font-size:13px}
+.opts button.on{background:var(--green);color:#fff;border-color:var(--green)}
+.cand{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}
+.cand .n{font-family:var(--serif);font-size:19px;font-weight:700}
+.bar{height:6px;background:var(--line);border-radius:3px;overflow:hidden;margin-top:6px}
+.bar div{height:100%;background:var(--green)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <a class="brand" href="index.html">Daybird<small>What was that?</small></a>
+  </header>
+  <nav class="tabs">
+    <a href="index.html">Brief</a>
+    <a href="id.html">ID</a>
+    <a href="passes.html">Passes</a>
+    <a href="feed.html">Feed</a>
+    <a href="profile.html">Profile</a>
+    <a href="host.html">Host land</a>
+  </nav>
+
+  <h1>Describe it. We rank what's actually around.</h1>
+  <p class="lead">Starts from every species reported near you in the last two weeks, then narrows by what you saw.</p>
+  <div id="pool" class="banner"></div>
+
+  <div class="card">
+    <label>Size</label>
+    <div class="opts" data-group="size"><button data-v="tiny">hummingbird / kinglet</button><button data-v="sparrow">sparrow / warbler</button><button data-v="robin">robin / cardinal</button><button data-v="jay">jay / dove</button><button data-v="crow">crow</button><button data-v="hawk">hawk / duck</button><button data-v="goose">goose / heron or bigger</button></div>
+    <label>Main colors (pick up to 3)</label>
+    <div class="opts" data-group="colors" data-multi="3"><button data-v="black">black</button><button data-v="white">white</button><button data-v="gray">gray</button><button data-v="brown">brown</button><button data-v="streaked">streaky</button><button data-v="buff">buff / tan</button><button data-v="red">red</button><button data-v="orange">orange / rust</button><button data-v="yellow">yellow</button><button data-v="green">green</button><button data-v="blue">blue</button></div>
+    <label>Where</label>
+    <div class="opts" data-group="hab"><button data-v="feeder">at a feeder</button><button data-v="yard">yard / town</button><button data-v="forest">forest</button><button data-v="edge">edge / brushy</button><button data-v="field">open field</button><button data-v="marsh">marsh / cattails</button><button data-v="pond">pond</button><button data-v="river">river / stream</button><button data-v="lake">lake</button><button data-v="shore">mudflat / shore</button><button data-v="sky">overhead</button></div>
+    <label>Doing what</label>
+    <div class="opts" data-group="beh"><button data-v="perched">perched</button><button data-v="ground">on the ground</button><button data-v="feeder">eating at feeder</button><button data-v="flying">flying</button><button data-v="soaring">soaring / circling</button><button data-v="hovering">hovering</button><button data-v="swimming">swimming</button><button data-v="diving">diving</button><button data-v="wading">wading</button><button data-v="trunk">on a trunk</button><button data-v="flocking">in a flock</button><button data-v="singing">singing</button></div>
+    <label>Anything else (optional)</label>
+    <input id="notes" placeholder="e.g. black cap, long tail, pumped its tail, white in the wings">
+    <div style="margin-top:12px"><button id="go">Rank it</button> <button class="ghost" id="clear">Clear</button></div>
+  </div>
+
+  <div id="results"></div>
+  <footer>Candidate pool from eBird (Cornell Lab). Field marks hand-written for ~120 common Northeast species. Not perfect; it's a shortlist to check against Merlin or a guide.</footer>
+</div>
+
+<script src="data/mock.js"></script>
+<script src="data/passes.js"></script>
+<script src="data/feed.js"></script>
+<script src="data/traits.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="js/config.js"></script>
+<script src="js/cloud.js"></script>
+<script src="js/app.js"></script>
+<script>
+(async () => {
+  await DB.ready;
+  const $ = (id) => document.getElementById(id);
+  const sel = { size: null, colors: [], hab: null, beh: null };
+
+  document.querySelectorAll('.opts').forEach(g => g.addEventListener('click', e => {
+    const b = e.target.closest('button'); if (!b) return;
+    const k = g.dataset.group, v = b.dataset.v, max = +g.dataset.multi || 1;
+    if (max > 1) { const i = sel[k].indexOf(v); if (i >= 0) sel[k].splice(i, 1); else if (sel[k].length < max) sel[k].push(v); b.classList.toggle('on', sel[k].includes(v)); }
+    else { sel[k] = sel[k] === v ? null : v; g.querySelectorAll('button').forEach(x => x.classList.toggle('on', x.dataset.v === sel[k])); }
+  }));
+
+  // candidate pool: recent eBird reports nearby (14 days). Offline: sample + every trait species at weight 0.
+  const s = DB.settings();
+  let freq = {}, codes = {}, source = 'none';
+  try {
+    if (s.ebirdKey) {
+      const r = await fetch(`https://api.ebird.org/v2/data/obs/geo/recent?lat=${s.lat}&lng=${s.lng}&dist=${Math.max(s.dist, 30)}&back=14&includeProvisional=true`, { headers: { 'X-eBirdApiToken': s.ebirdKey } });
+      const obs = await r.json();
+      const perLoc = {};
+      obs.forEach(o => { const k = o.comName + '|' + o.locId; if (!perLoc[k]) { perLoc[k] = 1; freq[o.comName] = (freq[o.comName] || 0) + 1; } codes[o.comName] = o.speciesCode; });
+      source = 'live';
+    }
+  } catch (e) { source = 'error'; }
+  if (source !== 'live') (window.DAYBIRD_MOCK.sightings.recent || []).forEach(o => freq[o.comName] = (freq[o.comName] || 0) + 1);
+  const n = Object.keys(freq).length;
+  $('pool').className = 'banner ' + (source === 'live' ? 'ok' : '');
+  $('pool').textContent = source === 'live' ? `${n} species reported within ${Math.max(s.dist, 30)} km in the last 14 days. Those get a head start.` : 'No eBird key (or offline): ranking on sample sightings only. Add your key in Settings for the real local pool.';
+
+  const SIZES = ['tiny','sparrow','robin','jay','crow','hawk','goose'];
+  function score(t) {
+    const [name, size, colors, hab, beh, notes] = t; let pts = 0; const why = [];
+    const f = freq[name] || 0;
+    if (f) { pts += Math.min(6, 2 + Math.log2(1 + f)); why.push(`reported at ${f} spot${f > 1 ? 's' : ''} nearby`); }
+    else if (source === 'live') pts -= 4;
+    if (sel.size) { const d = Math.abs(SIZES.indexOf(sel.size) - SIZES.indexOf(size)); if (d === 0) { pts += 4; why.push('right size'); } else if (d === 1) pts += 1; else pts -= 3; }
+    sel.colors.forEach(c => { if (colors.includes(c)) { pts += 2.5; why.push(c); } else pts -= 1; });
+    if (sel.hab) { if (hab.includes(sel.hab)) { pts += 3; why.push('fits habitat'); } else pts -= 1.5; }
+    if (sel.beh) { if (beh.includes(sel.beh)) { pts += 3; why.push('fits behavior'); } else pts -= 1; }
+    const STOP = new Set(['the','and','with','was','had','its','bird','very','big','small','like','some','there','this','that']);
+    const words = [...new Set($('notes').value.toLowerCase().split(/[^a-z]+/).filter(w => w.length > 2 && !STOP.has(w)))];
+    const nm = name.toLowerCase().replace(/-/g, ' '), nt = notes.toLowerCase();
+    const hit = words.filter(w => new RegExp('\\b' + w).test(nt) || new RegExp('\\b' + w).test(nm));
+    const nameHits = words.filter(w => new RegExp('\\b' + w).test(nm)).length;
+    if (hit.length) { pts += 2 * hit.length + 2 * nameHits; why.push('matches "' + hit.join(', ') + '"'); }
+    return { name, notes, pts, why, f, code: codes[name] };
+  }
+  $('go').onclick = () => {
+    const ranked = window.DAYBIRD_TRAITS.map(score).sort((a, b) => b.pts - a.pts).slice(0, 8);
+    const top = Math.max(1, ranked[0].pts);
+    $('results').innerHTML = `<h2>Most likely</h2>` + ranked.map((r, i) => `
+      <div class="card">
+        <div class="cand"><div><div class="n">${i + 1}. ${DB.esc(r.name)}</div><div class="meta">${DB.esc(r.notes)}</div>
+          <div style="margin-top:6px">${r.why.map(w => `<span class="chip">${DB.esc(w)}</span>`).join('')}</div></div>
+          <div style="text-align:right;flex:none"><a class="btn ghost small" href="https://ebird.org/species/${r.code || ''}${r.code ? '' : '?q=' + encodeURIComponent(r.name)}" target="_blank" rel="noopener" style="padding:5px 10px;font-size:13px">eBird</a>
+          <br><a class="meta" href="https://www.allaboutbirds.org/guide/${encodeURIComponent(r.name.replace(/ /g, '_').replace(/'/g, ''))}" target="_blank" rel="noopener">All About Birds</a></div></div>
+        <div class="bar"><div style="width:${Math.max(4, Math.round(r.pts / top * 100))}%"></div></div>
+      </div>`).join('') + `<p class="meta">Not it? Add a detail above and rank again, or <a href="feed.html">ask the feed</a> with a photo.</p>`;
+    $('results').scrollIntoView({ behavior: 'smooth' });
+  };
+  $('clear').onclick = () => { sel.size = sel.hab = sel.beh = null; sel.colors = []; $('notes').value = ''; document.querySelectorAll('.opts .on').forEach(b => b.classList.remove('on')); $('results').innerHTML = ''; };
+})();
+</script>
+</body>
+</html>
