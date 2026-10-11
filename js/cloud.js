@@ -12,7 +12,8 @@ const CLOUD = (() => {
     if (!ready) return null;
     const { data } = await sb.auth.getSession();
     _user = data.session?.user || null;
-    sb.auth.onAuthStateChange((_e, s) => { _user = s?.user || null; document.dispatchEvent(new Event('daybird:auth')); });
+    if (_user) await ensureProfile();
+    sb.auth.onAuthStateChange(async (_e, s) => { _user = s?.user || null; if (_user) await ensureProfile(); document.dispatchEvent(new Event('daybird:auth')); });
     return _user;
   }
   const user = () => _user;
@@ -24,6 +25,10 @@ const CLOUD = (() => {
   async function signOut() { await sb.auth.signOut(); }
 
   // ---- profiles ----
+  async function ensureProfile() {
+    const { data } = await sb.from('profiles').select('id').eq('id', _user.id).maybeSingle();
+    if (!data) await sb.from('profiles').insert({ id: _user.id, name: (_user.email || 'birder').split('@')[0] });
+  }
   async function getProfile(id = _user?.id) {
     if (!id) return null;
     const { data } = await sb.from('profiles').select('*').eq('id', id).maybeSingle();
