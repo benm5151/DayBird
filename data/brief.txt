@@ -1,16 +1,25 @@
-GO — Get out there.  (score 75)
-calm winds
+GO — Get out there.  (score 85)
+calm winds · 8 notable reports nearby
 
 39°F · wind 5 mph E · rain 0% · sunrise 06:58
 Migration last night: https://dashboard.birdcast.info/region/US-NH-009
 
 Where to go (species reported, last 3 days):
-(no eBird data)
+1. Campbell Flats Road — 14 species — https://ebird.org/hotspot/L3553748
+2. 122 Best Rd, Windsor US-VT 43.53604, -72.47743 — 11 species — https://ebird.org/hotspot/L78347648
+3. George Ratcliffe Park, White River Junction US-VT (43.6431,-72.3159) — 6 species — https://ebird.org/hotspot/L40127467
+4. Elm St, Norwich — 5 species — https://ebird.org/hotspot/L801017
+5. 53 Acorn Hill Rd, Lyme US-NH Front Porch — 5 species — https://ebird.org/hotspot/L42097329
 
 Notable nearby:
-Nothing notable in range.
+- Nelson's Sparrow ×1 — Campbell Flats Road, 2026-10-10 14:16 — https://ebird.org/checklist/S401006117
+- Nelson's Sparrow ×1 — Campbell Flats Road, 2026-10-10 12:55 — https://ebird.org/checklist/S401038785
+- Nelson's Sparrow ×1 — Campbell Flats Road, 2026-10-10 12:55 — https://ebird.org/checklist/S401038788
+- Nelson's Sparrow ×1 — Campbell Flats Road, 2026-10-10 11:58 — https://ebird.org/checklist/S401064584
+- Northern House Wren ×2 — Campbell Flats Road, 2026-10-10 11:58 — https://ebird.org/checklist/S401064584
+- Tennessee Warbler ×1 — Albert Schweitzer Trails, Lebanon, 2026-10-10 11:12 — https://ebird.org/checklist/S400907313
+- Magnolia Warbler ×1 — Trail to Leavitt Pond, Grantham, 2026-10-10 11:09 — https://ebird.org/checklist/S400961572
+- Tennessee Warbler ×1 — Trail to Leavitt Pond, Grantham, 2026-10-10 11:09 — https://ebird.org/checklist/S400961572
 
 Full brief and passes: https://benm5151.github.io/DayBird/
 Grade yesterday's call on the site so the accuracy score improves.
-
-Data notes: ebird notable: Invalid header value b'3e54ff4f-be46-4202-9ab4-b5d627d38391\n'; ebird recent: Invalid header value b'3e54ff4f-be46-4202-9ab4-b5d627d38391\n'

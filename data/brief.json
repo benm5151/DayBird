@@ -1,12 +1,13 @@
 {
- "generated": "2026-10-11T21:03:39.910497-04:00",
+ "generated": "2026-10-11T21:04:21.372104-04:00",
  "date": "2026-10-11",
  "word": "GO",
  "grade": "go",
- "score": 75,
+ "score": 85,
  "headline": "Get out there.",
  "why": [
-  "calm winds"
+  "calm winds",
+  "8 notable reports nearby"
  ],
  "wx": {
   "temp": 39,
@@ -15,10 +16,154 @@
   "rain": 0,
   "sunrise": "06:58"
  },
- "spots": [],
- "notable": [],
- "errors": [
-  "ebird notable: Invalid header value b'3e54ff4f-be46-4202-9ab4-b5d627d38391\\n'",
-  "ebird recent: Invalid header value b'3e54ff4f-be46-4202-9ab4-b5d627d38391\\n'"
- ]
+ "spots": [
+  {
+   "name": "Campbell Flats Road",
+   "locId": "L3553748",
+   "species": 14
+  },
+  {
+   "name": "122 Best Rd, Windsor US-VT 43.53604, -72.47743",
+   "locId": "L78347648",
+   "species": 11
+  },
+  {
+   "name": "George Ratcliffe Park, White River Junction US-VT (43.6431,-72.3159)",
+   "locId": "L40127467",
+   "species": 6
+  },
+  {
+   "name": "Elm St, Norwich",
+   "locId": "L801017",
+   "species": 5
+  },
+  {
+   "name": "53 Acorn Hill Rd, Lyme US-NH Front Porch",
+   "locId": "L42097329",
+   "species": 5
+  }
+ ],
+ "notable": [
+  {
+   "speciesCode": "nstspa",
+   "comName": "Nelson's Sparrow",
+   "sciName": "Ammospiza nelsoni",
+   "locId": "L3553748",
+   "locName": "Campbell Flats Road",
+   "obsDt": "2026-10-10 14:16",
+   "howMany": 1,
+   "lat": 43.7681138,
+   "lng": -72.2433633,
+   "obsValid": false,
+   "obsReviewed": false,
+   "locationPrivate": false,
+   "subId": "S401006117"
+  },
+  {
+   "speciesCode": "nstspa",
+   "comName": "Nelson's Sparrow",
+   "sciName": "Ammospiza nelsoni",
+   "locId": "L3553748",
+   "locName": "Campbell Flats Road",
+   "obsDt": "2026-10-10 12:55",
+   "howMany": 1,
+   "lat": 43.7681138,
+   "lng": -72.2433633,
+   "obsValid": false,
+   "obsReviewed": false,
+   "locationPrivate": false,
+   "subId": "S401038785"
+  },
+  {
+   "speciesCode": "nstspa",
+   "comName": "Nelson's Sparrow",
+   "sciName": "Ammospiza nelsoni",
+   "locId": "L3553748",
+   "locName": "Campbell Flats Road",
+   "obsDt": "2026-10-10 12:55",
+   "howMany": 1,
+   "lat": 43.7681138,
+   "lng": -72.2433633,
+   "obsValid": false,
+   "obsReviewed": false,
+   "locationPrivate": false,
+   "subId": "S401038788"
+  },
+  {
+   "speciesCode": "nstspa",
+   "comName": "Nelson's Sparrow",
+   "sciName": "Ammospiza nelsoni",
+   "locId": "L3553748",
+   "locName": "Campbell Flats Road",
+   "obsDt": "2026-10-10 11:58",
+   "howMany": 1,
+   "lat": 43.7681138,
+   "lng": -72.2433633,
+   "obsValid": false,
+   "obsReviewed": false,
+   "locationPrivate": false,
+   "subId": "S401064584"
+  },
+  {
+   "speciesCode": "houwre",
+   "comName": "Northern House Wren",
+   "sciName": "Troglodytes aedon",
+   "locId": "L3553748",
+   "locName": "Campbell Flats Road",
+   "obsDt": "2026-10-10 11:58",
+   "howMany": 2,
+   "lat": 43.7681138,
+   "lng": -72.2433633,
+   "obsValid": false,
+   "obsReviewed": false,
+   "locationPrivate": false,
+   "subId": "S401064584"
+  },
+  {
+   "speciesCode": "tenwar",
+   "comName": "Tennessee Warbler",
+   "sciName": "Leiothlypis peregrina",
+   "locId": "L24789424",
+   "locName": "Albert Schweitzer Trails, Lebanon",
+   "obsDt": "2026-10-10 11:12",
+   "howMany": 1,
+   "lat": 43.675615,
+   "lng": -72.2754777,
+   "obsValid": false,
+   "obsReviewed": false,
+   "locationPrivate": false,
+   "subId": "S400907313"
+  },
+  {
+   "speciesCode": "magwar",
+   "comName": "Magnolia Warbler",
+   "sciName": "Setophaga magnolia",
+   "locId": "L12544134",
+   "locName": "Trail to Leavitt Pond, Grantham",
+   "obsDt": "2026-10-10 11:09",
+   "howMany": 1,
+   "lat": 43.5672397,
+   "lng": -72.1516688,
+   "obsValid": false,
+   "obsReviewed": false,
+   "locationPrivate": false,
+   "subId": "S400961572"
+  },
+  {
+   "speciesCode": "tenwar",
+   "comName": "Tennessee Warbler",
+   "sciName": "Leiothlypis peregrina",
+   "locId": "L12544134",
+   "locName": "Trail to Leavitt Pond, Grantham",
+   "obsDt": "2026-10-10 11:09",
+   "howMany": 1,
+   "lat": 43.5672397,
+   "lng": -72.1516688,
+   "obsValid": false,
+   "obsReviewed": false,
+   "locationPrivate": false,
+   "subId": "S400961572"
+  }
+ ],
+ "errors": []
 }
