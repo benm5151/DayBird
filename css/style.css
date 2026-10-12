@@ -20,7 +20,10 @@ a{color:var(--brand);text-decoration-color:var(--accent)}
 .wrap{max-width:900px;margin:0 auto;padding:0 16px 80px}
 header.top{display:flex;align-items:center;justify-content:space-between;padding:18px 0 8px}
 .brand{font-family:var(--serif);font-size:26px;font-weight:700;letter-spacing:-.01em;text-decoration:none;color:var(--ink);display:flex;align-items:center;gap:10px}
-.brand img{width:40px;height:40px;flex:none}
+.brand img{width:52px;height:52px;flex:none;padding:5px;background:#F6F3EC;border:2px solid var(--accent);border-radius:14px;box-shadow:0 3px 10px rgba(31,42,55,.18),0 0 0 4px var(--accent-ink);transition:transform .15s}
+.brand:hover img{transform:rotate(-4deg) scale(1.04)}
+.brand{font-size:28px}
+.brand small{color:var(--accent);font-weight:600}
 .brand small{display:block;font-family:var(--sans);font-size:12px;font-weight:400;color:var(--muted);letter-spacing:.04em;text-transform:uppercase}
 nav.tabs{display:flex;gap:4px;border-bottom:1px solid var(--line);margin-bottom:18px;overflow-x:auto}
 nav.tabs a{padding:10px 14px;text-decoration:none;color:var(--muted);border-bottom:2px solid transparent;white-space:nowrap;font-weight:500}
