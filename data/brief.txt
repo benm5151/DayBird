@@ -1,22 +1,23 @@
 GO — Get out there.  (score 85)
-calm winds · 7 notable reports nearby
+calm winds · 8 notable reports nearby
 
-39°F · wind 5 mph E · rain 0% · sunrise 06:58
+49°F · wind 2 mph W · rain 1% · sunrise 06:59
 Migration last night: https://dashboard.birdcast.info/region/US-NH-009
 
 Where to go (species reported, last 3 days):
-1. Campbell Flats Road — 14 species — https://ebird.org/hotspot/L3553748
-2. 122 Best Rd, Windsor US-VT 43.53604, -72.47743 — 11 species — https://ebird.org/hotspot/L78347648
-3. George Ratcliffe Park, White River Junction US-VT (43.6431,-72.3159) — 6 species — https://ebird.org/hotspot/L40127467
-4. Elm St, Norwich — 5 species — https://ebird.org/hotspot/L801017
-5. 53 Acorn Hill Rd, Lyme US-NH Front Porch — 5 species — https://ebird.org/hotspot/L42097329
+1. Wilder Dam--boat ramp — 13 species — https://ebird.org/hotspot/L687022
+2. Campbell Flats Road — 13 species — https://ebird.org/hotspot/L3553748
+3. Mt. Ascutney Hospital and Health Center, 351 County Road, Windsor, Vermont, US (43.488, -72.402) — 9 species — https://ebird.org/hotspot/L10048859
+4. 15 Mine Road, South Strafford — 6 species — https://ebird.org/hotspot/L473621
+5. Ompompanoosuc River flats — 6 species — https://ebird.org/hotspot/L166149
 
 Notable nearby:
+- Dickcissel ×1 — Campbell Flats Road, 2026-10-11 13:20 — https://ebird.org/checklist/S401755864
 - Nelson's Sparrow ×1 — Campbell Flats Road, 2026-10-10 14:16 — https://ebird.org/checklist/S401006117
 - Northern House Wren ×2 — Campbell Flats Road, 2026-10-10 11:58 — https://ebird.org/checklist/S401064584
 - Tennessee Warbler ×1 — Albert Schweitzer Trails, Lebanon, 2026-10-10 11:12 — https://ebird.org/checklist/S400907313
-- Tennessee Warbler ×1 — Trail to Leavitt Pond, Grantham, 2026-10-10 11:09 — https://ebird.org/checklist/S400961572
 - Magnolia Warbler ×1 — Trail to Leavitt Pond, Grantham, 2026-10-10 11:09 — https://ebird.org/checklist/S400961572
+- Tennessee Warbler ×1 — Trail to Leavitt Pond, Grantham, 2026-10-10 11:09 — https://ebird.org/checklist/S400961572
 - Indigo Bunting ×2 — Campbell Flats Road, 2026-10-10 08:42 — https://ebird.org/checklist/S400939328
 - Olive-sided Flycatcher ×1 — Moose Mountain and Mill Pond, Hanover, 2026-10-10 08:05 — https://ebird.org/checklist/S400805818
 

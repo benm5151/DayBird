@@ -1,49 +1,64 @@
 {
- "generated": "2026-10-11T21:05:41.186186-04:00",
- "date": "2026-10-11",
+ "generated": "2026-10-12T15:17:25.612206-04:00",
+ "date": "2026-10-12",
  "word": "GO",
  "grade": "go",
  "score": 85,
  "headline": "Get out there.",
  "why": [
   "calm winds",
-  "7 notable reports nearby"
+  "8 notable reports nearby"
  ],
  "wx": {
-  "temp": 39,
-  "wind": 5,
-  "windDir": 85,
-  "rain": 0,
-  "sunrise": "06:58"
+  "temp": 49,
+  "wind": 2,
+  "windDir": 277,
+  "rain": 1,
+  "sunrise": "06:59"
  },
  "spots": [
   {
+   "name": "Wilder Dam--boat ramp",
+   "locId": "L687022",
+   "species": 13
+  },
+  {
    "name": "Campbell Flats Road",
    "locId": "L3553748",
-   "species": 14
+   "species": 13
   },
   {
-   "name": "122 Best Rd, Windsor US-VT 43.53604, -72.47743",
-   "locId": "L78347648",
-   "species": 11
+   "name": "Mt. Ascutney Hospital and Health Center, 351 County Road, Windsor, Vermont, US (43.488, -72.402)",
+   "locId": "L10048859",
+   "species": 9
   },
   {
-   "name": "George Ratcliffe Park, White River Junction US-VT (43.6431,-72.3159)",
-   "locId": "L40127467",
+   "name": "15 Mine Road, South Strafford",
+   "locId": "L473621",
    "species": 6
   },
   {
-   "name": "Elm St, Norwich",
-   "locId": "L801017",
-   "species": 5
-  },
-  {
-   "name": "53 Acorn Hill Rd, Lyme US-NH Front Porch",
-   "locId": "L42097329",
-   "species": 5
+   "name": "Ompompanoosuc River flats",
+   "locId": "L166149",
+   "species": 6
   }
  ],
  "notable": [
+  {
+   "speciesCode": "dickci",
+   "comName": "Dickcissel",
+   "sciName": "Spiza americana",
+   "locId": "L3553748",
+   "locName": "Campbell Flats Road",
+   "obsDt": "2026-10-11 13:20",
+   "howMany": 1,
+   "lat": 43.7681138,
+   "lng": -72.2433633,
+   "obsValid": false,
+   "obsReviewed": false,
+   "locationPrivate": false,
+   "subId": "S401755864"
+  },
   {
    "speciesCode": "nstspa",
    "comName": "Nelson's Sparrow",
@@ -54,8 +69,8 @@
    "howMany": 1,
    "lat": 43.7681138,
    "lng": -72.2433633,
-   "obsValid": false,
-   "obsReviewed": false,
+   "obsValid": true,
+   "obsReviewed": true,
    "locationPrivate": false,
    "subId": "S401006117"
   },
@@ -69,8 +84,8 @@
    "howMany": 2,
    "lat": 43.7681138,
    "lng": -72.2433633,
-   "obsValid": false,
-   "obsReviewed": false,
+   "obsValid": true,
+   "obsReviewed": true,
    "locationPrivate": false,
    "subId": "S401064584"
   },
@@ -90,9 +105,9 @@
    "subId": "S400907313"
   },
   {
-   "speciesCode": "tenwar",
-   "comName": "Tennessee Warbler",
-   "sciName": "Leiothlypis peregrina",
+   "speciesCode": "magwar",
+   "comName": "Magnolia Warbler",
+   "sciName": "Setophaga magnolia",
    "locId": "L12544134",
    "locName": "Trail to Leavitt Pond, Grantham",
    "obsDt": "2026-10-10 11:09",
@@ -105,9 +120,9 @@
    "subId": "S400961572"
   },
   {
-   "speciesCode": "magwar",
-   "comName": "Magnolia Warbler",
-   "sciName": "Setophaga magnolia",
+   "speciesCode": "tenwar",
+   "comName": "Tennessee Warbler",
+   "sciName": "Leiothlypis peregrina",
    "locId": "L12544134",
    "locName": "Trail to Leavitt Pond, Grantham",
    "obsDt": "2026-10-10 11:09",
@@ -129,8 +144,8 @@
    "howMany": 2,
    "lat": 43.7681138,
    "lng": -72.2433633,
-   "obsValid": false,
-   "obsReviewed": false,
+   "obsValid": true,
+   "obsReviewed": true,
    "locationPrivate": false,
    "subId": "S400939328"
   },
