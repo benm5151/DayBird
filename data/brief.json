@@ -1,5 +1,5 @@
 {
- "generated": "2026-10-11T21:04:21.372104-04:00",
+ "generated": "2026-10-11T21:05:41.186186-04:00",
  "date": "2026-10-11",
  "word": "GO",
  "grade": "go",
@@ -7,7 +7,7 @@
  "headline": "Get out there.",
  "why": [
   "calm winds",
-  "8 notable reports nearby"
+  "7 notable reports nearby"
  ],
  "wx": {
   "temp": 39,
@@ -60,51 +60,6 @@
    "subId": "S401006117"
   },
   {
-   "speciesCode": "nstspa",
-   "comName": "Nelson's Sparrow",
-   "sciName": "Ammospiza nelsoni",
-   "locId": "L3553748",
-   "locName": "Campbell Flats Road",
-   "obsDt": "2026-10-10 12:55",
-   "howMany": 1,
-   "lat": 43.7681138,
-   "lng": -72.2433633,
-   "obsValid": false,
-   "obsReviewed": false,
-   "locationPrivate": false,
-   "subId": "S401038785"
-  },
-  {
-   "speciesCode": "nstspa",
-   "comName": "Nelson's Sparrow",
-   "sciName": "Ammospiza nelsoni",
-   "locId": "L3553748",
-   "locName": "Campbell Flats Road",
-   "obsDt": "2026-10-10 12:55",
-   "howMany": 1,
-   "lat": 43.7681138,
-   "lng": -72.2433633,
-   "obsValid": false,
-   "obsReviewed": false,
-   "locationPrivate": false,
-   "subId": "S401038788"
-  },
-  {
-   "speciesCode": "nstspa",
-   "comName": "Nelson's Sparrow",
-   "sciName": "Ammospiza nelsoni",
-   "locId": "L3553748",
-   "locName": "Campbell Flats Road",
-   "obsDt": "2026-10-10 11:58",
-   "howMany": 1,
-   "lat": 43.7681138,
-   "lng": -72.2433633,
-   "obsValid": false,
-   "obsReviewed": false,
-   "locationPrivate": false,
-   "subId": "S401064584"
-  },
-  {
    "speciesCode": "houwre",
    "comName": "Northern House Wren",
    "sciName": "Troglodytes aedon",
@@ -135,6 +90,21 @@
    "subId": "S400907313"
   },
   {
+   "speciesCode": "tenwar",
+   "comName": "Tennessee Warbler",
+   "sciName": "Leiothlypis peregrina",
+   "locId": "L12544134",
+   "locName": "Trail to Leavitt Pond, Grantham",
+   "obsDt": "2026-10-10 11:09",
+   "howMany": 1,
+   "lat": 43.5672397,
+   "lng": -72.1516688,
+   "obsValid": false,
+   "obsReviewed": false,
+   "locationPrivate": false,
+   "subId": "S400961572"
+  },
+  {
    "speciesCode": "magwar",
    "comName": "Magnolia Warbler",
    "sciName": "Setophaga magnolia",
@@ -150,19 +120,34 @@
    "subId": "S400961572"
   },
   {
-   "speciesCode": "tenwar",
-   "comName": "Tennessee Warbler",
-   "sciName": "Leiothlypis peregrina",
-   "locId": "L12544134",
-   "locName": "Trail to Leavitt Pond, Grantham",
-   "obsDt": "2026-10-10 11:09",
-   "howMany": 1,
-   "lat": 43.5672397,
-   "lng": -72.1516688,
+   "speciesCode": "indbun",
+   "comName": "Indigo Bunting",
+   "sciName": "Passerina cyanea",
+   "locId": "L3553748",
+   "locName": "Campbell Flats Road",
+   "obsDt": "2026-10-10 08:42",
+   "howMany": 2,
+   "lat": 43.7681138,
+   "lng": -72.2433633,
    "obsValid": false,
    "obsReviewed": false,
    "locationPrivate": false,
-   "subId": "S400961572"
+   "subId": "S400939328"
+  },
+  {
+   "speciesCode": "olsfly",
+   "comName": "Olive-sided Flycatcher",
+   "sciName": "Contopus cooperi",
+   "locId": "L11600102",
+   "locName": "Moose Mountain and Mill Pond, Hanover",
+   "obsDt": "2026-10-10 08:05",
+   "howMany": 1,
+   "lat": 43.7032828,
+   "lng": -72.1643284,
+   "obsValid": false,
+   "obsReviewed": false,
+   "locationPrivate": false,
+   "subId": "S400805818"
   }
  ],
  "errors": []

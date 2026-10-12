@@ -1,5 +1,5 @@
 GO — Get out there.  (score 85)
-calm winds · 8 notable reports nearby
+calm winds · 7 notable reports nearby
 
 39°F · wind 5 mph E · rain 0% · sunrise 06:58
 Migration last night: https://dashboard.birdcast.info/region/US-NH-009
@@ -13,13 +13,12 @@ Where to go (species reported, last 3 days):
 
 Notable nearby:
 - Nelson's Sparrow ×1 — Campbell Flats Road, 2026-10-10 14:16 — https://ebird.org/checklist/S401006117
-- Nelson's Sparrow ×1 — Campbell Flats Road, 2026-10-10 12:55 — https://ebird.org/checklist/S401038785
-- Nelson's Sparrow ×1 — Campbell Flats Road, 2026-10-10 12:55 — https://ebird.org/checklist/S401038788
-- Nelson's Sparrow ×1 — Campbell Flats Road, 2026-10-10 11:58 — https://ebird.org/checklist/S401064584
 - Northern House Wren ×2 — Campbell Flats Road, 2026-10-10 11:58 — https://ebird.org/checklist/S401064584
 - Tennessee Warbler ×1 — Albert Schweitzer Trails, Lebanon, 2026-10-10 11:12 — https://ebird.org/checklist/S400907313
-- Magnolia Warbler ×1 — Trail to Leavitt Pond, Grantham, 2026-10-10 11:09 — https://ebird.org/checklist/S400961572
 - Tennessee Warbler ×1 — Trail to Leavitt Pond, Grantham, 2026-10-10 11:09 — https://ebird.org/checklist/S400961572
+- Magnolia Warbler ×1 — Trail to Leavitt Pond, Grantham, 2026-10-10 11:09 — https://ebird.org/checklist/S400961572
+- Indigo Bunting ×2 — Campbell Flats Road, 2026-10-10 08:42 — https://ebird.org/checklist/S400939328
+- Olive-sided Flycatcher ×1 — Moose Mountain and Mill Pond, Hanover, 2026-10-10 08:05 — https://ebird.org/checklist/S400805818
 
 Full brief and passes: https://benm5151.github.io/DayBird/
 Grade yesterday's call on the site so the accuracy score improves.
