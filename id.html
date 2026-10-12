@@ -94,7 +94,8 @@
 
   // ---- where & when ----
   const s = DB.settings();
-  const ctx = JSON.parse(sessionStorage.getItem('daybird:idctx') || 'null') || { place: 'Lebanon, NH', lat: s.lat, lng: s.lng, when: new Date().toISOString().slice(0, 10), tod: 'morning' };
+  const ctx = JSON.parse(sessionStorage.getItem('daybird:idctx') || 'null') || { place: 'Lebanon, NH', lat: s.lat, lng: s.lng, when: localDate(), tod: 'morning' };
+  function localDate() { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; }
   $('place').value = ctx.place; $('when').value = ctx.when; $('tod').value = ctx.tod;
   const saveCtx = () => sessionStorage.setItem('daybird:idctx', JSON.stringify(ctx));
 
