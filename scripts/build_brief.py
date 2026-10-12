@@ -33,7 +33,13 @@ notable, spots = [], []
 if KEY:
     H = {"X-eBirdApiToken": KEY}
     try:
-        notable = get(f"https://api.ebird.org/v2/data/obs/geo/recent/notable?lat={LAT}&lng={LNG}&dist={DIST}&back={BACK}&detail=simple", H)[:8]
+        raw = get(f"https://api.ebird.org/v2/data/obs/geo/recent/notable?lat={LAT}&lng={LNG}&dist={DIST}&back={BACK}&detail=simple", H)
+        seen = set()
+        for o in raw:  # one line per species+location, newest first (eBird returns newest first)
+            k = (o["comName"], o.get("locId") or o["locName"])
+            if k not in seen:
+                seen.add(k); notable.append(o)
+        notable = notable[:8]
     except Exception as e:
         errors.append(f"ebird notable: {e}")
     try:
