@@ -6,7 +6,7 @@ import json, os, sys, urllib.request, urllib.parse, datetime, zoneinfo, collecti
 
 LAT, LNG, DIST, BACK = 43.6423, -72.2518, 25, 3
 TZ = zoneinfo.ZoneInfo("America/New_York")
-KEY = os.environ.get("EBIRD_KEY", "")
+KEY = os.environ.get("EBIRD_KEY", "").strip()
 SITE = "https://benm5151.github.io/DayBird/"
 
 def get(url, headers=None):
