@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="56 30 316 322" role="img" aria-label="Daybird mark: a tufted titmouse on a branch">
+  <path fill="#1F2A37" fill-rule="evenodd" d="M 84 152 L 108 134 C 110 106 128 84 152 72 C 166 66 180 54 198 38 C 194 60 198 76 210 90 C 258 100 292 142 300 200 C 306 232 320 272 358 322 L 336 334 C 312 308 286 292 262 286 C 232 306 176 298 146 264 C 118 238 108 204 106 172 Z M 120 128 a 9 9 0 1 0 18 0 a 9 9 0 1 0 -18 0 Z M 180 176 C 228 174 270 208 298 254 C 264 224 224 196 180 176 Z"/>
+  <path d="M202 296 L198 338 M226 292 L232 338" fill="none" stroke="#1F2A37" stroke-width="6" stroke-linecap="round"/>
+  <path d="M66 342 C150 334 262 334 346 342" fill="none" stroke="#E8833A" stroke-width="9" stroke-linecap="round"/>
+</svg>

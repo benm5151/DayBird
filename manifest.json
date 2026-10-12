@@ -3,8 +3,8 @@
   "short_name": "Daybird",
   "start_url": "./index.html",
   "display": "standalone",
-  "background_color": "#f6f3ec",
-  "theme_color": "#2f6b4f",
+  "background_color": "#F6F3EC",
+  "theme_color": "#1F2A37",
   "icons": [
     {
       "src": "icon.svg",

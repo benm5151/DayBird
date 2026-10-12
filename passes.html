@@ -6,14 +6,14 @@
 <title>Daybird — Land Passes</title>
 <link rel="stylesheet" href="css/style.css">
 <link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#2f6b4f">
+<meta name="theme-color" content="#1F2A37">
 <link rel="icon" href="icon.svg">
 <link rel="apple-touch-icon" href="icon.svg">
 </head>
 <body>
 <div class="wrap">
   <header class="top">
-    <a class="brand" href="index.html">Daybird<small>Land passes</small></a>
+    <a class="brand" href="index.html"><img src="mark.svg" alt=""><span>Daybird<small>Land passes</small></span></a>
   </header>
   <nav class="tabs">
     <a href="index.html">Brief</a>
@@ -82,7 +82,7 @@
         <p class="meta"><b>Window:</b> ${DB.esc(p.window)} · <b>Seats:</b> ${p.seats}</p>
         <p class="meta">${DB.esc(p.trigger || '')}</p>
         <p class="meta">${DB.esc(p.host || '')}</p>
-        ${priv[p.id] ? `<p class="meta" style="color:var(--green)">📍 ${DB.esc(priv[p.id].location || '')}</p>` : ''}
+        ${priv[p.id] ? `<p class="meta" style="color:var(--accent)">📍 ${DB.esc(priv[p.id].location || '')}</p>` : ''}
         <label>Date</label>
         <select id="d-${p.id}">${(p.dates||[]).map(d => `<option>${d}</option>`).join('') || '<option>Any</option>'}</select>
         <label>Seats</label>
