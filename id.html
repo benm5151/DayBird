@@ -38,7 +38,7 @@
 
   <div class="card">
     <h3>Have a photo?</h3>
-    <p class="tagline">Upload it and Claude will ID it using the photo, your notes below, and the local candidate list. Photos are resized before upload and not stored.</p>
+    <p class="tagline">Upload it and Claude will ID it using the photo, your notes below, and the local candidate list. Photos are resized before upload and not stored. The whole site shares a $1/day budget (about 100 IDs); signed-in birders get up to 25 a day, guests 5.</p>
     <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap"><input type="file" id="photo" accept="image/*" capture="environment" style="width:auto"><button id="photoGo" disabled>ID this photo</button><span class="meta" id="photoMsg"></span></div>
     <img id="preview" alt="" class="hidden" style="max-width:260px;border-radius:10px;margin-top:10px">
   </div>
@@ -152,7 +152,7 @@
           ${freq[c.name] ? `<div style="margin-top:6px"><span class="chip">reported at ${freq[c.name]} spot${freq[c.name] > 1 ? 's' : ''} nearby</span></div>` : ''}</div>
           <div style="text-align:right;flex:none"><a class="btn ghost small" href="https://ebird.org/species/${codes[c.name] || ''}${codes[c.name] ? '' : '?q=' + encodeURIComponent(c.name)}" target="_blank" rel="noopener" style="padding:5px 10px;font-size:13px">eBird</a></div></div>
           <div class="bar"><div style="width:${Math.max(4, c.confidence)}%"></div></div></div>`).join('') +
-        (res.quality ? `<p class="meta">${DB.esc(res.quality)}</p>` : '') + `<p class="meta">Agree? <a href="feed.html">Post it to the feed</a> with the photo.</p>`;
+        (res.quality ? `<p class="meta">${DB.esc(res.quality)}</p>` : '') + `<p class="meta">Agree? <a href="feed.html">Post it to the feed</a> with the photo.${res.remaining !== undefined ? ` · This ID cost about ${(res.cost*100).toFixed(1)}¢; $${res.remaining} of today's $1 site budget left.` : ''}</p>`;
       $('photoMsg').textContent = '';
       $('results').scrollIntoView({ behavior: 'smooth' });
     } catch (err) { $('photoMsg').textContent = 'Photo ID failed: ' + err.message; }
