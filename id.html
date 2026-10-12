@@ -37,6 +37,16 @@
   <div id="pool" class="banner"></div>
 
   <div class="card">
+    <h3>Where and when</h3>
+    <div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px">
+      <div><label>Place</label><input id="place" placeholder="Lebanon, NH" list="placeList"><datalist id="placeList"></datalist><div style="margin-top:6px"><button class="ghost small" id="gps" type="button">Use my GPS</button> <span class="meta" id="placeMsg"></span></div></div>
+      <div><label>Date seen</label><input id="when" type="date"></div>
+      <div><label>Time of day</label><select id="tod"><option value="dawn">Dawn (first light)</option><option value="morning" selected>Morning</option><option value="midday">Midday</option><option value="afternoon">Afternoon</option><option value="dusk">Dusk</option><option value="night">Night</option></select></div>
+    </div>
+    <p class="meta" style="margin-top:8px">Changing the place or date re-pulls the candidate list from eBird for that spot and window.</p>
+  </div>
+
+  <div class="card">
     <h3>Have a photo?</h3>
     <p class="tagline">Upload it and Claude will ID it using the photo, your notes below, and the local candidate list. Photos are resized before upload and not stored. The whole site shares a $1/day budget (about 100 IDs); signed-in birders get up to 25 a day, guests 5.</p>
     <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap"><input type="file" id="photo" accept="image/*" style="width:auto"><button id="photoGo" disabled>ID this photo</button><span class="meta" id="photoMsg"></span></div>
@@ -82,22 +92,58 @@
     else { sel[k] = sel[k] === v ? null : v; g.querySelectorAll('button').forEach(x => x.classList.toggle('on', x.dataset.v === sel[k])); }
   }));
 
-  // candidate pool: recent eBird reports nearby (14 days). Offline: sample + every trait species at weight 0.
+  // ---- where & when ----
   const s = DB.settings();
+  const ctx = JSON.parse(sessionStorage.getItem('daybird:idctx') || 'null') || { place: 'Lebanon, NH', lat: s.lat, lng: s.lng, when: new Date().toISOString().slice(0, 10), tod: 'morning' };
+  $('place').value = ctx.place; $('when').value = ctx.when; $('tod').value = ctx.tod;
+  const saveCtx = () => sessionStorage.setItem('daybird:idctx', JSON.stringify(ctx));
+
+  let geoTimer;
+  $('place').addEventListener('input', () => {
+    clearTimeout(geoTimer);
+    geoTimer = setTimeout(async () => {
+      const q = $('place').value.trim(); if (q.length < 3) return;
+      try {
+        const r = await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(q)}&count=5&language=en&format=json`);
+        const j = await r.json(); const hits = j.results || [];
+        $('placeList').innerHTML = hits.map(h => `<option value="${DB.esc([h.name, h.admin1, h.country_code].filter(Boolean).join(', '))}" data-lat="${h.latitude}" data-lng="${h.longitude}">`).join('');
+        const exact = hits.find(h => [h.name, h.admin1, h.country_code].filter(Boolean).join(', ') === q) || (hits.length === 1 ? hits[0] : null);
+        if (exact) { ctx.place = q; ctx.lat = exact.latitude; ctx.lng = exact.longitude; saveCtx(); $('placeMsg').textContent = `${exact.latitude.toFixed(2)}, ${exact.longitude.toFixed(2)}`; loadPool(); }
+      } catch {}
+    }, 400);
+  });
+  $('place').addEventListener('change', () => $('place').dispatchEvent(new Event('input')));
+  $('gps').onclick = () => {
+    if (!navigator.geolocation) return $('placeMsg').textContent = 'No GPS here.';
+    navigator.geolocation.getCurrentPosition(p => { ctx.lat = p.coords.latitude; ctx.lng = p.coords.longitude; ctx.place = `GPS ${ctx.lat.toFixed(3)}, ${ctx.lng.toFixed(3)}`; $('place').value = ctx.place; saveCtx(); $('placeMsg').textContent = 'using GPS'; loadPool(); }, e => $('placeMsg').textContent = e.message);
+  };
+  $('when').onchange = () => { ctx.when = $('when').value; saveCtx(); loadPool(); };
+  $('tod').onchange = () => { ctx.tod = $('tod').value; saveCtx(); };
+
+  // ---- candidate pool: eBird reports near the chosen place in a window around the chosen date ----
   let freq = {}, codes = {}, source = 'none';
-  try {
-    if (s.ebirdKey) {
-      const r = await fetch(`https://api.ebird.org/v2/data/obs/geo/recent?lat=${s.lat}&lng=${s.lng}&dist=${Math.max(s.dist, 30)}&back=14&includeProvisional=true`, { headers: { 'X-eBirdApiToken': s.ebirdKey } });
-      const obs = await r.json();
-      const perLoc = {};
-      obs.forEach(o => { const k = o.comName + '|' + o.locId; if (!perLoc[k]) { perLoc[k] = 1; freq[o.comName] = (freq[o.comName] || 0) + 1; } codes[o.comName] = o.speciesCode; });
-      source = 'live';
-    }
-  } catch (e) { source = 'error'; }
-  if (source !== 'live') (window.DAYBIRD_MOCK.sightings.recent || []).forEach(o => freq[o.comName] = (freq[o.comName] || 0) + 1);
-  const n = Object.keys(freq).length;
-  $('pool').className = 'banner ' + (source === 'live' ? 'ok' : '');
-  $('pool').textContent = source === 'live' ? `${n} species reported within ${Math.max(s.dist, 30)} km in the last 14 days. Those get a head start.` : 'No eBird key (or offline): ranking on sample sightings only. Add your key in Settings for the real local pool.';
+  async function loadPool() {
+    freq = {}; codes = {}; source = 'none';
+    const dist = Math.max(s.dist, 30);
+    const daysAgo = Math.round((Date.now() - new Date(ctx.when + 'T12:00:00')) / 864e5);
+    const back = Math.min(30, Math.max(14, daysAgo + 7));   // eBird only serves the last 30 days by geo
+    try {
+      if (s.ebirdKey) {
+        const r = await fetch(`https://api.ebird.org/v2/data/obs/geo/recent?lat=${ctx.lat}&lng=${ctx.lng}&dist=${dist}&back=${back}&includeProvisional=true`, { headers: { 'X-eBirdApiToken': s.ebirdKey } });
+        const obs = await r.json();
+        const perLoc = {};
+        obs.forEach(o => { const k = o.comName + '|' + o.locId; if (!perLoc[k]) { perLoc[k] = 1; freq[o.comName] = (freq[o.comName] || 0) + 1; } codes[o.comName] = o.speciesCode; });
+        source = 'live';
+      }
+    } catch (e) { source = 'error'; }
+    if (source !== 'live') (window.DAYBIRD_MOCK.sightings.recent || []).forEach(o => freq[o.comName] = (freq[o.comName] || 0) + 1);
+    const n = Object.keys(freq).length;
+    $('pool').className = 'banner ' + (source === 'live' ? 'ok' : '');
+    $('pool').textContent = source === 'live'
+      ? `${n} species reported within ${dist} km of ${ctx.place} in the last ${back} days${daysAgo > 30 ? ' (eBird only serves 30 days, so this is the current season, not ' + ctx.when + ')' : ''}. Those get a head start.`
+      : 'No eBird key (or offline): ranking on sample sightings only. Add your key in Settings for the real local pool.';
+  }
+  await loadPool();
 
   const SIZES = ['tiny','sparrow','robin','jay','crow','hawk','goose'];
   function score(t) {
@@ -120,7 +166,7 @@
   $('go').onclick = () => {
     const ranked = window.DAYBIRD_TRAITS.map(score).sort((a, b) => b.pts - a.pts).slice(0, 8);
     const top = Math.max(1, ranked[0].pts);
-    $('results').innerHTML = `<h2>Most likely</h2>` + ranked.map((r, i) => `
+    $('results').innerHTML = `<h2>Most likely</h2><p class="meta">${DB.esc(ctx.place)} · ${ctx.when} · ${$('tod').value}</p>` + ranked.map((r, i) => `
       <div class="card">
         <div class="cand"><div><div class="n">${i + 1}. ${DB.esc(r.name)}</div><div class="meta">${DB.esc(r.notes)}</div>
           <div style="margin-top:6px">${r.why.map(w => `<span class="chip">${DB.esc(w)}</span>`).join('')}</div></div>
@@ -144,7 +190,8 @@
     const candidates = Object.entries(freq).sort((a, b) => b[1] - a[1]).map(([name, f]) => ({ name, freq: f }));
     const desc = [sel.size && ('size: ' + sel.size), sel.colors.length && ('colors: ' + sel.colors.join(', ')), sel.hab && ('habitat: ' + sel.hab), sel.beh && ('behavior: ' + sel.beh), $('notes').value].filter(Boolean).join('; ');
     try {
-      const res = await CLOUD.photoId({ image: photoData.split(',')[1], media_type: 'image/jpeg', description: desc, candidates, place: `near ${s.lat.toFixed(2)}, ${s.lng.toFixed(2)} (Upper Valley, NH/VT)`, date: new Date().toDateString() });
+      const when = new Date(ctx.when + 'T12:00:00').toLocaleDateString(undefined, { month: 'long', day: 'numeric', year: 'numeric' });
+      const res = await CLOUD.photoId({ image: photoData.split(',')[1], media_type: 'image/jpeg', description: desc, candidates, place: `${ctx.place} (${ctx.lat.toFixed(2)}, ${ctx.lng.toFixed(2)})`, date: `${when}, ${$('tod').options[$('tod').selectedIndex].text.toLowerCase()}` });
       if (res.error) throw new Error(res.error);
       const cands = res.candidates || [];
       $('results').innerHTML = `<h2>Photo ID</h2>` + (res.safety ? `<div class="banner">${DB.esc(res.safety)}</div>` : '') + cands.map((c, i) => `
