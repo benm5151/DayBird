@@ -30,7 +30,8 @@ Weather comes from Open-Meteo (no key). If eBird returns a CORS error in the bro
 - **Passes**: sample listings + any you create on **Host land**. Booking is saved locally and posts to the feed.
 - **Feed**: seed posts + your posts and likes, local only.
 - **Profile**: import MyEBirdData.csv (parsed in-browser) → life list, year list, recent lifers, lifers-by-month, most-logged species, top spots; favorite bird + photos; one-tap share of stats to the feed.
-- **Settings**: name, key, location, radius, migration rating.
+- **Settings**: name, key, eBird display name + regions (for live sync), location, radius, migration rating.
+- **Live sync**: eBird has no per-user endpoint, so Profile → "Sync new checklists" scans `product/lists/{region}` for checklists under your display name, reads each with `product/checklist/view`, and merges new species into the life list (baseline from the CSV). Synced checklist IDs are remembered so nothing double-counts.
 
 ## Accounts and the shared feed (Supabase)
 

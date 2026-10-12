@@ -14,6 +14,8 @@ const DB = (() => {
     name: 'Ben',
     lat: 43.6423, lng: -72.2518, dist: 25, back: 3,   // Lebanon, NH; km; days
     ebirdKey: '',
+    ebirdName: '',           // your eBird display name, exactly as it appears on your checklists
+    ebirdRegions: 'US-NH,US-VT',
     migration: 0,            // 0 = unknown, 1..5 from BirdCast local dashboard
     birdcastUrl: 'https://dashboard.birdcast.info/region/US-NH-009', // Grafton County
   };
@@ -232,6 +234,62 @@ const DB = (() => {
     if (online()) CLOUD.saveProfile({ life }).catch(() => {});
     return life;
   }
+  // ---- live sync: pull your recent checklists by region, merge new species into the life list ----
+  async function syncFromEbird(onProgress = () => {}) {
+    const s = settings();
+    if (!s.ebirdKey) throw new Error('Add your eBird API key in Settings first.');
+    if (!s.ebirdName) throw new Error('Add your eBird display name in Settings first.');
+    const H = { 'X-eBirdApiToken': s.ebirdKey };
+    const regions = s.ebirdRegions.split(',').map(r => r.trim()).filter(Boolean);
+    const me = s.ebirdName.trim().toLowerCase();
+    const seen = store.get('syncedSubIds', []);
+    let mine = [];
+    for (const r of regions) {
+      onProgress(`Scanning recent checklists in ${r}…`);
+      const res = await fetch(`https://api.ebird.org/v2/product/lists/${r}?maxResults=200`, { headers: H });
+      if (!res.ok) throw new Error(`eBird ${res.status} for region ${r}`);
+      const lists = await res.json();
+      mine.push(...lists.filter(l => (l.userDisplayName || '').trim().toLowerCase() === me && !seen.includes(l.subId)));
+    }
+    if (!mine.length) return { newChecklists: 0, newSpecies: [], checked: regions };
+    const L = store.get('life', null) || { total: 0, recentLifers: [], allSpecies: [], mostSeen: [], topPlaces: [], byMonth: Array(12).fill(0), checklists: 0, observations: 0, yearList: 0, thisYear: 0 };
+    const have = new Set(L.allSpecies);
+    const newSpecies = [];
+    for (const l of mine) {
+      onProgress(`Reading checklist ${l.subId} (${l.loc?.name || ''})…`);
+      const res = await fetch(`https://api.ebird.org/v2/product/checklist/view/${l.subId}`, { headers: H });
+      if (!res.ok) continue;
+      const cl = await res.json();
+      const date = (cl.obsDt || l.obsDt || '').slice(0, 10);
+      for (const o of cl.obs || []) {
+        const name = o.comName || (await speciesName(o.speciesCode, H));
+        if (!name || /\b(sp\.|hybrid|\/)/.test(name) || /\(Domestic/.test(name)) continue;
+        L.observations++;
+        if (!have.has(name)) {
+          have.add(name);
+          newSpecies.push({ name, first: date, loc: l.loc?.name || cl.locId || '', sightings: 1 });
+          if (date) L.byMonth[+date.slice(5, 7) - 1]++;
+          if (date.startsWith(String(new Date().getFullYear()))) L.thisYear++;
+        }
+      }
+      L.checklists++;
+      seen.push(l.subId);
+    }
+    L.allSpecies = [...have].sort();
+    L.total = L.allSpecies.length;
+    L.recentLifers = [...newSpecies.sort((a, b) => b.first.localeCompare(a.first)), ...L.recentLifers].slice(0, 10);
+    L.lastSync = new Date().toISOString();
+    store.set('life', L); store.set('syncedSubIds', seen.slice(-2000));
+    if (online()) CLOUD.saveProfile({ life: L }).catch(() => {});
+    return { newChecklists: mine.length, newSpecies, checked: regions };
+  }
+  const _nameCache = {};
+  async function speciesName(code, H) {
+    if (_nameCache[code]) return _nameCache[code];
+    try { const r = await fetch(`https://api.ebird.org/v2/ref/taxonomy/ebird?species=${code}&fmt=json`, { headers: H }); const j = await r.json(); _nameCache[code] = j[0]?.comName; } catch {}
+    return _nameCache[code];
+  }
+
   async function lifeList() {
     if (online()) { const p = await CLOUD.getProfile().catch(() => null); if (p?.life) return p.life; }
     return store.get('life', null);
@@ -255,7 +313,7 @@ const DB = (() => {
   const ready = CLOUD.ready ? CLOUD.init() : Promise.resolve(null);
 
   return { ready, online, settings, saveSettings, loadBrief, gradeCall, briefText, loadPasses, bookings, book, cancelBooking, addListing, loadFeed, post, deletePost, toggleLike,
-           fileToDataURL, importLifeList, lifeList, profile, saveProfile, esc, fmtDate, ago, dirName };
+           fileToDataURL, importLifeList, syncFromEbird, lifeList, profile, saveProfile, esc, fmtDate, ago, dirName };
 })();
 
 // nav highlight + sign-in widget

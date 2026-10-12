@@ -75,6 +75,9 @@
   <div id="editWrap">
   <h2>Edit</h2>
   <div class="card">
+    <label>Live sync from eBird</label>
+    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><button class="ghost" id="sync" type="button">Sync new checklists</button><span class="meta" id="syncMsg"></span></div>
+    <p class="meta">Finds your recent checklists in the regions set in Settings (needs your eBird display name there) and adds any new species. The CSV below is the full baseline; re-import it every month or so.</p>
     <label>Import your eBird data (MyEBirdData.csv — download at ebird.org/downloadMyData)</label>
     <input type="file" id="csv" accept=".csv,text/csv">
     <p class="meta" id="csvMsg">Parsed in your browser. Nothing is uploaded.</p>
@@ -142,6 +145,7 @@
         <div><b>${L.thisYear}</b><span>lifers ${new Date().getFullYear()}</span></div>
         <div><b>${L.checklists}</b><span>checklists</span></div>
         <div><b>${L.observations}</b><span>observations</span></div>`;
+      if (L.lastSync && !isPublic) $('stats').insertAdjacentHTML('beforeend', `<div><b>${DB.ago(L.lastSync)}</b><span>last sync</span></div>`);
       $('lifers').innerHTML = L.recentLifers.map(x => `<div class="row"><span class="l">${DB.esc(x.name)}</span><span class="r">${x.first}<br>${DB.esc(x.loc)}</span></div>`).join('');
       $('most').innerHTML = L.mostSeen.map(x => `<div class="row"><span class="l">${DB.esc(x.name)}</span><span class="r">${x.sightings}×</span></div>`).join('');
       $('places').innerHTML = L.topPlaces.map(x => `<div class="row"><span class="l">${DB.esc(x.name)}</span><span class="r">${x.n} obs</span></div>`).join('');
@@ -161,6 +165,15 @@
     const f = e.target.files[0]; if (!f) return;
     try { const L = DB.importLifeList(await f.text()); await new Promise(r => setTimeout(r, 300)); $('csvMsg').textContent = `Imported ${L.observations} observations · ${L.total} species · ${L.firstDate} to ${L.lastDate}.`; render(); }
     catch (err) { $('csvMsg').textContent = 'Could not parse that file. Is it MyEBirdData.csv? ' + err.message; }
+  };
+  $('sync').onclick = async () => {
+    $('sync').disabled = true;
+    try {
+      const r = await DB.syncFromEbird(m => $('syncMsg').textContent = m);
+      $('syncMsg').textContent = r.newChecklists ? `Added ${r.newChecklists} checklist${r.newChecklists > 1 ? 's' : ''}, ${r.newSpecies.length} new species${r.newSpecies.length ? ': ' + r.newSpecies.map(x => x.name).join(', ') : ''}.` : `No new checklists by you in ${r.checked.join(', ')}.`;
+      render();
+    } catch (e) { $('syncMsg').textContent = e.message; }
+    $('sync').disabled = false;
   };
   $('photo').onchange = async (e) => { if (e.target.files[0]) { photo = await DB.fileToDataURL(e.target.files[0], 400); render(); } };
   $('favPhoto').onchange = async (e) => { if (e.target.files[0]) { favPhoto = await DB.fileToDataURL(e.target.files[0], 600); render(); } };
