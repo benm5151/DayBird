@@ -1,0 +1,15 @@
+MAYBE — Worth a look.  (score 50)
+no weather data
+
+Migration last night: https://dashboard.birdcast.info/region/US-NH-009
+
+Where to go (species reported, last 3 days):
+(no eBird data)
+
+Notable nearby:
+Nothing notable in range.
+
+Full brief and passes: https://benm5151.github.io/DayBird/
+Grade yesterday's call on the site so the accuracy score improves.
+
+Data notes: weather: <urlopen error Tunnel connection failed: 403 Forbidden>; no EBIRD_KEY

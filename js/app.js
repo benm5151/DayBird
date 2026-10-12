@@ -94,15 +94,23 @@ const DB = (() => {
       catch (e) { errors.push('eBird: ' + e.message + ' (CORS or key problem — see README)'); }
     }
     if (!sightings || !wx) {
+      // prefer the brief the GitHub Action committed this morning over the static sample
+      let live = null; try { const r = await fetch('data/brief.json', { cache: 'no-store' }); if (r.ok) live = await r.json(); } catch {}
+      if (live && live.wx && !wx) { wx = live.wx; errors = errors.filter(e => !e.startsWith('weather')); }
+      if (live && !sightings && (live.spots || []).length) {
+        sightings = { notable: live.notable || [], recent: [] };
+        sightings._spots = live.spots;
+        if (!s.ebirdKey) { errors.push(`Showing this morning's brief built at ${new Date(live.generated).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })}. Add your eBird key in Settings for live data.`); source = 'daily'; }
+      }
       const mock = window.DAYBIRD_MOCK;
       sightings = sightings || mock.sightings;
       wx = wx || mock.weather;
-      if (!s.ebirdKey) errors.push('No eBird key saved — showing sample sightings. Add your key in Settings.');
+      if (!s.ebirdKey && source !== 'daily') errors.push('No eBird key saved — showing sample sightings. Add your key in Settings.');
     }
     // group hotspots by activity (eBird gives numSpeciesAllTime; recent list gives locations)
     const byLoc = {};
     (sightings.recent || []).forEach(o => { const k = o.locId || o.locName; byLoc[k] = byLoc[k] || { name: o.locName, locId: o.locId, species: 0 }; byLoc[k].species++; });
-    const spots = Object.values(byLoc).sort((a, b) => b.species - a.species).slice(0, 5);
+    const spots = sightings._spots || Object.values(byLoc).sort((a, b) => b.species - a.species).slice(0, 5);
     const notable = (sightings.notable || []).slice(0, 8);
     const call = makeCall(wx, s.migration, notable.length);
     // call history: one entry per day, kept 60 days, with optional "was it right?" verdict

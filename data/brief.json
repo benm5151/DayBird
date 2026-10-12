@@ -1,0 +1,18 @@
+{
+ "generated": "2026-10-11T20:51:21.014896-04:00",
+ "date": "2026-10-11",
+ "word": "MAYBE",
+ "grade": "maybe",
+ "score": 50,
+ "headline": "Worth a look.",
+ "why": [
+  "no weather data"
+ ],
+ "wx": null,
+ "spots": [],
+ "notable": [],
+ "errors": [
+  "weather: <urlopen error Tunnel connection failed: 403 Forbidden>",
+  "no EBIRD_KEY"
+ ]
+}
