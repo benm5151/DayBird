@@ -1,6 +1,7 @@
-MAYBE — Worth a look.  (score 50)
-no weather data
+GO — Get out there.  (score 75)
+calm winds
 
+39°F · wind 5 mph E · rain 0% · sunrise 06:58
 Migration last night: https://dashboard.birdcast.info/region/US-NH-009
 
 Where to go (species reported, last 3 days):
@@ -12,4 +13,4 @@ Nothing notable in range.
 Full brief and passes: https://benm5151.github.io/DayBird/
 Grade yesterday's call on the site so the accuracy score improves.
 
-Data notes: weather: <urlopen error Tunnel connection failed: 403 Forbidden>; no EBIRD_KEY
+Data notes: ebird notable: Invalid header value b'3e54ff4f-be46-4202-9ab4-b5d627d38391\n'; ebird recent: Invalid header value b'3e54ff4f-be46-4202-9ab4-b5d627d38391\n'
