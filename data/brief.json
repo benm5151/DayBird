@@ -1,49 +1,63 @@
 {
- "generated": "2026-10-12T15:17:25.612206-04:00",
- "date": "2026-10-12",
- "word": "GO",
- "grade": "go",
- "score": 85,
- "headline": "Get out there.",
+ "generated": "2026-10-13T13:06:47.528524-04:00",
+ "date": "2026-10-13",
+ "word": "MAYBE",
+ "grade": "maybe",
+ "score": 60,
+ "headline": "Worth a look.",
  "why": [
-  "calm winds",
-  "8 notable reports nearby"
+  "4 notable reports nearby"
  ],
  "wx": {
   "temp": 49,
-  "wind": 2,
-  "windDir": 277,
-  "rain": 1,
-  "sunrise": "06:59"
+  "wind": 13,
+  "windDir": 116,
+  "rain": 40,
+  "sunrise": "07:00"
  },
  "spots": [
   {
-   "name": "Wilder Dam--boat ramp",
-   "locId": "L687022",
-   "species": 13
-  },
-  {
    "name": "Campbell Flats Road",
    "locId": "L3553748",
-   "species": 13
+   "species": 16
   },
   {
-   "name": "Mt. Ascutney Hospital and Health Center, 351 County Road, Windsor, Vermont, US (43.488, -72.402)",
-   "locId": "L10048859",
-   "species": 9
+   "name": "Cady Brook Trail",
+   "locId": "L9257800",
+   "species": 10
   },
   {
-   "name": "15 Mine Road, South Strafford",
-   "locId": "L473621",
-   "species": 6
+   "name": "Wilder Dam--boat ramp",
+   "locId": "L687022",
+   "species": 10
   },
   {
    "name": "Ompompanoosuc River flats",
    "locId": "L166149",
    "species": 6
+  },
+  {
+   "name": "163 Clay Hill Rd, Hartland US-VT (43.5938,-72.3811)",
+   "locId": "L17454648",
+   "species": 4
   }
  ],
  "notable": [
+  {
+   "speciesCode": "houwre",
+   "comName": "Northern House Wren",
+   "sciName": "Troglodytes aedon",
+   "locId": "L3553748",
+   "locName": "Campbell Flats Road",
+   "obsDt": "2026-10-12 14:24",
+   "howMany": 1,
+   "lat": 43.7681138,
+   "lng": -72.2433633,
+   "obsValid": false,
+   "obsReviewed": false,
+   "locationPrivate": false,
+   "subId": "S401795609"
+  },
   {
    "speciesCode": "dickci",
    "comName": "Dickcissel",
@@ -60,6 +74,21 @@
    "subId": "S401755864"
   },
   {
+   "speciesCode": "indbun",
+   "comName": "Indigo Bunting",
+   "sciName": "Passerina cyanea",
+   "locId": "L3553748",
+   "locName": "Campbell Flats Road",
+   "obsDt": "2026-10-11 11:10",
+   "howMany": 1,
+   "lat": 43.7681138,
+   "lng": -72.2433633,
+   "obsValid": false,
+   "obsReviewed": false,
+   "locationPrivate": false,
+   "subId": "S401870015"
+  },
+  {
    "speciesCode": "nstspa",
    "comName": "Nelson's Sparrow",
    "sciName": "Ammospiza nelsoni",
@@ -73,96 +102,6 @@
    "obsReviewed": true,
    "locationPrivate": false,
    "subId": "S401006117"
-  },
-  {
-   "speciesCode": "houwre",
-   "comName": "Northern House Wren",
-   "sciName": "Troglodytes aedon",
-   "locId": "L3553748",
-   "locName": "Campbell Flats Road",
-   "obsDt": "2026-10-10 11:58",
-   "howMany": 2,
-   "lat": 43.7681138,
-   "lng": -72.2433633,
-   "obsValid": true,
-   "obsReviewed": true,
-   "locationPrivate": false,
-   "subId": "S401064584"
-  },
-  {
-   "speciesCode": "tenwar",
-   "comName": "Tennessee Warbler",
-   "sciName": "Leiothlypis peregrina",
-   "locId": "L24789424",
-   "locName": "Albert Schweitzer Trails, Lebanon",
-   "obsDt": "2026-10-10 11:12",
-   "howMany": 1,
-   "lat": 43.675615,
-   "lng": -72.2754777,
-   "obsValid": false,
-   "obsReviewed": false,
-   "locationPrivate": false,
-   "subId": "S400907313"
-  },
-  {
-   "speciesCode": "magwar",
-   "comName": "Magnolia Warbler",
-   "sciName": "Setophaga magnolia",
-   "locId": "L12544134",
-   "locName": "Trail to Leavitt Pond, Grantham",
-   "obsDt": "2026-10-10 11:09",
-   "howMany": 1,
-   "lat": 43.5672397,
-   "lng": -72.1516688,
-   "obsValid": false,
-   "obsReviewed": false,
-   "locationPrivate": false,
-   "subId": "S400961572"
-  },
-  {
-   "speciesCode": "tenwar",
-   "comName": "Tennessee Warbler",
-   "sciName": "Leiothlypis peregrina",
-   "locId": "L12544134",
-   "locName": "Trail to Leavitt Pond, Grantham",
-   "obsDt": "2026-10-10 11:09",
-   "howMany": 1,
-   "lat": 43.5672397,
-   "lng": -72.1516688,
-   "obsValid": false,
-   "obsReviewed": false,
-   "locationPrivate": false,
-   "subId": "S400961572"
-  },
-  {
-   "speciesCode": "indbun",
-   "comName": "Indigo Bunting",
-   "sciName": "Passerina cyanea",
-   "locId": "L3553748",
-   "locName": "Campbell Flats Road",
-   "obsDt": "2026-10-10 08:42",
-   "howMany": 2,
-   "lat": 43.7681138,
-   "lng": -72.2433633,
-   "obsValid": true,
-   "obsReviewed": true,
-   "locationPrivate": false,
-   "subId": "S400939328"
-  },
-  {
-   "speciesCode": "olsfly",
-   "comName": "Olive-sided Flycatcher",
-   "sciName": "Contopus cooperi",
-   "locId": "L11600102",
-   "locName": "Moose Mountain and Mill Pond, Hanover",
-   "obsDt": "2026-10-10 08:05",
-   "howMany": 1,
-   "lat": 43.7032828,
-   "lng": -72.1643284,
-   "obsValid": false,
-   "obsReviewed": false,
-   "locationPrivate": false,
-   "subId": "S400805818"
   }
  ],
  "errors": []
