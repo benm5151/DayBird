@@ -1,21 +1,22 @@
-MAYBE — Worth a look.  (score 60)
-4 notable reports nearby
+GO — Get out there.  (score 85)
+calm winds · 5 notable reports nearby
 
-49°F · wind 13 mph SE · rain 40% · sunrise 07:00
+54°F · wind 4 mph SE · rain 1% · sunrise 07:02
 Migration last night: https://dashboard.birdcast.info/region/US-NH-009
 
 Where to go (species reported, last 3 days):
-1. Campbell Flats Road — 16 species — https://ebird.org/hotspot/L3553748
-2. Cady Brook Trail — 10 species — https://ebird.org/hotspot/L9257800
-3. Wilder Dam--boat ramp — 10 species — https://ebird.org/hotspot/L687022
-4. Ompompanoosuc River flats — 6 species — https://ebird.org/hotspot/L166149
-5. 163 Clay Hill Rd, Hartland US-VT (43.5938,-72.3811) — 4 species — https://ebird.org/hotspot/L17454648
+1. 300 Gifford Rd, White River Junction US-VT 43.66251, -72.31743 — 16 species — https://ebird.org/hotspot/L29764121
+2. Campbell Flats Road — 15 species — https://ebird.org/hotspot/L3553748
+3. Wilder Dam--boat ramp — 11 species — https://ebird.org/hotspot/L687022
+4. 695–697 US-5, Hartland US-VT 43.60163, -72.35405 — 4 species — https://ebird.org/hotspot/L36438311
+5. White River Junction (village) — 3 species — https://ebird.org/hotspot/L165371
 
 Notable nearby:
+- Gray Catbird ×1 — 163 Clay Hill Rd, Hartland US-VT 43.59665, -72.37979, 2026-10-14 09:13 — https://ebird.org/checklist/S402254355
+- Nelson's Sparrow ×1 — Campbell Flats Road, 2026-10-13 11:14 — https://ebird.org/checklist/S402031061
+- Indigo Bunting ×1 — Campbell Flats Road, 2026-10-13 11:14 — https://ebird.org/checklist/S402031061
 - Northern House Wren ×1 — Campbell Flats Road, 2026-10-12 14:24 — https://ebird.org/checklist/S401795609
 - Dickcissel ×1 — Campbell Flats Road, 2026-10-11 13:20 — https://ebird.org/checklist/S401755864
-- Indigo Bunting ×1 — Campbell Flats Road, 2026-10-11 11:10 — https://ebird.org/checklist/S401870015
-- Nelson's Sparrow ×1 — Campbell Flats Road, 2026-10-10 14:16 — https://ebird.org/checklist/S401006117
 
 Full brief and passes: https://benm5151.github.io/DayBird/
 Grade yesterday's call on the site so the accuracy score improves.

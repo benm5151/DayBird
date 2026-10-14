@@ -1,48 +1,94 @@
 {
- "generated": "2026-10-13T13:06:47.528524-04:00",
- "date": "2026-10-13",
- "word": "MAYBE",
- "grade": "maybe",
- "score": 60,
- "headline": "Worth a look.",
+ "generated": "2026-10-14T10:39:14.308072-04:00",
+ "date": "2026-10-14",
+ "word": "GO",
+ "grade": "go",
+ "score": 85,
+ "headline": "Get out there.",
  "why": [
-  "4 notable reports nearby"
+  "calm winds",
+  "5 notable reports nearby"
  ],
  "wx": {
-  "temp": 49,
-  "wind": 13,
-  "windDir": 116,
-  "rain": 40,
-  "sunrise": "07:00"
+  "temp": 54,
+  "wind": 4,
+  "windDir": 130,
+  "rain": 1,
+  "sunrise": "07:02"
  },
  "spots": [
   {
-   "name": "Campbell Flats Road",
-   "locId": "L3553748",
+   "name": "300 Gifford Rd, White River Junction US-VT 43.66251, -72.31743",
+   "locId": "L29764121",
    "species": 16
   },
   {
-   "name": "Cady Brook Trail",
-   "locId": "L9257800",
-   "species": 10
+   "name": "Campbell Flats Road",
+   "locId": "L3553748",
+   "species": 15
   },
   {
    "name": "Wilder Dam--boat ramp",
    "locId": "L687022",
-   "species": 10
+   "species": 11
   },
   {
-   "name": "Ompompanoosuc River flats",
-   "locId": "L166149",
-   "species": 6
-  },
-  {
-   "name": "163 Clay Hill Rd, Hartland US-VT (43.5938,-72.3811)",
-   "locId": "L17454648",
+   "name": "695\u2013697 US-5, Hartland US-VT 43.60163, -72.35405",
+   "locId": "L36438311",
    "species": 4
+  },
+  {
+   "name": "White River Junction (village)",
+   "locId": "L165371",
+   "species": 3
   }
  ],
  "notable": [
+  {
+   "speciesCode": "grycat",
+   "comName": "Gray Catbird",
+   "sciName": "Dumetella carolinensis",
+   "locId": "L13910850",
+   "locName": "163 Clay Hill Rd, Hartland US-VT 43.59665, -72.37979",
+   "obsDt": "2026-10-14 09:13",
+   "howMany": 1,
+   "lat": 43.596654,
+   "lng": -72.379795,
+   "obsValid": false,
+   "obsReviewed": false,
+   "locationPrivate": true,
+   "subId": "S402254355"
+  },
+  {
+   "speciesCode": "nstspa",
+   "comName": "Nelson's Sparrow",
+   "sciName": "Ammospiza nelsoni",
+   "locId": "L3553748",
+   "locName": "Campbell Flats Road",
+   "obsDt": "2026-10-13 11:14",
+   "howMany": 1,
+   "lat": 43.7681138,
+   "lng": -72.2433633,
+   "obsValid": false,
+   "obsReviewed": false,
+   "locationPrivate": false,
+   "subId": "S402031061"
+  },
+  {
+   "speciesCode": "indbun",
+   "comName": "Indigo Bunting",
+   "sciName": "Passerina cyanea",
+   "locId": "L3553748",
+   "locName": "Campbell Flats Road",
+   "obsDt": "2026-10-13 11:14",
+   "howMany": 1,
+   "lat": 43.7681138,
+   "lng": -72.2433633,
+   "obsValid": false,
+   "obsReviewed": false,
+   "locationPrivate": false,
+   "subId": "S402031061"
+  },
   {
    "speciesCode": "houwre",
    "comName": "Northern House Wren",
@@ -72,36 +118,6 @@
    "obsReviewed": false,
    "locationPrivate": false,
    "subId": "S401755864"
-  },
-  {
-   "speciesCode": "indbun",
-   "comName": "Indigo Bunting",
-   "sciName": "Passerina cyanea",
-   "locId": "L3553748",
-   "locName": "Campbell Flats Road",
-   "obsDt": "2026-10-11 11:10",
-   "howMany": 1,
-   "lat": 43.7681138,
-   "lng": -72.2433633,
-   "obsValid": false,
-   "obsReviewed": false,
-   "locationPrivate": false,
-   "subId": "S401870015"
-  },
-  {
-   "speciesCode": "nstspa",
-   "comName": "Nelson's Sparrow",
-   "sciName": "Ammospiza nelsoni",
-   "locId": "L3553748",
-   "locName": "Campbell Flats Road",
-   "obsDt": "2026-10-10 14:16",
-   "howMany": 1,
-   "lat": 43.7681138,
-   "lng": -72.2433633,
-   "obsValid": true,
-   "obsReviewed": true,
-   "locationPrivate": false,
-   "subId": "S401006117"
   }
  ],
  "errors": []
