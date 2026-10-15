@@ -1,49 +1,79 @@
 {
- "generated": "2026-10-14T10:39:14.308072-04:00",
- "date": "2026-10-14",
+ "generated": "2026-10-15T10:23:14.271225-04:00",
+ "date": "2026-10-15",
  "word": "GO",
  "grade": "go",
- "score": 85,
+ "score": 80,
  "headline": "Get out there.",
  "why": [
-  "calm winds",
-  "5 notable reports nearby"
+  "NW tailwind for fall migrants",
+  "7 notable reports nearby"
  ],
  "wx": {
-  "temp": 54,
-  "wind": 4,
-  "windDir": 130,
-  "rain": 1,
-  "sunrise": "07:02"
+  "temp": 47,
+  "wind": 10,
+  "windDir": 333,
+  "rain": 0,
+  "sunrise": "07:03"
  },
  "spots": [
   {
-   "name": "300 Gifford Rd, White River Junction US-VT 43.66251, -72.31743",
-   "locId": "L29764121",
+   "name": "Wilder Yard",
+   "locId": "L57377545",
    "species": 16
   },
   {
    "name": "Campbell Flats Road",
    "locId": "L3553748",
-   "species": 15
+   "species": 16
   },
   {
    "name": "Wilder Dam--boat ramp",
    "locId": "L687022",
-   "species": 11
+   "species": 6
   },
   {
-   "name": "695\u2013697 US-5, Hartland US-VT 43.60163, -72.35405",
-   "locId": "L36438311",
-   "species": 4
+   "name": "Kate\u2019s Yard Windsor US-VT 43.54108, -72.47920",
+   "locId": "L55672753",
+   "species": 5
   },
   {
-   "name": "White River Junction (village)",
-   "locId": "L165371",
+   "name": "Wilder WMA, Lyme",
+   "locId": "L1470609",
    "species": 3
   }
  ],
  "notable": [
+  {
+   "speciesCode": "bkbcuc",
+   "comName": "Black-billed Cuckoo",
+   "sciName": "Coccyzus erythropthalmus",
+   "locId": "L47800014",
+   "locName": "Simon Pearce - Windsor US-VT 43.51721, -72.40171",
+   "obsDt": "2026-10-15 09:12",
+   "howMany": 1,
+   "lat": 43.517208,
+   "lng": -72.401711,
+   "obsValid": false,
+   "obsReviewed": false,
+   "locationPrivate": true,
+   "subId": "S402507344"
+  },
+  {
+   "speciesCode": "grycat",
+   "comName": "Gray Catbird",
+   "sciName": "Dumetella carolinensis",
+   "locId": "L55672753",
+   "locName": "Kate\u2019s Yard Windsor US-VT 43.54108, -72.47920",
+   "obsDt": "2026-10-15 07:07",
+   "howMany": 1,
+   "lat": 43.541083,
+   "lng": -72.479197,
+   "obsValid": false,
+   "obsReviewed": false,
+   "locationPrivate": true,
+   "subId": "S402463389"
+  },
   {
    "speciesCode": "grycat",
    "comName": "Gray Catbird",
@@ -60,9 +90,24 @@
    "subId": "S402254355"
   },
   {
-   "speciesCode": "nstspa",
-   "comName": "Nelson's Sparrow",
-   "sciName": "Ammospiza nelsoni",
+   "speciesCode": "pinwar",
+   "comName": "Pine Warbler",
+   "sciName": "Setophaga pinus",
+   "locId": "L6605121",
+   "locName": "1 2360 Academy Road",
+   "obsDt": "2026-10-14 08:12",
+   "howMany": 1,
+   "lat": 43.7922753,
+   "lng": -72.2522441,
+   "obsValid": false,
+   "obsReviewed": false,
+   "locationPrivate": true,
+   "subId": "S402362018"
+  },
+  {
+   "speciesCode": "indbun",
+   "comName": "Indigo Bunting",
+   "sciName": "Passerina cyanea",
    "locId": "L3553748",
    "locName": "Campbell Flats Road",
    "obsDt": "2026-10-13 11:14",
@@ -75,9 +120,9 @@
    "subId": "S402031061"
   },
   {
-   "speciesCode": "indbun",
-   "comName": "Indigo Bunting",
-   "sciName": "Passerina cyanea",
+   "speciesCode": "nstspa",
+   "comName": "Nelson's Sparrow",
+   "sciName": "Ammospiza nelsoni",
    "locId": "L3553748",
    "locName": "Campbell Flats Road",
    "obsDt": "2026-10-13 11:14",
@@ -103,21 +148,6 @@
    "obsReviewed": false,
    "locationPrivate": false,
    "subId": "S401795609"
-  },
-  {
-   "speciesCode": "dickci",
-   "comName": "Dickcissel",
-   "sciName": "Spiza americana",
-   "locId": "L3553748",
-   "locName": "Campbell Flats Road",
-   "obsDt": "2026-10-11 13:20",
-   "howMany": 1,
-   "lat": 43.7681138,
-   "lng": -72.2433633,
-   "obsValid": false,
-   "obsReviewed": false,
-   "locationPrivate": false,
-   "subId": "S401755864"
   }
  ],
  "errors": []
