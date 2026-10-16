@@ -1,46 +1,46 @@
 {
- "generated": "2026-10-15T10:23:14.271225-04:00",
- "date": "2026-10-15",
- "word": "GO",
- "grade": "go",
- "score": 80,
- "headline": "Get out there.",
+ "generated": "2026-10-16T10:12:36.494552-04:00",
+ "date": "2026-10-16",
+ "word": "STAY IN",
+ "grade": "stay",
+ "score": 35,
+ "headline": "Coffee first.",
  "why": [
-  "NW tailwind for fall migrants",
-  "7 notable reports nearby"
+  "rain likely",
+  "6 notable reports nearby"
  ],
  "wx": {
-  "temp": 47,
+  "temp": 46,
   "wind": 10,
-  "windDir": 333,
-  "rain": 0,
-  "sunrise": "07:03"
+  "windDir": 123,
+  "rain": 76,
+  "sunrise": "07:04"
  },
  "spots": [
   {
-   "name": "Wilder Yard",
-   "locId": "L57377545",
-   "species": 16
-  },
-  {
    "name": "Campbell Flats Road",
    "locId": "L3553748",
-   "species": 16
+   "species": 26
   },
   {
    "name": "Wilder Dam--boat ramp",
    "locId": "L687022",
-   "species": 6
+   "species": 13
   },
   {
-   "name": "Kate\u2019s Yard Windsor US-VT 43.54108, -72.47920",
-   "locId": "L55672753",
+   "name": "28 Thompson Rd, Hanover US-NH 43.74996, -72.15606",
+   "locId": "L78623820",
    "species": 5
   },
   {
-   "name": "Wilder WMA, Lyme",
-   "locId": "L1470609",
-   "species": 3
+   "name": "Wilder Dam Reservoir, Lebanon",
+   "locId": "L167093",
+   "species": 5
+  },
+  {
+   "name": "Simon Pearce - Windsor US-VT 43.51721, -72.40171",
+   "locId": "L47800014",
+   "species": 5
   }
  ],
  "notable": [
@@ -99,25 +99,10 @@
    "howMany": 1,
    "lat": 43.7922753,
    "lng": -72.2522441,
-   "obsValid": false,
-   "obsReviewed": false,
+   "obsValid": true,
+   "obsReviewed": true,
    "locationPrivate": true,
    "subId": "S402362018"
-  },
-  {
-   "speciesCode": "indbun",
-   "comName": "Indigo Bunting",
-   "sciName": "Passerina cyanea",
-   "locId": "L3553748",
-   "locName": "Campbell Flats Road",
-   "obsDt": "2026-10-13 11:14",
-   "howMany": 1,
-   "lat": 43.7681138,
-   "lng": -72.2433633,
-   "obsValid": false,
-   "obsReviewed": false,
-   "locationPrivate": false,
-   "subId": "S402031061"
   },
   {
    "speciesCode": "nstspa",
@@ -135,19 +120,19 @@
    "subId": "S402031061"
   },
   {
-   "speciesCode": "houwre",
-   "comName": "Northern House Wren",
-   "sciName": "Troglodytes aedon",
+   "speciesCode": "indbun",
+   "comName": "Indigo Bunting",
+   "sciName": "Passerina cyanea",
    "locId": "L3553748",
    "locName": "Campbell Flats Road",
-   "obsDt": "2026-10-12 14:24",
+   "obsDt": "2026-10-13 11:14",
    "howMany": 1,
    "lat": 43.7681138,
    "lng": -72.2433633,
    "obsValid": false,
    "obsReviewed": false,
    "locationPrivate": false,
-   "subId": "S401795609"
+   "subId": "S402031061"
   }
  ],
  "errors": []
