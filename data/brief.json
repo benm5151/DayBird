@@ -1,49 +1,64 @@
 {
- "generated": "2026-10-16T10:12:36.494552-04:00",
- "date": "2026-10-16",
- "word": "STAY IN",
- "grade": "stay",
- "score": 35,
- "headline": "Coffee first.",
+ "generated": "2026-10-17T09:09:52.790608-04:00",
+ "date": "2026-10-17",
+ "word": "GO",
+ "grade": "go",
+ "score": 80,
+ "headline": "Get out there.",
  "why": [
-  "rain likely",
-  "6 notable reports nearby"
+  "NW tailwind for fall migrants",
+  "4 notable reports nearby"
  ],
  "wx": {
-  "temp": 46,
-  "wind": 10,
-  "windDir": 123,
-  "rain": 76,
-  "sunrise": "07:04"
+  "temp": 41,
+  "wind": 11,
+  "windDir": 316,
+  "rain": 0,
+  "sunrise": "07:05"
  },
  "spots": [
   {
-   "name": "Campbell Flats Road",
-   "locId": "L3553748",
-   "species": 26
-  },
-  {
    "name": "Wilder Dam--boat ramp",
    "locId": "L687022",
-   "species": 13
+   "species": 20
   },
   {
-   "name": "28 Thompson Rd, Hanover US-NH 43.74996, -72.15606",
-   "locId": "L78623820",
-   "species": 5
+   "name": "Campbell Flats Road",
+   "locId": "L3553748",
+   "species": 9
   },
   {
-   "name": "Wilder Dam Reservoir, Lebanon",
-   "locId": "L167093",
-   "species": 5
+   "name": "Gina 3 Powers St, Lebanon",
+   "locId": "L18571723",
+   "species": 6
   },
   {
    "name": "Simon Pearce - Windsor US-VT 43.51721, -72.40171",
    "locId": "L47800014",
-   "species": 5
+   "species": 6
+  },
+  {
+   "name": "Pompy Farm Oxbow",
+   "locId": "L8092679",
+   "species": 6
   }
  ],
  "notable": [
+  {
+   "speciesCode": "lessca",
+   "comName": "Lesser Scaup",
+   "sciName": "Aythya affinis",
+   "locId": "L167093",
+   "locName": "Wilder Dam Reservoir, Lebanon",
+   "obsDt": "2026-10-15 16:36",
+   "howMany": 3,
+   "lat": 43.67184,
+   "lng": -72.302414,
+   "obsValid": false,
+   "obsReviewed": false,
+   "locationPrivate": false,
+   "subId": "S402611032"
+  },
   {
    "speciesCode": "bkbcuc",
    "comName": "Black-billed Cuckoo",
@@ -54,8 +69,8 @@
    "howMany": 1,
    "lat": 43.517208,
    "lng": -72.401711,
-   "obsValid": false,
-   "obsReviewed": false,
+   "obsValid": true,
+   "obsReviewed": true,
    "locationPrivate": true,
    "subId": "S402507344"
   },
@@ -69,8 +84,8 @@
    "howMany": 1,
    "lat": 43.541083,
    "lng": -72.479197,
-   "obsValid": false,
-   "obsReviewed": false,
+   "obsValid": true,
+   "obsReviewed": true,
    "locationPrivate": true,
    "subId": "S402463389"
   },
@@ -84,55 +99,10 @@
    "howMany": 1,
    "lat": 43.596654,
    "lng": -72.379795,
-   "obsValid": false,
-   "obsReviewed": false,
-   "locationPrivate": true,
-   "subId": "S402254355"
-  },
-  {
-   "speciesCode": "pinwar",
-   "comName": "Pine Warbler",
-   "sciName": "Setophaga pinus",
-   "locId": "L6605121",
-   "locName": "1 2360 Academy Road",
-   "obsDt": "2026-10-14 08:12",
-   "howMany": 1,
-   "lat": 43.7922753,
-   "lng": -72.2522441,
    "obsValid": true,
    "obsReviewed": true,
    "locationPrivate": true,
-   "subId": "S402362018"
-  },
-  {
-   "speciesCode": "nstspa",
-   "comName": "Nelson's Sparrow",
-   "sciName": "Ammospiza nelsoni",
-   "locId": "L3553748",
-   "locName": "Campbell Flats Road",
-   "obsDt": "2026-10-13 11:14",
-   "howMany": 1,
-   "lat": 43.7681138,
-   "lng": -72.2433633,
-   "obsValid": false,
-   "obsReviewed": false,
-   "locationPrivate": false,
-   "subId": "S402031061"
-  },
-  {
-   "speciesCode": "indbun",
-   "comName": "Indigo Bunting",
-   "sciName": "Passerina cyanea",
-   "locId": "L3553748",
-   "locName": "Campbell Flats Road",
-   "obsDt": "2026-10-13 11:14",
-   "howMany": 1,
-   "lat": 43.7681138,
-   "lng": -72.2433633,
-   "obsValid": false,
-   "obsReviewed": false,
-   "locationPrivate": false,
-   "subId": "S402031061"
+   "subId": "S402254355"
   }
  ],
  "errors": []

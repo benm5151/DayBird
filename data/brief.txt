@@ -1,23 +1,21 @@
-STAY IN — Coffee first.  (score 35)
-rain likely · 6 notable reports nearby
+GO — Get out there.  (score 80)
+NW tailwind for fall migrants · 4 notable reports nearby
 
-46°F · wind 10 mph SE · rain 76% · sunrise 07:04
+41°F · wind 11 mph NW · rain 0% · sunrise 07:05
 Migration last night: https://dashboard.birdcast.info/region/US-NH-009
 
 Where to go (species reported, last 3 days):
-1. Campbell Flats Road — 26 species — https://ebird.org/hotspot/L3553748
-2. Wilder Dam--boat ramp — 13 species — https://ebird.org/hotspot/L687022
-3. 28 Thompson Rd, Hanover US-NH 43.74996, -72.15606 — 5 species — https://ebird.org/hotspot/L78623820
-4. Wilder Dam Reservoir, Lebanon — 5 species — https://ebird.org/hotspot/L167093
-5. Simon Pearce - Windsor US-VT 43.51721, -72.40171 — 5 species — https://ebird.org/hotspot/L47800014
+1. Wilder Dam--boat ramp — 20 species — https://ebird.org/hotspot/L687022
+2. Campbell Flats Road — 9 species — https://ebird.org/hotspot/L3553748
+3. Gina 3 Powers St, Lebanon — 6 species — https://ebird.org/hotspot/L18571723
+4. Simon Pearce - Windsor US-VT 43.51721, -72.40171 — 6 species — https://ebird.org/hotspot/L47800014
+5. Pompy Farm Oxbow — 6 species — https://ebird.org/hotspot/L8092679
 
 Notable nearby:
+- Lesser Scaup ×3 — Wilder Dam Reservoir, Lebanon, 2026-10-15 16:36 — https://ebird.org/checklist/S402611032
 - Black-billed Cuckoo ×1 — Simon Pearce - Windsor US-VT 43.51721, -72.40171, 2026-10-15 09:12 — https://ebird.org/checklist/S402507344
 - Gray Catbird ×1 — Kate’s Yard Windsor US-VT 43.54108, -72.47920, 2026-10-15 07:07 — https://ebird.org/checklist/S402463389
 - Gray Catbird ×1 — 163 Clay Hill Rd, Hartland US-VT 43.59665, -72.37979, 2026-10-14 09:13 — https://ebird.org/checklist/S402254355
-- Pine Warbler ×1 — 1 2360 Academy Road, 2026-10-14 08:12 — https://ebird.org/checklist/S402362018
-- Nelson's Sparrow ×1 — Campbell Flats Road, 2026-10-13 11:14 — https://ebird.org/checklist/S402031061
-- Indigo Bunting ×1 — Campbell Flats Road, 2026-10-13 11:14 — https://ebird.org/checklist/S402031061
 
 Full brief and passes: https://benm5151.github.io/DayBird/
 Grade yesterday's call on the site so the accuracy score improves.
