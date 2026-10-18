@@ -1,0 +1,268 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Daybird — Our birds</title>
+<link rel="stylesheet" href="css/style.css">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#1F2A37">
+<link rel="icon" href="icon.svg">
+<link rel="apple-touch-icon" href="icon.svg">
+<style>
+.paper{background:#F6F3EC;border-radius:12px}
+.swatches{display:flex;gap:12px;flex-wrap:wrap}
+.swatch{flex:1;min-width:140px;border-radius:12px;padding:14px;border:1px solid var(--line)}
+.swatch b{display:block;font-family:var(--serif);font-size:18px}
+.swatch code{font-size:13px}
+.birds{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px}
+.bird{text-align:center}
+.bird img{width:100%;aspect-ratio:1;display:block;border-radius:12px;background:#F6F3EC}
+.bird b{display:block;font-family:var(--serif);font-size:15px;margin-top:6px;line-height:1.2}
+.bird .meta{font-size:12px}
+.bird button{margin-top:6px}
+.sizes{display:grid;grid-template-columns:auto 1fr;gap:8px 14px;align-items:center;font-size:13px}
+.sizes .row3{display:flex;gap:14px;align-items:flex-end;flex-wrap:wrap;border:0;padding:0}
+.sizes img{background:#F6F3EC;border-radius:6px}
+.marks{display:flex;gap:18px;align-items:center;flex-wrap:wrap}
+.marks img{height:120px;width:120px}
+.dd{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px}
+.dd ul,.checks ul{margin:6px 0 0;padding-left:18px}
+.checks li{margin:4px 0}
+.callouts{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px}
+.callouts img{width:100%;aspect-ratio:1;background:#F6F3EC;border-radius:12px}
+.uses{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px}
+.briefcard{background:#F6F3EC;color:#1F2A37;border-radius:14px;padding:14px;display:flex;gap:12px;align-items:center;border:1px solid #e3ddd0}
+.briefcard img{width:72px;height:72px;flex:none}
+.briefcard .word{font-family:var(--serif);font-size:26px;font-weight:700;line-height:1}
+.briefcard .word span{color:#2f6b4f}
+.briefcard p{margin:4px 0 0;font-size:13px}
+.stickerdemo{display:flex;gap:10px;flex-wrap:wrap}
+.stickerdemo span{width:72px;height:72px;border-radius:50%;background:#F6F3EC;border:2px solid #E8833A;display:grid;place-items:center}
+.stickerdemo img{width:56px;height:56px}
+.maker{display:grid;grid-template-columns:1fr;gap:14px}
+@media(min-width:700px){.maker{grid-template-columns:1fr 1fr}}
+.maker canvas{width:100%;height:auto;border-radius:12px;border:1px solid var(--line);background:#F6F3EC}
+.ctrl{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:8px}
+.ctrl button{white-space:nowrap}
+.sheet{width:100%;border-radius:12px;display:block}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <a class="brand" href="index.html"><img src="mark.svg" alt=""><span>Daybird<small>Our birds</small></span></a>
+    <a class="btn ghost" href="stickers.html">Sticker sheet</a>
+  </header>
+  <nav class="tabs">
+    <a href="index.html">Brief</a>
+    <a href="id.html">ID</a>
+    <a href="passes.html">Passes</a>
+    <a href="feed.html">Feed</a>
+    <a href="profile.html">Profile</a>
+    <a href="host.html">Host land</a>
+  </nav>
+
+  <div class="banner">Draft for Ben's review. The twelve shapes are original drawings, built from outline points and checked by eye, not traced from photos. Before any of this goes on a sticker or a printed card, an experienced birder should check each proportion (crest, bill, tail, posture) and each amber mark against a field guide. The checklist is at the bottom of the page.</div>
+
+  <h1>Our birds: the Daybird art</h1>
+  <p class="lead">A silhouette plus one accent. Every bird is a flat ink shape with a single amber mark on the one field mark a beginner uses to name it.</p>
+
+  <div class="card">
+    <h3>The rule</h3>
+    <p>Start from the Daybird mark: a tufted titmouse in ink, the branch in amber. Each species gets the same treatment. Draw the whole bird as one ink silhouette, facing left and perched where that is how you meet it, with the proportions a birder checks first: how big the head is, how long the tail is, what shape the bill is. Then add exactly one amber mark, and put it on the field mark a new birder should look for, so the art teaches the same thing the brief does. Nothing else gets color. No outlines, no gradients, no second accent. If a bird needs two colors to read, the shape is not done yet.</p>
+  </div>
+
+  <div class="grid">
+    <div class="card">
+      <h3>Palette</h3>
+      <div class="swatches">
+        <div class="swatch" style="background:#1F2A37;color:#F6F3EC"><b>Ink navy</b><code>#1F2A37</code><div class="meta" style="color:#c9d0d8">the bird</div></div>
+        <div class="swatch" style="background:#E8833A;color:#1F2A37"><b>Amber</b><code>#E8833A</code><div class="meta" style="color:#3a2a1a">one mark</div></div>
+        <div class="swatch" style="background:#F6F3EC;color:#1F2A37"><b>Paper</b><code>#F6F3EC</code><div class="meta">behind it</div></div>
+      </div>
+    </div>
+    <div class="card">
+      <h3>The mark</h3>
+      <div class="marks">
+        <img src="mark.svg" alt="Daybird mark: tufted titmouse on an amber branch" class="paper">
+        <img src="icon.svg" alt="Daybird app icon">
+        <p class="meta" style="flex:1;min-width:160px">A tufted titmouse: crest, stubby bill, long tail, perched. The branch is its accent. The mark keeps its amber branch; a species never gets one, because the amber is spoken for.</p>
+      </div>
+    </div>
+  </div>
+
+  <h2>The twelve</h2>
+  <p class="meta">Name, then which field mark carries the amber. Each is <code>art/birds/&lt;slug&gt;.svg</code>, viewBox 0 0 240 240, under 5 KB, paths only, ink and amber only. Tap a bird to make a card from it.</p>
+  <div class="card"><div class="birds" id="birds"></div></div>
+  <div class="card"><h3>Contact sheet</h3><p class="meta">All twelve on one image, <code>art/contact-sheet.png</code>, rebuilt by <code>scripts/build_art.mjs --png</code>.</p><img class="sheet" src="art/contact-sheet.png" alt="Contact sheet of the twelve silhouettes"></div>
+
+  <h2>Sizes</h2>
+  <p class="meta">Checked at 24, 48 and 120 px. At 24 px only the shape has to read: which bird, which posture. The amber reads from 48 px up, and at 24 px the smallest marks (the downy's nape spot, the cardinal's bill, the goldfinch's wing bar) drop out, so use 48 px or larger anywhere the accent matters. If a mark still vanishes at 48 px, make the mark bigger, not the bird.</p>
+  <div class="card"><div class="sizes" id="sizes"></div></div>
+
+  <h2>Do and don't</h2>
+  <div class="dd">
+    <div class="card">
+      <h3>Do</h3>
+      <ul>
+        <li>One accent only, on the field mark a beginner uses.</li>
+        <li>Silhouette faces left. A flying bird is seen from below, head up.</li>
+        <li>Perch, trunk, ground or water line is optional and always ink.</li>
+        <li>Keep the eye as a small cut-out and one thin wing crease; they are what make a flat shape read as a bird.</li>
+        <li>Check proportions against a field guide: crest, bill, tail, legs, posture.</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3>Don't</h3>
+      <ul>
+        <li>No outlines, strokes around the body, or gradients.</li>
+        <li>No second color, even when the bird is famous for one (the cardinal stays ink; only its bill is amber).</li>
+        <li>No amber branch under a species; that belongs to the mark.</li>
+        <li>No text inside a species file. Labels live in the callout versions.</li>
+        <li>No guessing a shape you have not checked. Ask a birder.</li>
+      </ul>
+    </div>
+  </div>
+
+  <h2>Field-mark callouts</h2>
+  <p class="meta">Six of the twelve with a thin amber leader and a short label, for the brief, the ID page and the backs of sticker sheets. <code>art/callouts/&lt;slug&gt;.svg</code>. Same rules, plus one leader, one dot and a label of a few words.</p>
+  <div class="card"><div class="callouts" id="callouts"></div></div>
+
+  <h2>Usage</h2>
+  <div class="uses">
+    <div class="card">
+      <h3>Brief card</h3>
+      <p class="meta">The morning call with the day's likeliest bird beside it.</p>
+      <div class="briefcard"><img src="art/birds/american-robin.svg" alt=""><div><div class="word"><span>GO</span></div><p>Calm and dry at sunrise, 41°. Robins are back on the lawns. Worth getting out.</p></div></div>
+    </div>
+    <div class="card">
+      <h3>Bird-of-the-day card</h3>
+      <p class="meta">A 1080×1350 image for texts and groups: paper, the silhouette large, name in serif, one hint, a small daybird wordmark. Made below, in your browser.</p>
+      <p class="meta"><a href="#maker">Make a card</a></p>
+    </div>
+    <div class="card">
+      <h3>Stickers</h3>
+      <p class="meta">2.5-inch circles, paper fill, thin amber ring, twelve to a letter sheet. <a href="stickers.html">Print the sheet</a>.</p>
+      <div class="stickerdemo"><span><img src="art/birds/black-capped-chickadee.svg" alt=""></span><span><img src="art/birds/blue-jay.svg" alt=""></span><span><img src="art/birds/red-tailed-hawk.svg" alt=""></span></div>
+    </div>
+  </div>
+
+  <h2 id="maker">Make a card</h2>
+  <div class="card maker">
+    <div>
+      <label for="cardBird">Bird</label>
+      <select id="cardBird"></select>
+      <label for="cardWhere">Where (optional)</label><input id="cardWhere" placeholder="Mink Brook, Hanover">
+      <label for="cardDate">Date (optional)</label><input id="cardDate">
+      <div class="ctrl"><button id="cardMake">Make a card</button><button class="ghost" id="cardSave" disabled>Download PNG</button><span class="meta" id="cardMsg"></span></div>
+      <p class="meta">Everything happens in your browser. Nothing is uploaded.</p>
+    </div>
+    <canvas id="cardCanvas" width="1080" height="1350"></canvas>
+  </div>
+
+  <h2>Photo to Daybird card</h2>
+  <div class="card maker">
+    <div>
+      <label for="photoIn">Your bird photo</label>
+      <input type="file" id="photoIn" accept="image/*">
+      <label for="photoName">Name</label>
+      <div class="ctrl" style="margin-top:0"><input id="photoName" placeholder="American Robin" list="artNames" style="flex:1"><button class="ghost small hidden" id="photoAuto">Name it for me</button></div>
+      <datalist id="artNames"></datalist>
+      <label for="photoHint">One line (optional)</label><input id="photoHint" placeholder="First one of the year, on the way to work.">
+      <div class="ctrl"><button id="photoMake" disabled>Make a card</button><button class="ghost" id="photoSave" disabled>Download PNG</button><span class="meta" id="photoMsg"></span></div>
+      <p class="meta" id="photoNote">The photo stays in your browser and is not stored. If the name matches one of the twelve, its silhouette goes in the corner. "Name it for me" appears when you are signed in and the photo ID is set up; that one call sends the photo to the ID service.</p>
+    </div>
+    <canvas id="photoCanvas" width="1080" height="1350"></canvas>
+  </div>
+
+  <h2>Accuracy check</h2>
+  <div class="card checks">
+    <p class="meta">For the reviewer. One line per bird on what to compare against a field guide. Fix a shape by editing its outline points in <code>scripts/build_art.mjs</code> and running it again.</p>
+    <ul id="checks"></ul>
+  </div>
+
+  <footer>Daybird art, draft. The silhouettes are original drawings, not traced. Sightings data © eBird / Cornell Lab of Ornithology.</footer>
+</div>
+
+<script src="data/art.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="js/config.js"></script>
+<script src="js/cloud.js"></script>
+<script src="data/traits.js"></script>
+<script src="js/brief.js"></script>
+<script src="js/app.js"></script>
+<script src="js/footer.js"></script>
+<script src="js/birdcard.js"></script>
+<script>
+(async () => {
+  const $ = (id) => document.getElementById(id);
+  const esc = (s) => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  const ART = globalThis.DAYBIRD_ART || [];
+  const artPath = (b) => `art/birds/${b.slug}.svg`;
+  const today = () => new Date().toLocaleDateString(undefined, { month: 'long', day: 'numeric', year: 'numeric' });
+
+  // grid of twelve
+  $('birds').innerHTML = ART.map((b, i) => `<div class="bird"><img src="${artPath(b)}" alt="${esc(b.name)} silhouette"><b>${esc(b.name)}</b><div class="meta">amber: ${esc(b.mark)}</div><button class="small ghost" data-card="${i}">Make a card</button></div>`).join('');
+  // sizes
+  $('sizes').innerHTML = ART.map(b => `<span>${esc(b.name)}</span><span class="row3">${[24, 48, 120].map(s => `<img src="${artPath(b)}" width="${s}" height="${s}" alt="">`).join('')}</span>`).join('');
+  // callouts
+  $('callouts').innerHTML = ART.filter(b => b.callout).map(b => `<div class="bird"><img src="art/callouts/${b.slug}.svg" alt="${esc(b.name)}: ${esc(b.mark)}"><b>${esc(b.name)}</b><div class="meta">${esc(b.mark)}</div></div>`).join('');
+  // reviewer checklist
+  $('checks').innerHTML = ART.map(b => `<li><b>${esc(b.name)}</b> (amber: ${esc(b.mark)}): ${esc(b.check || '')}</li>`).join('');
+
+  // --- card maker
+  $('cardBird').innerHTML = ART.map((b, i) => `<option value="${i}">${esc(b.name)}</option>`).join('');
+  $('artNames').innerHTML = ART.map(b => `<option value="${esc(b.name)}">`).join('');
+  $('cardDate').value = today();
+  const cardOpts = () => { const b = ART[+$('cardBird').value]; return { name: b.name, hint: b.hint, art: artPath(b), where: $('cardWhere').value.trim(), song: `Look for the ${b.mark}`, date: $('cardDate').value.trim() }; };
+  async function makeCard() {
+    const b = ART[+$('cardBird').value];
+    $('cardMsg').textContent = 'Drawing…';
+    try {
+      await DAYBIRD_CARD.render($('cardCanvas'), cardOpts());
+      $('cardSave').disabled = false; $('cardMsg').textContent = 'Ready.';
+      $('cardCanvas').dataset.bird = b.slug;
+    } catch (e) { $('cardMsg').textContent = 'Could not draw: ' + e.message; }
+  }
+  $('cardMake').onclick = makeCard;
+  $('cardSave').onclick = async () => { await DAYBIRD_CARD.render($('cardCanvas'), cardOpts()); await DAYBIRD_CARD.download(`daybird-${$('cardCanvas').dataset.bird || 'card'}.png`); };
+  document.querySelectorAll('[data-card]').forEach(btn => btn.onclick = () => { $('cardBird').value = btn.dataset.card; makeCard(); $('maker').scrollIntoView({ behavior: 'smooth' }); });
+
+  // --- photo card
+  let photoData = null;
+  const matchArt = (name) => { const n = name.trim().toLowerCase(); return ART.find(b => b.name.toLowerCase() === n) || (n.length > 3 ? ART.find(b => b.name.toLowerCase().includes(n)) : null) || null; };
+  $('photoIn').onchange = async (e) => {
+    const f = e.target.files[0]; if (!f) return;
+    try { photoData = await DB.fileToDataURL(f, 1600); $('photoMake').disabled = false; $('photoMsg').textContent = 'Photo loaded.'; }
+    catch (err) { photoData = null; $('photoMake').disabled = true; $('photoMsg').textContent = 'Could not read that file.'; }
+    gate();
+  };
+  function gate() { $('photoAuto').classList.toggle('hidden', !(photoData && globalThis.CLOUD && typeof CLOUD.photoId === 'function' && DB.online())); }
+  try { await DB.ready; } catch {}
+  gate();
+  const photoOpts = () => { const name = $('photoName').value.trim() || 'A bird'; const b = matchArt(name); return { name, hint: $('photoHint').value.trim() || (b ? b.hint : ''), art: b ? artPath(b) : null, photo: photoData, date: today() }; };
+  $('photoMake').onclick = async () => {
+    if (!photoData) return;
+    $('photoMsg').textContent = 'Drawing…';
+    try { await DAYBIRD_CARD.render($('photoCanvas'), photoOpts()); $('photoSave').disabled = false; $('photoMsg').textContent = 'Ready.'; }
+    catch (e) { $('photoMsg').textContent = 'Could not draw: ' + e.message; }
+  };
+  $('photoSave').onclick = async () => { await DAYBIRD_CARD.render($('photoCanvas'), photoOpts()); await DAYBIRD_CARD.download('daybird-photo-card.png'); };
+  $('photoAuto').onclick = async () => {
+    if (!photoData) return;
+    $('photoAuto').disabled = true; $('photoMsg').textContent = 'Asking the photo ID…';
+    try {
+      const s = DB.settings();
+      const res = await CLOUD.photoId({ image: photoData.split(',')[1], media_type: 'image/jpeg', description: '', candidates: [], place: `${(+s.lat).toFixed(2)}, ${(+s.lng).toFixed(2)}`, date: new Date().toDateString() });
+      if (res && res.error) throw new Error(res.error);
+      const best = (res && res.candidates && res.candidates[0]) || null;
+      if (best && best.name) { $('photoName').value = best.name; $('photoMsg').textContent = `Best guess: ${best.name}${best.confidence ? ` (${best.confidence}%)` : ''}. Change it if it looks wrong.`; }
+      else $('photoMsg').textContent = 'No clear match. Type the name.';
+    } catch (e) { $('photoMsg').textContent = 'Photo ID is not available: ' + e.message; }
+    $('photoAuto').disabled = false;
+  };
+})();
+</script>
+</body>
+</html>

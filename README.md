@@ -204,6 +204,24 @@ Tests: `node --test tests/premium-odds.test.mjs` (the estimates, day scoring, ic
 
 - **Yes, with a commercial license:** drop the "Premium preview" banner (`PREMIUM.banner` in `js/premium.js`), gate the planner, route finder and calendar nudges behind a paid flag on the profile, and email the waitlist. Replace the heuristics with odds fitted to eBird frequency data (the `SEASON` table and the two formulas in `js/odds.js` are the only places to change; the page copy in the "How we estimate this" fold must change with them). Replace the OSRM demo server with a paid routing API.
 - **No:** keep the pages free, keep eBird attribution everywhere, and move anything that would be charged for onto data Daybird is allowed to sell (its own weather-based scores, the hand-written windows table, the calendar nudges without eBird data).
+## Art system
+
+**The rule: a silhouette plus one accent.** Every species is one flat ink shape (`#1F2A37`) with a single amber mark (`#E8833A`) on the field mark a beginner uses to name it, on paper (`#F6F3EC`). It extends the Daybird mark (`mark.svg`, a tufted titmouse whose amber is the branch). No outlines, no gradients, no second color; the bird faces left unless it is flying, and a perch, trunk, ground or water line is optional and always ink. `art.html` ("Our birds") is the style guide: palette, the twelve birds, sizes at 24/48/120 px, do/don't, callouts, and the card makers. `stickers.html` is a print-ready sheet.
+
+What is in it:
+
+- `art/birds/<slug>.svg`, twelve species (chickadee, jay, cardinal, robin, downy, nuthatch, goldfinch, junco, song sparrow, red-tailed hawk, mallard, Canada goose), each viewBox `0 0 240 240`, under 5 KB, paths only, no text. `art/contact-sheet.png` shows all twelve.
+- `art/callouts/<slug>.svg`, six of them with a thin amber leader and a short label pointing at the accent.
+- `data/art.js`, the list the pages read: slug, name, which mark carries the amber, a one-line hint for cards, and a `check` line for the reviewer.
+- `js/birdcard.js`: `DAYBIRD_CARD.render(canvas, { name, hint, art, where, song, date, photo })` draws a 1080×1350 card (paper, the silhouette large, name in serif, hint in sans, a small daybird wordmark); `DAYBIRD_CARD.toBlob()` and `.download(filename)` give the PNG. The SVG is loaded into the canvas as an Image from a Blob URL, so it works from `file://` too. With `photo` set, the photo fills a rounded frame and the silhouette becomes a corner stamp. On `art.html`, "Make a card" works for any of the twelve, and "Photo to Daybird card" takes a photo from the user's device, the name they type (the silhouette joins in if the name is one of the twelve) and, when they are signed in and `bird-id` is deployed, a "Name it for me" button that calls the existing photo ID once. The photo never leaves the browser otherwise.
+- `stickers.html`: letter page, half-inch margins, 3 across × 4 down of 2.5-inch circles (the common 12-up round label layout, e.g. Avery 94509), each a silhouette on paper with a thin amber ring and a small mark-plus-wordmark lockup; a Print button, and an optional second page of Daybird marks. Print at 100%, not "fit to page".
+- `scripts/build_art.mjs` builds every SVG from outline points. `node scripts/build_art.mjs` writes the files; add `--png` (with the `sharp` package installed, or `SHARP_PATH` pointing at it) to also render previews and the contact sheet.
+
+**How to add a bird.** Open `scripts/build_art.mjs` and add an entry to `BIRDS`: a `slug`, `name`, `mark`, an `aria-label`, and `body`, the outline as 15–20 `[x, y]` points clockwise from the bill tip in the 240 × 240 box (flag a point `'c'` for a corner such as a bill tip or tail corner). Add an `eye`, a `wing` crease, `legs` and a `perch` if the bird is perched, and the one `accent` shape. Run the script, look at the PNG, and move points until the bird reads at a glance; the generator joins the points with smooth curves, so a bird is a list of places the outline passes through, not hand-written Béziers. Then add the same slug to `data/art.js` with a hint and a check line (and `callout: true` plus a `callout` spec in the build script if it gets a label), and run `node tests/validate-art.mjs`, which checks every SVG: well-formed, viewBox, no images/scripts/text in species files, size, palette only, and that the data file and the folders agree.
+
+**Accuracy caveat and the expert review step.** The twelve shapes are original drawings made from outline points and checked by eye against what I know of each bird, not traced from photos or measured from specimens. Proportions a birder looks at first (crest shape, bill length, tail length and shape, posture) are plausible but not verified. Before any of this goes on a sticker run or a printed card, an experienced birder should go through the "Accuracy check" list at the bottom of `art.html` with a field guide open and flag anything off; fixing a shape is moving a few points in the build script. Both pages carry a draft banner until that happens. The 24 px size check also shows that the smallest accents (downy nape spot, cardinal bill, goldfinch wing bar) drop out below about 48 px, so use the art at 48 px or larger wherever the accent matters.
+
+Tests: `node tests/validate-art.mjs` (no packages needed). The browser checks (twelve images load, the card button produces a 1080×1350 PNG with paper, ink and amber pixels, the download works, the photo card renders from a fixture image, the sticker page prints to one letter page, every page loads without an error) were run with Playwright during the build and are not in the repo because they depend on a locally installed Playwright and sharp.
 
 ## Still faked
 
@@ -225,6 +243,9 @@ profile.html   life list stats + favorite bird
 settings.html  key + location + migration
 unsubscribe.html  opt-out page linked from emailed briefs
 learn.html     learn and play: first 10, weekly groups, bingo, challenges, quiz, streak, tracks
+art.html       the art system: twelve silhouettes, callouts, card makers
+stickers.html  print-ready sticker sheet
+art/           bird SVGs, callouts, contact sheet
 supabase/functions/  bird-id, send-brief, unsubscribe (edge functions)
 recap.html     your month in birds + the share card
 digest.html    this week in birds (news digest)
@@ -258,6 +279,9 @@ data/windows.js  hand-written migration windows for northern New England
 data/pages.js    pages outside the main tabs, listed by the hub
 tests/           premium-odds.test.mjs (node --test), premium-functions.test.ts (deno test)
 scripts/build_brief.mjs  daily brief builder (GitHub Action)
+scripts/build_art.mjs    builds the bird SVGs from outline points
+tests/validate-art.mjs   checks every SVG against the art rules
+js/birdcard.js  1080×1350 card drawer (DAYBIRD_CARD)
 css/style.css
 data/mock.js     sample sightings/weather (fallback)
 data/passes.js   sample listings
@@ -266,4 +290,6 @@ data/challenges.js  learn-five challenges (hand-written)
 data/tracks.js   six-month path + specialty tracks (hand-written)
 data/pages.js    pages beyond the main tabs (the hub lists these)
 tests/learn.test.mjs  Playwright checks for learn.html
+data/art.js      the twelve birds: slug, name, mark, hint, check
+data/pages.js    pages beyond the main tabs (hub list)
 ```

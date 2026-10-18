@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240" role="img" aria-label="Song Sparrow: breast spot">
+<path fill="#1F2A37" fill-rule="evenodd" d="M50 108C55.8 104.4 61.2 102.8 66 98C70.8 93.2 71.4 87 76 82C82.7 74.8 88.4 68 98 66C107.4 64.1 116.1 66.5 124 72C130.4 76.4 130.8 84.2 136 90C144.2 99.2 153.4 103.3 162 112C169.9 120 174 128.1 182 136C196.5 150.4 214.4 155.1 226 172C228.6 175.7 231 179.6 230 184C228.8 189 225.1 193.5 220 194C199.3 196 192.7 160 172 162C160.9 163.1 160.1 179.1 150 184C138.9 189.4 128 190.8 116 188C101.8 184.7 92.2 176.4 82 166C72.5 156.3 65.7 147.1 62 134C60.2 127.8 62 122.5 62 116C57.7 113.1 54.3 110.9 50 108ZM69.5 100a4.5 4.5 0 1 0 9 0a4.5 4.5 0 1 0 -9 0ZM118 110Q144.7 143.8 186 156Q148.1 138.8 118 110Z"/>
+<path d="M112 186L106 212M130 187L136 212" fill="none" stroke="#1F2A37" stroke-width="5" stroke-linecap="round"/>
+<path d="M34 214C96 207 158 207 214 214" fill="none" stroke="#1F2A37" stroke-width="7" stroke-linecap="round"/>
+<path fill="#E8833A" d="M84 134C86.8 134.1 88.8 136.5 90 139C91.7 142.6 91.5 146.3 90 150C88.8 152.8 87.1 156 84 156C80.9 156 79.3 152.8 78 150C76.3 146.4 75.3 142.6 77 139C78.3 136.2 80.9 133.9 84 134Z"/>
+<path d="M84 145L52 172" fill="none" stroke="#E8833A" stroke-width="1.5" stroke-linecap="round"/>
+<circle cx="84" cy="145" r="2.6" fill="#E8833A"/>
+<text x="52" y="188" text-anchor="middle" font-family="Iowan Old Style,Palatino Linotype,Palatino,Georgia,serif" font-size="13" fill="#1F2A37">breast spot</text>
+</svg>
