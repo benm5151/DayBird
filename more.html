@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Daybird — More</title>
+<link rel="stylesheet" href="css/style.css">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#1F2A37">
+<link rel="icon" href="icon.svg">
+<link rel="apple-touch-icon" href="icon.svg">
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <a class="brand" href="index.html"><img src="mark.svg" alt=""><span>Daybird<small>More</small></span></a>
+    <a class="btn ghost" href="settings.html">Settings</a>
+  </header>
+  <nav class="tabs">
+    <a href="index.html">Brief</a>
+    <a href="id.html">ID</a>
+    <a href="feed.html">Feed</a>
+    <a href="profile.html">Profile</a>
+    <a href="more.html">More</a>
+  </nav>
+
+  <h1>More</h1>
+  <p class="lead">Everything that isn't on the main tabs.</p>
+  <div id="hub" class="grid"></div>
+
+  <footer>Sightings via eBird (Cornell Lab of Ornithology). <a href="about.html">About Daybird</a>.</footer>
+</div>
+
+<script src="data/pages.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="js/config.js"></script>
+<script src="js/cloud.js"></script>
+<script src="data/traits.js"></script>
+<script src="js/brief.js"></script>
+<script src="js/app.js"></script>
+<script src="js/footer.js"></script>
+<script>
+(() => {
+  // The four pages that left the tab bar, plus whatever other builders registered in data/pages.js.
+  const BUILTIN = [
+    { href: 'passes.html', title: 'Passes', blurb: 'Mornings on private land, a few seats at a time.', group: 'plan' },
+    { href: 'host.html', title: 'Host land', blurb: 'List your pond, pasture or ridge for a few birders on the good mornings.', group: 'plan' },
+    { href: 'settings.html', title: 'Settings', blurb: 'Your location, eBird key, where you bird and how long you have birded.', group: 'you' },
+    { href: 'about.html', title: 'About', blurb: 'What Daybird is and who makes it.', group: 'about' },
+  ];
+  const GROUPS = { plan: 'Plan a morning', learn: 'Learn', you: 'You', about: 'About Daybird' };
+  const extra = Array.isArray(globalThis.DAYBIRD_PAGES) ? globalThis.DAYBIRD_PAGES : [];
+  const seen = new Set(BUILTIN.map(p => p.href));
+  const pages = BUILTIN.concat(extra.filter(p => p && p.href && p.title && !seen.has(p.href) && seen.add(p.href)));
+  const by = {};
+  for (const p of pages) { const g = GROUPS[p.group] ? p.group : 'other'; (by[g] = by[g] || []).push(p); }
+  const order = Object.keys(GROUPS).concat('other');
+  document.getElementById('hub').innerHTML = order.filter(g => by[g]).map(g => `
+    <div class="card hub" data-group="${g}">
+      <h3>${GROUPS[g] || 'Other'}</h3>
+      ${by[g].map(p => `<a href="${DB.esc(p.href)}"><b>${DB.esc(p.title)}</b>${p.blurb ? `<span>${DB.esc(p.blurb)}</span>` : ''}</a>`).join('')}
+    </div>`).join('');
+})();
+</script>
+</body>
+</html>

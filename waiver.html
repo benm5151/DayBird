@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Daybird — Guest waiver and host agreement</title>
+<meta name="description" content="What guests and hosts agree to when a land pass is booked through Daybird.">
+<link rel="stylesheet" href="css/style.css">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#1F2A37">
+<link rel="icon" href="icon.svg">
+<link rel="apple-touch-icon" href="icon.svg">
+<style>
+.legal h2{margin-top:26px}
+.legal p,.legal li{max-width:68ch}
+.legal ol,.legal ul{padding-left:22px}
+.legal li{margin-bottom:6px}
+.placeholder{background:var(--amber-ink);color:var(--amber);padding:0 4px;border-radius:4px;font-family:ui-monospace,monospace;font-size:13px}
+.doc{border-left:3px solid var(--accent);padding-left:16px;margin:14px 0 24px}
+</style>
+</head>
+<body>
+<div class="wrap legal">
+  <header class="top">
+    <a class="brand" href="index.html"><img src="mark.svg" alt=""><span>Daybird<small>Waiver and host agreement</small></span></a>
+  </header>
+  <nav class="tabs">
+    <a href="index.html">Brief</a>
+    <a href="id.html">ID</a>
+    <a href="passes.html">Passes</a>
+    <a href="feed.html">Feed</a>
+    <a href="profile.html">Profile</a>
+    <a href="host.html">Host land</a>
+  </nav>
+
+  <div class="banner" id="templateBanner" role="note"><b>TEMPLATE — attorney review before any paid pass.</b> These two documents were drafted by Daybird's builder, not a lawyer. Waivers, landowner liability and recreational-use laws differ by state. Have a New Hampshire attorney review and adapt them before anyone pays for a pass.</div>
+
+  <h1>Guest waiver and host agreement</h1>
+  <p class="lead">When you book a pass you tick a box that says you accept the guest waiver. When you list your land you tick a box for the host agreement. This page is what those boxes mean. Daybird records the time you ticked.</p>
+
+  <h2 id="guest">Guest waiver (template)</h2>
+  <div class="doc">
+    <p>I am booking a visit to private land through Daybird. I understand and agree that:</p>
+    <ol>
+      <li><b>I take on the risks of walking on private land.</b> Fields, woods, shorelines and farm land have uneven ground, water, ice, fences, animals, machinery, ticks, hunting in season and weather that changes. I accept these risks for myself. I will not hold the landowner or Daybird responsible for an injury or loss that comes from an ordinary risk of being outdoors, except where the law says a waiver like this cannot apply.</li>
+      <li><b>Nobody promises birds.</b> The brief is a forecast and the listing is the host's best description. The birds may not show up. A quiet morning is not grounds for a refund or a complaint.</li>
+      <li><b>I will follow the host's rules.</b> I will arrive and leave within the listed window, park where I am told, stay on the paths or areas the host names, keep dogs home unless the listing allows them, and leave when asked.</li>
+      <li><b>I will leave no trace.</b> I will take out everything I bring in, close gates behind me, and not disturb livestock, crops, nests or roosts. I will not use playback or flush birds for a better look.</li>
+      <li><b>I will keep the location private.</b> The exact location and directions are shared with me to make the visit possible. I will not post or forward them, and I will keep sensitive species vague in anything public.</li>
+      <li><b>I am 13 or older.</b> If I am under 18, a parent or guardian is booking for me and will be with me on the visit.</li>
+      <li><b>Daybird is a notice board.</b> It introduces me to the host and records the booking. It does not inspect land, insure visits or guarantee anything about the host or the property.</li>
+    </ol>
+    <p class="meta">Recorded when you book: the time you accepted this waiver, with your booking. Version <span class="placeholder">[WAIVER_VERSION]</span>, dated <span class="placeholder">[DATE]</span>.</p>
+  </div>
+
+  <h2 id="host">Host agreement (template)</h2>
+  <div class="doc">
+    <p>I am listing land I own or have the right to open to visitors. I understand and agree that:</p>
+    <ol>
+      <li><b>I have the right to invite people onto this land</b> and I will keep the listing accurate about where visitors may go and what they may do.</li>
+      <li><b>I will tell visitors what they need to know.</b> I will list the rules, parking and meeting point, and warn about anything on the land a reasonable visitor would not expect, such as an electric fence, a bull, an open well or active logging.</li>
+      <li><b>I decide who comes and when.</b> I can cancel a booking, and I can ask anyone to leave. Daybird does not screen visitors beyond requiring a sign-in email.</li>
+      <li><b>I understand the law may protect me, and may not.</b> Many states, including New Hampshire, limit a landowner's liability to people allowed on the land for recreation free of charge. Charging a fee can change that. Before I charge for a pass I will ask an attorney and my insurer whether my coverage applies. <span class="placeholder">[Attorney to confirm the current New Hampshire recreational-use statute and the effect of a fee.]</span></li>
+      <li><b>I will keep visitors' details private.</b> I see the display names of people who book so I know who to expect. I will not share them.</li>
+      <li><b>Daybird is a notice board.</b> It shows my listing, reveals my exact location only to people with a booking, and records bookings. It does not take payment yet, does not insure visits, and is not a party to the visit.</li>
+    </ol>
+    <p class="meta">Recorded when you publish: the time you accepted this agreement, with your listing. Version <span class="placeholder">[HOST_AGREEMENT_VERSION]</span>, dated <span class="placeholder">[DATE]</span>.</p>
+  </div>
+
+  <h2>Before the first paid pass</h2>
+  <ul>
+    <li>One-hour attorney consult: waivers for minors, landowner liability, New Hampshire's recreational-use law, and whether a fee changes the picture.</li>
+    <li>Ask an insurance agent about event or general liability cover for hosted mornings.</li>
+    <li>Record a version number for each document so a booking can be matched to the exact text the guest saw.</li>
+  </ul>
+
+  <footer>Daybird is a guide, not safety advice. Check conditions yourself.</footer>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="js/config.js"></script>
+<script src="js/cloud.js"></script>
+<script src="data/traits.js"></script>
+<script src="js/brief.js"></script>
+<script src="js/app.js"></script>
+<script src="js/footer.js"></script>
+</body>
+</html>

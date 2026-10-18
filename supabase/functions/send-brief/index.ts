@@ -21,12 +21,11 @@ const CORS = {
   "Access-Control-Allow-Methods": "POST, OPTIONS",
 };
 const TZ = "America/New_York"; // daily caps reset at midnight Eastern, like the photo-ID cap
-const RADIUS_KM = 25, BACK_DAYS = 3; // same as scripts/build_brief.py
-const DIRS = ["N", "NE", "E", "SE", "S", "SW", "W", "NW"];
+const RADIUS_KM = 25, BACK_DAYS = 3; // same as scripts/build_brief.mjs
 
 const num = (name: string, d: number) => { const v = Number(Deno.env.get(name)); return Number.isFinite(v) && v > 0 ? v : d; };
 function config() {
-  const site = (Deno.env.get("SITE_URL") || "https://benm5151.github.io/DayBird/").trim();
+  const site = (Deno.env.get("SITE_URL") || "https://day-bird.com/").trim();
   return {
     ebirdKey: (Deno.env.get("EBIRD_KEY") || "").trim(),
     resendKey: (Deno.env.get("RESEND_API_KEY") || "").trim(),
@@ -44,14 +43,6 @@ function config() {
 }
 type Cfg = ReturnType<typeof config>;
 
-type Wx = { temp: number; wind: number; windDir: number; rain: number; sunrise: string };
-type Spot = { name: string; locId?: string; species: number };
-type Notable = { comName: string; howMany?: number; locName: string; obsDt?: string; subId?: string };
-export type Brief = {
-  place: string; date: string; dateLabel: string; shortDate: string; whenLabel: string;
-  word: string; grade: "go" | "maybe" | "stay"; headline: string; score: number; why: string[];
-  wx: Wx | null; spots: Spot[]; notable: Notable[]; errors: string[]; partial: boolean;
-};
 
 // ---------------------------------------------------------------- request handling
 export async function handler(req: Request): Promise<Response> {
@@ -81,7 +72,7 @@ export async function handler(req: Request): Promise<Response> {
     const limitMsg = await checkLimits(c, user.id, kind, rHash);
     if (limitMsg) return json({ error: limitMsg }, 429);
 
-    const brief = await buildBrief(v.lat, v.lng, v.place, c.ebirdKey);
+    const brief = await buildBrief(v.lat, v.lng, v.place, c.ebirdKey, v.mode, v.level);
     if (!brief) return json({ error: "Couldn't build a brief right now: weather and sightings were both unavailable. Try again in a few minutes." }, 502);
 
     const sender = kind === "other" ? await senderLabel(c, user.id) : "";
@@ -93,7 +84,7 @@ export async function handler(req: Request): Promise<Response> {
 
     await record(c, { sender_id: user.id, kind, recipient_hash: rHash, place: brief.place, ok: true });
     if (brief.errors.length) console.log("send-brief partial:", brief.errors.join("; "));
-    return json({ ok: true, kind, to: kind === "self" ? recipient : maskEmail(recipient), word: brief.word, place: brief.place, when: brief.whenLabel, partial: brief.partial });
+    return json({ ok: true, kind, to: kind === "self" ? recipient : maskEmail(recipient), word: brief.call.word, place: brief.place, when: brief.whenLabel, partial: brief.partial });
   } catch (e) {
     console.error("send-brief failed:", e);
     return json({ error: "Something went wrong sending the brief. Try again in a minute." }, 500);
@@ -102,7 +93,7 @@ export async function handler(req: Request): Promise<Response> {
 // The guard lets a test import this file without starting a server.
 if (!(globalThis as any).__DAYBIRD_TEST__) Deno.serve(handler);
 
-function parseRequest(b: any): { kind: "self" | "other"; email: string; lat: number; lng: number; place: string } | { error: string } {
+function parseRequest(b: any): { kind: "self" | "other"; email: string; lat: number; lng: number; place: string; mode: string; level: string } | { error: string } {
   if (!b || typeof b !== "object") return { error: "Bad request." };
   if (b.to !== "self" && b.to !== "other") return { error: "Choose who to send the brief to." };
   // Number(null) and Number("") are 0, which would quietly point the brief at the equator: require real numbers.
@@ -115,7 +106,8 @@ function parseRequest(b: any): { kind: "self" | "other"; email: string; lat: num
     email = String(b.email ?? "").trim().toLowerCase();
     if (email.length > 254 || !/^[^\s@<>()",;:\\]+@[^\s@<>()",;:\\]+\.[^\s@<>()",;:\\]{2,}$/.test(email) || email.includes("..")) return { error: "That doesn't look like a valid email address." };
   }
-  return { kind: b.to, email, lat: Math.round(lat * 1000) / 1000, lng: Math.round(lng * 1000) / 1000, place };
+  const mode = B.MODES[b.mode] ? String(b.mode) : "any", level = B.LEVELS[b.level] ? String(b.level) : "new";
+  return { kind: b.to, email, lat: Math.round(lat * 1000) / 1000, lng: Math.round(lng * 1000) / 1000, place, mode, level };
 }
 
 // Checks the token with Supabase Auth itself, so it stays safe even if "Verify JWT" were switched off.
@@ -180,169 +172,55 @@ async function senderLabel(c: Cfg, userId: string): Promise<string> {
 }
 
 // ---------------------------------------------------------------- building the brief
+// Scoring, wording and the email body come from js/brief.js (the same engine the site and the daily
+// Action use), loaded from the live site so the dashboard-pasted function needs no local files.
+// Tests remap this URL to the local file with an import map.
+import "https://day-bird.com/js/brief.js";
+import "https://day-bird.com/data/traits.js";
+const B: any = (globalThis as any).DAYBIRD_BRIEF;
+const TRAITS: any[] = (globalThis as any).DAYBIRD_TRAITS || [];
+
 async function getJSON(url: string, headers: Record<string, string> = {}) {
   const r = await fetch(url, { headers, signal: AbortSignal.timeout(15000) });
   if (!r.ok) throw new Error(`${r.status} from ${new URL(url).hostname}`);
   return r.json();
 }
 
-// Weather for 6–9 AM local. After 9 AM local the morning is over, so it covers tomorrow instead.
-async function getWeather(lat: number, lng: number): Promise<{ wx: Wx; date: string; whenLabel: string }> {
-  const w = await getJSON(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lng}` +
-    `&hourly=temperature_2m,precipitation_probability,wind_speed_10m,wind_direction_10m&daily=sunrise&current=temperature_2m` +
-    `&timezone=auto&forecast_days=2&wind_speed_unit=mph&temperature_unit=fahrenheit`);
-  const hourNow = w.current?.time ? Number(String(w.current.time).slice(11, 13)) : 0;
-  const dayIdx = hourNow >= 9 && (w.daily?.time?.length || 0) > 1 ? 1 : 0;
-  const date: string = w.daily.time[dayIdx];
-  const idx: number[] = [];
-  (w.hourly.time as string[]).forEach((t, i) => { if (t.startsWith(date) && ["06", "07", "08", "09"].includes(t.slice(11, 13))) idx.push(i); });
-  const avg = (k: string) => {
-    const vals = idx.map((i) => w.hourly[k]?.[i]).filter((x) => typeof x === "number" && Number.isFinite(x)) as number[];
-    return vals.length ? vals.reduce((a, b) => a + b, 0) / vals.length : NaN;
-  };
-  const wx = { temp: avg("temperature_2m"), wind: avg("wind_speed_10m"), windDir: avg("wind_direction_10m"), rain: avg("precipitation_probability") };
-  if (!Number.isFinite(wx.temp) || !Number.isFinite(wx.wind)) throw new Error("no hourly weather for the morning window");
-  return {
-    wx: { temp: Math.round(wx.temp), wind: Math.round(wx.wind), windDir: Math.round(Number.isFinite(wx.windDir) ? wx.windDir : 0), rain: Math.round(Number.isFinite(wx.rain) ? wx.rain : 0), sunrise: String(w.daily.sunrise?.[dayIdx] || "").slice(11, 16) },
-    date, whenLabel: dayIdx === 1 ? "tomorrow morning" : "this morning",
-  };
-}
-
-async function getEbird(lat: number, lng: number, key: string): Promise<{ notable: Notable[]; spots: Spot[]; errors: string[] }> {
-  const H = { "X-eBirdApiToken": key };
+export async function buildBrief(lat: number, lng: number, place: string, ebirdKey: string, mode = "any", level = "new") {
+  const errors: string[] = [];
+  const H = { "X-eBirdApiToken": ebirdKey };
   const q = `lat=${lat}&lng=${lng}&dist=${RADIUS_KM}&back=${BACK_DAYS}`;
-  const [n, r] = await Promise.allSettled([
-    getJSON(`https://api.ebird.org/v2/data/obs/geo/recent/notable?${q}&detail=simple`, H),
-    getJSON(`https://api.ebird.org/v2/data/obs/geo/recent?${q}`, H),
-  ]);
-  const errors: string[] = [];
-  const notable: Notable[] = [];
-  if (n.status === "fulfilled") {
-    const seen = new Set<string>();
-    for (const o of n.value as any[]) { // one line per species + place, newest first (eBird returns newest first)
-      const k = `${o.comName}|${o.locId || o.locName}`;
-      if (seen.has(k)) continue;
-      seen.add(k);
-      notable.push({ comName: String(o.comName || ""), howMany: o.howMany, locName: String(o.locName || ""), obsDt: o.obsDt, subId: o.subId });
-    }
-  } else errors.push(`ebird notable: ${n.reason?.message || n.reason}`);
-  const by = new Map<string, { name: string; locId?: string; species: Set<string> }>();
-  if (r.status === "fulfilled") {
-    for (const o of r.value as any[]) {
-      const k = o.locId || o.locName;
-      if (!by.has(k)) by.set(k, { name: String(o.locName || ""), locId: o.locId, species: new Set() });
-      by.get(k)!.species.add(o.comName);
-    }
-  } else errors.push(`ebird recent: ${r.reason?.message || r.reason}`);
-  const spots = [...by.values()].map((v) => ({ name: v.name, locId: v.locId, species: v.species.size })).sort((a, b) => b.species - a.species).slice(0, 5);
-  return { notable: notable.slice(0, 8), spots, errors };
-}
-
-// Same rules as scripts/build_brief.py (no migration rating: BirdCast has no public API).
-function scoreCall(wx: Wx | null, notableCount: number, month: number) {
-  let score = 50;
-  const why: string[] = [];
-  if (wx) {
-    const d = DIRS[Math.round(wx.windDir / 45) % 8];
-    if (wx.wind <= 8) { score += 15; why.push("calm winds"); } else if (wx.wind >= 18) { score -= 20; why.push("windy"); }
-    if (wx.rain <= 20) score += 10; else if (wx.rain >= 60) { score -= 25; why.push("rain likely"); }
-    if (month >= 8 && month <= 11 && (d === "N" || d === "NW")) { score += 10; why.push("NW tailwind for fall migrants"); }
-    if (month >= 3 && month <= 6 && (d === "S" || d === "SW")) { score += 10; why.push("SW tailwind for spring migrants"); }
-  } else why.push("no weather data");
-  if (notableCount >= 3) { score += 10; why.push(`${notableCount} notable reports nearby`); }
-  const grade = score >= 70 ? "go" : score >= 45 ? "maybe" : "stay";
-  return { score, grade: grade as "go" | "maybe" | "stay", why };
-}
-
-export async function buildBrief(lat: number, lng: number, place: string, ebirdKey: string): Promise<Brief | null> {
-  const errors: string[] = [];
-  const [wr, er] = await Promise.allSettled([
-    getWeather(lat, lng),
-    ebirdKey ? getEbird(lat, lng, ebirdKey) : Promise.reject(new Error("no EBIRD_KEY")),
+  const [wr, nr, rr] = await Promise.allSettled([
+    getJSON(B.weatherUrl(lat, lng)).then((w: unknown) => B.parseWeather(w)),
+    ebirdKey ? getJSON(`https://api.ebird.org/v2/data/obs/geo/recent/notable?${q}&detail=simple`, H) : Promise.reject(new Error("no EBIRD_KEY")),
+    ebirdKey ? getJSON(`https://api.ebird.org/v2/data/obs/geo/recent?${q}`, H) : Promise.reject(new Error("no EBIRD_KEY")),
   ]);
   const w = wr.status === "fulfilled" ? wr.value : null;
   if (wr.status === "rejected") errors.push(`weather: ${wr.reason?.message || wr.reason}`);
-  const eb = er.status === "fulfilled" ? er.value : { notable: [], spots: [], errors: [] as string[] };
-  if (er.status === "rejected") errors.push(`ebird: ${er.reason?.message || er.reason}`);
-  errors.push(...eb.errors);
+  if (nr.status === "rejected") errors.push(`ebird notable: ${nr.reason?.message || nr.reason}`);
+  if (rr.status === "rejected") errors.push(`ebird recent: ${rr.reason?.message || rr.reason}`);
+  const eb = B.parseEbird(nr.status === "fulfilled" ? nr.value : [], rr.status === "fulfilled" ? rr.value : []);
   if (!w && !eb.spots.length && !eb.notable.length) return null;
-
-  const date = w?.date || new Date().toISOString().slice(0, 10);
-  const { score, grade, why } = scoreCall(w?.wx || null, eb.notable.length, Number(date.slice(5, 7)));
-  const d = new Date(`${date}T12:00:00Z`);
-  const fmt = (o: Intl.DateTimeFormatOptions) => new Intl.DateTimeFormat("en-US", { timeZone: "UTC", ...o }).format(d);
-  return {
-    place, date, dateLabel: fmt({ weekday: "long", month: "short", day: "numeric" }), shortDate: fmt({ weekday: "short", month: "short", day: "numeric" }),
-    whenLabel: w?.whenLabel || "today",
-    word: { go: "GO", maybe: "MAYBE", stay: "STAY IN" }[grade], grade,
-    headline: { go: "Get out there.", maybe: "Worth a look.", stay: "Coffee first." }[grade],
-    score, why, wx: w?.wx || null, spots: eb.spots, notable: eb.notable, errors, partial: errors.length > 0,
-  };
+  const brief = B.compose({ place, date: w?.date, whenLabel: w?.whenLabel || "today", wx: w?.wx || null, tomorrow: w?.tomorrow || null, ...eb, mode, level, traits: TRAITS });
+  return { ...brief, errors, partial: errors.length > 0 };
 }
 
 // ---------------------------------------------------------------- the email itself
-const ESC: Record<string, string> = { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" };
-const esc = (s: unknown) => String(s ?? "").replace(/[&<>"']/g, (ch) => ESC[ch]);
 const cleanText = (s: unknown, max: number) => String(s ?? "").replace(/[\u0000-\u001f\u007f<>]/g, " ").replace(/\s+/g, " ").trim().slice(0, max);
-const safeId = (s: unknown) => (typeof s === "string" && /^[A-Za-z0-9]{1,20}$/.test(s) ? s : "");
-const wind = (wx: Wx) => `${wx.wind} mph ${DIRS[Math.round(wx.windDir / 45) % 8]}`;
-const BIRDCAST = "https://dashboard.birdcast.info/";
+const esc = (s: unknown) => B.esc(s);
 
-export function renderEmail(b: Brief, o: { site: string; address: string; sender: string; unsubPage: string }) {
-  const subject = `${b.word} · ${cleanText(b.place, 60)} · ${b.shortDate}`;
+export function renderEmail(b: any, o: { site: string; address: string; sender: string; unsubPage: string }) {
+  const subject = `${b.call.word} · ${cleanText(b.place, 60)} · ${b.shortDate}`;
   const intro = o.sender ? `${o.sender} shared today's Daybird brief with you.` : "";
-  const when = `${b.place} · ${b.dateLabel}, 6–9 AM (${b.whenLabel})`;
-  const wxLine = b.wx ? `${b.wx.temp}°F · wind ${wind(b.wx)} · rain ${b.wx.rain}%${b.wx.sunrise ? ` · sunrise ${b.wx.sunrise}` : ""}` : "";
-  const whyLine = b.why.join(" · ") || "Average conditions.";
   const note = b.partial ? "Some data was unavailable for this brief, so it may be incomplete." : "";
   const legal = "Sightings via eBird (Cornell Lab of Ornithology). Weather via Open-Meteo. Daybird is a guide, not safety advice.";
-
-  // ---- plain text
-  const T: string[] = [];
-  if (intro) T.push(intro, "");
-  T.push(`${b.word} — ${b.headline}  (score ${b.score})`, whyLine, "", when);
-  if (wxLine) T.push(wxLine);
-  T.push(`Migration last night: ${BIRDCAST}`, "", `Where to go (species reported in the last ${BACK_DAYS} days, within ${RADIUS_KM} km):`);
-  b.spots.forEach((s, i) => { const id = safeId(s.locId); T.push(`${i + 1}. ${s.name} — ${s.species} species${id ? ` — https://ebird.org/hotspot/${id}` : ""}`); });
-  if (!b.spots.length) T.push("(no eBird data)");
-  T.push("", "Notable nearby:");
-  b.notable.forEach((n) => { const id = safeId(n.subId); T.push(`- ${n.comName}${n.howMany ? ` ×${n.howMany}` : ""} — ${n.locName}${n.obsDt ? `, ${n.obsDt}` : ""}${id ? ` — https://ebird.org/checklist/${id}` : ""}`); });
-  if (!b.notable.length) T.push("Nothing notable in range.");
-  T.push("", `Full brief: ${o.site}`);
-  if (note) T.push(note);
-  T.push("", legal);
-  if (o.address) T.push(o.address);
-  if (o.unsubPage) T.push(`Don't want briefs from friends? Unsubscribe: ${o.unsubPage}`);
-
-  // ---- HTML (inline styles only: email clients ignore stylesheets)
-  const color = { go: "#2f6b4f", maybe: "#b8561a", stay: "#a33a2a" }[b.grade];
-  const li = (inner: string) => `<li style="margin:0 0 6px">${inner}</li>`;
-  const link = (href: string, text: string) => `<a href="${esc(href)}" style="color:#1F2A37">${esc(text)}</a>`;
-  const spots = b.spots.map((s) => { const id = safeId(s.locId); return li(`${id ? link(`https://ebird.org/hotspot/${id}`, s.name) : esc(s.name)} <span style="color:#5f6b63">— ${s.species} species</span>`); }).join("") || li("No recent eBird reports.");
-  const notable = b.notable.map((n) => { const id = safeId(n.subId); const nm = `${n.comName}${n.howMany ? ` ×${n.howMany}` : ""}`; return li(`${id ? link(`https://ebird.org/checklist/${id}`, nm) : esc(nm)} <span style="color:#5f6b63">— ${esc(n.locName)}${n.obsDt ? `, ${esc(n.obsDt)}` : ""}</span>`); }).join("") || li("Nothing notable in range.");
-  const html = `<!doctype html><html><body style="margin:0;background:#f6f3ec">
-<div style="max-width:560px;margin:0 auto;padding:16px;font-family:Georgia,'Times New Roman',serif;color:#1F2A37">
-<div style="background:#fffdf8;border:1px solid #e3ddd0;border-radius:14px;padding:20px">
-<div style="font:700 12px Arial,sans-serif;letter-spacing:.08em;text-transform:uppercase;color:#E8833A">Daybird · morning brief</div>
-${intro ? `<p style="font:15px Arial,sans-serif;margin:10px 0 0">${esc(intro)}</p>` : ""}
-<div style="font-size:46px;font-weight:700;line-height:1.1;margin:10px 0 2px;color:${color}">${esc(b.word)}</div>
-<div style="font-size:20px">${esc(b.headline)}</div>
-<p style="font:15px Arial,sans-serif;color:#5f6b63;margin:8px 0">${esc(whyLine)}</p>
-<p style="font:600 14px Arial,sans-serif;margin:14px 0 2px">${esc(when)}</p>
-${wxLine ? `<p style="font:14px Arial,sans-serif;margin:0 0 4px">${esc(wxLine)}</p>` : ""}
-<p style="font:14px Arial,sans-serif;margin:0 0 14px">${link(BIRDCAST, "Check last night's migration on BirdCast")}</p>
-<h3 style="font:700 16px Arial,sans-serif;margin:16px 0 6px">Where to go</h3>
-<p style="font:12px Arial,sans-serif;color:#5f6b63;margin:0 0 6px">Most species reported in the last ${BACK_DAYS} days, within ${RADIUS_KM} km.</p>
-<ol style="font:15px Arial,sans-serif;padding-left:20px;margin:0">${spots}</ol>
-<h3 style="font:700 16px Arial,sans-serif;margin:16px 0 6px">Notable nearby</h3>
-<ul style="font:15px Arial,sans-serif;padding-left:20px;margin:0">${notable}</ul>
-<p style="font:14px Arial,sans-serif;margin:18px 0 0">${link(o.site, "Open the full brief")}</p>
-${note ? `<p style="font:13px Arial,sans-serif;color:#a33a2a;margin:10px 0 0">${esc(note)}</p>` : ""}
-</div>
-<p style="font:12px Arial,sans-serif;color:#5f6b63;margin:14px 4px 0">${esc(legal)}${o.address ? `<br>${esc(o.address)}` : ""}${o.unsubPage ? `<br>Don't want briefs from friends? ${link(o.unsubPage, "Unsubscribe")}` : ""}</p>
-</div></body></html>`;
-  return { subject, html, text: T.join("\n") + "\n" };
+  const footer = [legal, o.address, o.unsubPage ? `Don't want briefs from friends? Unsubscribe: ${o.unsubPage}` : ""].filter(Boolean);
+  const text = B.text(b, { site: o.site, intro, note, footer });
+  const footerHtml = [esc(legal), o.address ? esc(o.address) : "", o.unsubPage ? `Don't want briefs from friends? <a href="${esc(o.unsubPage)}" style="color:#1F2A37">Unsubscribe</a>` : ""].filter(Boolean).join("<br>");
+  const html = B.emailHtml(b, { site: o.site, intro, note, footerHtml });
+  return { subject, html, text };
 }
+
 
 // ---------------------------------------------------------------- sending
 async function sendEmail(c: Cfg, m: { to: string; subject: string; html: string; text: string; oneClick?: string }): Promise<{ ok: true } | { ok: false; error: string }> {

@@ -1,0 +1,236 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Daybird — Friend circles</title>
+<meta name="description" content="A private circle for the people you bird with: who went out this morning, and on what call.">
+<link rel="stylesheet" href="css/style.css">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#1F2A37">
+<link rel="icon" href="icon.svg">
+<link rel="apple-touch-icon" href="icon.svg">
+<style>
+.circle-tabs{display:flex;gap:6px;flex-wrap:wrap;margin:6px 0 14px}
+.circle-tabs button{background:var(--bg);color:var(--ink);border:1px solid var(--line);font-weight:500;padding:6px 12px;border-radius:999px}
+.circle-tabs button.on{border-color:var(--accent);background:var(--accent-ink);color:var(--ink)}
+.code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:28px;letter-spacing:.18em;font-weight:700;color:var(--brand)}
+.members{display:flex;flex-wrap:wrap;gap:8px 14px;margin-top:8px}
+.members span{display:inline-flex;align-items:center;gap:6px;font-size:14px}
+.members .avatar{width:26px;height:26px;font-size:12px}
+.members img{width:26px;height:26px;border-radius:50%;object-fit:cover}
+.words{display:flex;gap:6px;flex-wrap:wrap}
+.words button{border-radius:999px;padding:6px 14px;background:var(--bg);color:var(--ink);border:1px solid var(--line);font-weight:600}
+.words button.go.on{background:var(--green-ink);color:var(--green);border-color:var(--green)}
+.words button.maybe.on{background:var(--amber-ink);color:var(--amber);border-color:var(--amber)}
+.words button.stay.on{background:var(--red-ink);color:var(--red);border-color:var(--red)}
+.days{width:100%;border-collapse:collapse;font-size:12px;table-layout:fixed}
+.days th{color:var(--muted);font-weight:600;padding:2px 0 6px;text-align:center;font-size:11px}
+.days th:first-child,.days td:first-child{text-align:left;width:88px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding-right:6px;font-weight:600}
+.days td{text-align:center;padding:3px 0;border-top:1px solid var(--line)}
+.days th.today{color:var(--accent)}
+.dot{display:inline-block;width:16px;height:16px;border-radius:50%;background:var(--line);line-height:16px;font-size:10px;font-weight:700;color:#fff}
+.dot.go{background:var(--green)}.dot.maybe{background:var(--amber)}.dot.stay{background:var(--red)}
+@media (prefers-color-scheme:dark){.dot{color:#141922}}
+@media (max-width:600px){.days th:first-child,.days td:first-child{width:64px}.days .you{display:none}.days td.me{color:var(--accent)}.dot{width:13px;height:13px;line-height:13px;font-size:9px}}
+.lines .row{align-items:flex-start}
+.lines .r{white-space:nowrap}
+.confirm{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:8px}
+.counter{font-size:12px;color:var(--muted);text-align:right}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <a class="brand" href="index.html"><img src="mark.svg" alt=""><span>Daybird<small>Friend circles</small></span></a>
+    <a class="btn ghost" href="settings.html">Settings</a>
+  </header>
+  <nav class="tabs">
+    <a href="index.html">Brief</a>
+    <a href="id.html">ID</a>
+    <a href="passes.html">Passes</a>
+    <a href="feed.html">Feed</a>
+    <a href="profile.html">Profile</a>
+    <a href="host.html">Host land</a>
+  </nav>
+
+  <h1>Who's going out this morning?</h1>
+  <p class="lead">A private circle for the people you actually bird with. No public feed, no likes, nothing to moderate. Each morning, one line: the call you went out on, where, and a word or two.</p>
+  <div id="gate"></div>
+
+  <div class="grid" id="startRow">
+    <div class="card">
+      <h3>Start a circle</h3>
+      <p class="tagline">You get a six-letter code to text your friends.</p>
+      <label for="newName">Name</label>
+      <div class="inline"><input id="newName" maxlength="60" placeholder="Tuesday dawn crew"><button id="createBtn">Create</button></div>
+      <p class="meta" id="createMsg" role="status"></p>
+    </div>
+    <div class="card">
+      <h3>Join with a code</h3>
+      <p class="tagline">Someone in the circle gives you theirs.</p>
+      <label for="joinCode">Invite code</label>
+      <div class="inline"><input id="joinCode" maxlength="8" placeholder="K7PM2X" autocapitalize="characters" autocomplete="off" spellcheck="false" style="text-transform:uppercase"><button id="joinBtn">Join</button></div>
+      <p class="meta" id="joinMsg" role="status"></p>
+    </div>
+  </div>
+
+  <div class="circle-tabs" id="circleTabs" role="tablist"></div>
+  <div id="circleView"></div>
+
+  <footer>Circles are private: only members can read a circle's names, code or mornings. Nothing here is posted to the feed. Calls come from the Daybird brief (eBird and Open-Meteo data).</footer>
+</div>
+
+<script src="data/mock.js"></script>
+<script src="data/passes.js"></script>
+<script src="data/feed.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="js/config.js"></script>
+<script src="js/cloud.js"></script>
+<script src="data/traits.js"></script>
+<script src="js/brief.js"></script>
+<script src="js/app.js"></script>
+<script src="js/footer.js"></script>
+<script src="js/notice.js"></script>
+<script>
+(async () => {
+  await DB.ready;
+  const $ = (id) => document.getElementById(id);
+  const esc = DB.esc;
+  const WORDS = { GO: 'go', MAYBE: 'maybe', STAY: 'stay' };
+  const SHOW = { GO: 'GO', MAYBE: 'MAYBE', STAY: 'STAY IN' };
+  const localDate = (d = new Date()) => new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 10);
+  const today = localDate();
+  const DAYS = Array.from({ length: 14 }, (_, i) => localDate(new Date(Date.now() - (13 - i) * 864e5)));
+
+  let circles = [], current = null, word = null, brief = null;
+
+  // ---- sign-in gate: circles live online only, so the people in them can see each other
+  function gate() {
+    const on = DB.online();
+    const msg = !CLOUD.ready ? 'Offline mode: circles need the online connection, because the point is that your friends see them.'
+      : !on ? 'Sign in (top right) to start or join a circle. Circles live online so the people in them can see each other.' : '';
+    $('gate').innerHTML = msg ? `<div class="banner">${esc(msg)}</div>` : '';
+    ['newName', 'createBtn', 'joinCode', 'joinBtn'].forEach(id => $(id).disabled = !on);
+    return on;
+  }
+
+  async function load() {
+    if (!gate()) { circles = []; current = null; renderTabs(); $('circleView').innerHTML = ''; return; }
+    try { circles = await CLOUD.circles.list(); } catch (e) { $('gate').innerHTML = `<div class="banner">Could not load circles: ${esc(e.message)}. Has migration 9 been run?</div>`; circles = []; }
+    if (!circles.find(c => c.id === current)) current = circles[0]?.id || null;
+    renderTabs();
+    await renderCircle();
+  }
+
+  function renderTabs() {
+    $('circleTabs').innerHTML = circles.map(c => `<button role="tab" aria-selected="${c.id === current}" class="${c.id === current ? 'on' : ''}" data-tab="${esc(c.id)}">${esc(c.name)}</button>`).join('');
+  }
+
+  async function renderCircle() {
+    const c = circles.find(x => x.id === current);
+    const view = $('circleView');
+    if (!c) { view.innerHTML = DB.online() ? '<p class="meta">No circles yet. Start one, or join a friend\'s with their code.</p>' : ''; return; }
+    let members = [], mornings = [];
+    try { [members, mornings] = await Promise.all([CLOUD.circles.members(c.id), CLOUD.circles.mornings(c.id, DAYS[0])]); }
+    catch (e) { view.innerHTML = `<div class="banner">Could not load this circle: ${esc(e.message)}</div>`; return; }
+    const me = CLOUD.user()?.id;
+    const byUserDate = {};
+    mornings.forEach(m => { byUserDate[m.userId + '|' + m.date] = m; });
+    const nameOf = Object.fromEntries(members.map(m => [m.userId, m.name]));
+    const mineToday = byUserDate[me + '|' + today];
+    if (!word) word = mineToday?.word || (brief ? toWord(brief.call.word) : null);
+    const spots = (brief?.spots || []).map(s => s.name).filter(Boolean);
+    const dayHead = DAYS.map(d => { const dt = new Date(d + 'T12:00:00'); return `<th class="${d === today ? 'today' : ''}" title="${d}">${'SMTWTFS'[dt.getDay()]}</th>`; }).join('');
+    const rows = members.map(m => `<tr><td class="${m.me ? 'me' : ''}" title="${esc(m.name)}${m.me ? ' (you)' : ''}">${esc(m.name)}${m.me ? ' <span class="meta you">(you)</span>' : ''}</td>${DAYS.map(d => {
+      const x = byUserDate[m.userId + '|' + d];
+      return `<td>${x ? `<span class="dot ${WORDS[x.word]}" data-cell="${esc(m.userId)}|${d}" title="${esc(m.name)} · ${d} · ${SHOW[x.word]}${x.spot ? ' · ' + esc(x.spot) : ''}${x.note ? ' · ' + esc(x.note) : ''}" aria-label="${SHOW[x.word]}">${x.word[0]}</span>` : '<span class="dot" aria-hidden="true"></span>'}</td>`;
+    }).join('')}</tr>`).join('');
+    const lines = [...mornings].sort((a, b) => b.date.localeCompare(a.date) || b.at.localeCompare(a.at)).slice(0, 20);
+    view.innerHTML = `
+      <div class="card">
+        <div class="pass-head">
+          <div><h2 style="margin:0">${esc(c.name)}</h2><div class="tagline">${members.length} member${members.length === 1 ? '' : 's'}${c.mine ? ' · you started it' : ''}</div></div>
+          <div style="text-align:right"><div class="meta">Invite code</div><div class="code" id="inviteCode">${esc(c.code)}</div><button class="ghost small" id="copyCode" type="button">Copy code</button></div>
+        </div>
+        <div class="members" id="members">${members.map(m => `<span>${m.avatar ? `<img src="${esc(m.avatar)}" alt="">` : `<span class="avatar">${esc((m.name || 'B')[0])}</span>`}${esc(m.name)}</span>`).join('')}</div>
+        <p class="meta" style="margin-top:10px">Share the code by text. Anyone with it can join and see the names and mornings here; there is no approval step, so keep it among friends.</p>
+      </div>
+
+      <div class="card">
+        <h3>Post this morning</h3>
+        <p class="tagline">${brief ? `Today's brief says <b>${esc(brief.call.word)}</b>. Tap a different word if you went anyway, or stayed in.` : 'Pick the call you went out on.'}</p>
+        <div class="words" id="words">${Object.keys(WORDS).map(w => `<button type="button" class="${WORDS[w]} ${word === w ? 'on' : ''}" data-word="${w}" aria-pressed="${word === w}">${SHOW[w]}</button>`).join('')}</div>
+        <label for="spot">Where (optional)</label>
+        <input id="spot" list="spotList" maxlength="80" placeholder="Mink Brook" value="${esc(mineToday?.spot || '')}">
+        <datalist id="spotList">${spots.map(s => `<option value="${esc(s)}">`).join('')}</datalist>
+        <label for="note">A line for the others (optional)</label>
+        <input id="note" maxlength="140" placeholder="Two wood ducks on the pond, back by 8." value="${esc(mineToday?.note || '')}">
+        <div class="counter"><span id="noteCount">${(mineToday?.note || '').length}</span>/140</div>
+        <div class="inline" style="margin-top:8px"><button id="postBtn" type="button">${mineToday ? 'Update this morning' : 'Post this morning'}</button><span class="meta" id="postMsg" role="status"></span></div>
+        <p class="meta" id="storeNotice"></p>
+      </div>
+
+      <div class="card">
+        <h3>Last 14 days</h3>
+        <p class="tagline">Who went out, on what call. Hover or tap a dot for the line.</p>
+        <table class="days" id="grid" aria-label="Mornings in the last 14 days"><thead><tr><th></th>${dayHead}</tr></thead><tbody>${rows}</tbody></table>
+        <div class="lines" id="lines" style="margin-top:12px">${lines.map(l => `<div class="row"><span><b>${esc(nameOf[l.userId] || 'Birder')}</b> <span class="pill ${WORDS[l.word]}">${SHOW[l.word]}</span>${l.spot ? ' · ' + esc(l.spot) : ''}${l.note ? `<div class="meta">${esc(l.note)}</div>` : ''}</span><span class="r">${l.date === today ? 'today' : l.date.slice(5)}</span></div>`).join('') || '<p class="meta">Nothing posted yet. Be the first.</p>'}</div>
+      </div>
+
+      <div class="card">
+        <h3>${c.mine ? 'Delete this circle' : 'Leave this circle'}</h3>
+        <p class="meta">${c.mine ? 'You started it, so leaving deletes it for everyone in it, mornings included.' : 'Your mornings in this circle go with you. You can rejoin later with the code.'}</p>
+        <button class="ghost" id="leaveBtn" type="button">${c.mine ? 'Delete circle' : 'Leave circle'}</button>
+        <div class="confirm hidden" id="leaveConfirm"><span class="meta">${c.mine ? 'Delete' : 'Leave'} ${esc(c.name)}?</span><button class="small" id="leaveYes" type="button">Yes, ${c.mine ? 'delete it' : 'leave'}</button><button class="small ghost" id="leaveNo" type="button">Keep it</button></div>
+        <p class="meta" id="leaveMsg" role="status"></p>
+      </div>`;
+    DAYBIRD_NOTICE.attach($('storeNotice'), 'circle');
+
+    $('copyCode').onclick = async () => { try { await navigator.clipboard.writeText(c.code); $('copyCode').textContent = 'Copied'; } catch { $('copyCode').textContent = c.code; } };
+    $('words').onclick = (e) => { const w = e.target.dataset?.word; if (!w) return; word = w; [...$('words').children].forEach(b => { b.classList.toggle('on', b.dataset.word === w); b.setAttribute('aria-pressed', b.dataset.word === w); }); };
+    $('note').oninput = () => { $('noteCount').textContent = $('note').value.length; };
+    $('postBtn').onclick = async () => {
+      if (!word) return $('postMsg').textContent = 'Pick GO, MAYBE or STAY IN first.';
+      $('postBtn').disabled = true; $('postMsg').textContent = 'Posting…';
+      try { await CLOUD.circles.post(c.id, { date: today, word, spot: $('spot').value.trim(), note: $('note').value.trim() }); await renderCircle(); }
+      catch (e) { $('postMsg').textContent = 'Could not post: ' + e.message; $('postBtn').disabled = false; }
+    };
+    $('leaveBtn').onclick = () => { $('leaveConfirm').classList.remove('hidden'); $('leaveBtn').classList.add('hidden'); };
+    $('leaveNo').onclick = () => { $('leaveConfirm').classList.add('hidden'); $('leaveBtn').classList.remove('hidden'); };
+    $('leaveYes').onclick = async () => {
+      $('leaveYes').disabled = true;
+      try { await CLOUD.circles.leave(c.id, c.mine); current = null; word = null; await load(); }
+      catch (e) { $('leaveMsg').textContent = 'Could not leave: ' + e.message; $('leaveYes').disabled = false; }
+    };
+  }
+
+  const toWord = (w) => String(w || '').toUpperCase().startsWith('STAY') ? 'STAY' : (WORDS[String(w).toUpperCase()] ? String(w).toUpperCase() : null);
+
+  $('circleTabs').onclick = async (e) => { const id = e.target.dataset?.tab; if (!id || id === current) return; current = id; word = null; renderTabs(); await renderCircle(); };
+  $('createBtn').onclick = async () => {
+    const name = $('newName').value.trim();
+    if (!name) return $('createMsg').textContent = 'Give the circle a name.';
+    $('createBtn').disabled = true; $('createMsg').textContent = 'Creating…';
+    try { const c = await CLOUD.circles.create(name); $('newName').value = ''; $('createMsg').textContent = `Made "${c.name}". Its code is ${c.code}.`; current = c.id; word = null; await load(); }
+    catch (e) { $('createMsg').textContent = 'Could not create: ' + e.message; }
+    $('createBtn').disabled = !DB.online();
+  };
+  $('joinBtn').onclick = async () => {
+    const code = $('joinCode').value.replace(/[^a-z0-9]/gi, '').toUpperCase();
+    if (code.length < 6) return $('joinMsg').textContent = 'Codes are six letters and numbers.';
+    $('joinBtn').disabled = true; $('joinMsg').textContent = 'Joining…';
+    try { const c = await CLOUD.circles.join(code); $('joinCode').value = ''; $('joinMsg').textContent = `You're in "${c.name}".`; current = c.id; word = null; await load(); }
+    catch (e) { $('joinMsg').textContent = e.message; }
+    $('joinBtn').disabled = !DB.online();
+  };
+  ['newName', 'joinCode'].forEach((id, i) => $(id).addEventListener('keydown', e => { if (e.key === 'Enter') $(['createBtn', 'joinBtn'][i]).click(); }));
+
+  // Today's call, for the "Post this morning" default. The brief is best-effort here; the page works without it.
+  try { brief = await DB.loadBrief(); } catch { brief = null; }
+  await load();
+  document.addEventListener('daybird:refresh', load);
+})();
+</script>
+</body>
+</html>

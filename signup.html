@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Daybird — Get the morning brief by email</title>
+<link rel="stylesheet" href="css/style.css">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#1F2A37">
+<link rel="icon" href="icon.svg">
+<link rel="apple-touch-icon" href="icon.svg">
+<style>
+.check{display:flex;gap:10px;align-items:flex-start;margin:12px 0;font-size:14px}
+.check input{width:auto;margin-top:4px;flex:none}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+@media (max-width:600px){.two{grid-template-columns:1fr}}
+.sample{font-family:var(--serif);font-size:17px;border-left:3px solid var(--accent);padding:4px 0 4px 14px;margin:8px 0 0;color:var(--ink)}
+#authbox{display:none !important}  /* subscribing needs no account; a sign-in box beside the signup form would only confuse */
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <a class="brand" href="index.html"><img src="mark.svg" alt=""><span>Daybird<small>Morning brief by email</small></span></a>
+    <a class="btn ghost" href="settings.html">Settings</a>
+  </header>
+  <nav class="tabs">
+    <a href="index.html">Brief</a>
+    <a href="id.html">ID</a>
+    <a href="passes.html">Passes</a>
+    <a href="feed.html">Feed</a>
+    <a href="profile.html">Profile</a>
+    <a href="host.html">Host land</a>
+  </nav>
+
+  <h1>Know by sunrise whether to go.</h1>
+  <p class="lead">One short email early each morning (about 5:40 AM Eastern): GO, MAYBE or STAY IN for your place, why, what to wear, and what to look for. Free, and you can stop any time.</p>
+  <p class="sample">Calm and dry at sunrise, 41°. Warblers are moving on last night's north wind. Worth getting out.</p>
+
+  <form class="card" id="form" novalidate>
+    <h3>Sign up</h3>
+    <label for="email">Your email</label>
+    <input id="email" type="email" placeholder="you@email.com" autocomplete="email" required>
+
+    <label for="placeQ">Where you bird</label>
+    <div class="inline">
+      <input id="placeQ" placeholder="Town, e.g. Hanover, NH" autocomplete="off">
+      <button class="ghost small" id="placeFind" type="button">Find</button>
+      <button class="ghost small" id="placeGeo" type="button">Use my location</button>
+    </div>
+    <div class="picks" id="placePicks"></div>
+    <p class="meta">Brief covers: <b id="placeNow"></b></p>
+    <p class="meta" id="placeMsg" role="status" aria-live="polite"></p>
+
+    <div class="two">
+      <div><label for="mode">Where you'll usually be</label><select id="mode"></select></div>
+      <div><label for="level">How long you've birded</label><select id="level"></select></div>
+    </div>
+
+    <label class="check"><input type="checkbox" id="goOnly"><span>Only email me on GO mornings</span></label>
+    <label class="check"><input type="checkbox" id="consent"><span>Send me the Daybird morning brief. I can unsubscribe from any email.</span></label>
+    <p class="tagline">What we store: your email, the place you pick (rounded to about a kilometre), and the three choices above. Nothing else. Opens and link clicks in the email are counted so we know how many people read it; no IP address or device details are kept.</p>
+
+    <button id="go" type="submit">Email me a confirm link</button>
+    <p class="meta" id="msg" role="status" aria-live="polite"></p>
+  </form>
+
+  <div class="card hidden" id="done">
+    <h3>Check your email</h3>
+    <p>We sent a confirm link to <b id="doneEmail"></b>. Tap it and the first brief arrives tomorrow morning. If it isn't there in a few minutes, check the spam folder.</p>
+    <p class="meta">Already on the list? The email you just got has a link to change your place or unsubscribe.</p>
+  </div>
+
+  <footer>Sightings via eBird (Cornell Lab of Ornithology). Weather via Open-Meteo. Daybird is a guide, not safety advice. <a href="about.html">About Daybird</a>.</footer>
+</div>
+
+<script src="data/mock.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="js/config.js"></script>
+<script src="js/cloud.js"></script>
+<script src="data/traits.js"></script>
+<script src="js/brief.js"></script>
+<script src="js/app.js"></script>
+<script src="js/footer.js"></script>
+<script src="js/subscribe.js"></script>
+<script>
+(() => {
+  const $ = (id) => document.getElementById(id);
+  const st = DB.settings();
+  $('mode').innerHTML = SUB.modeOptions(st.mode); $('level').innerHTML = SUB.levelOptions(st.level);
+  const picker = SUB.picker({ q: 'placeQ', find: 'placeFind', geo: 'placeGeo', picks: 'placePicks', now: 'placeNow', msg: 'placeMsg' }, DB.briefPlace());
+  const say = (t, bad) => { $('msg').textContent = t; $('msg').style.color = bad ? 'var(--red)' : ''; };
+
+  $('form').onsubmit = async (e) => {
+    e.preventDefault();
+    const email = $('email').value.trim(), place = picker.get();
+    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)) return say('Enter your email address first.', true);
+    if (!place) return say('Pick the place you bird first.', true);
+    if (!$('consent').checked) return say('Tick the box to agree to the emails.', true);
+    $('go').disabled = true; say('Sending…');
+    try {
+      await SUB.call('subscribe', { email, lat: place.lat, lng: place.lng, place: place.label, mode: $('mode').value, level: $('level').value, go_only: $('goOnly').checked, consent: true });
+      $('doneEmail').textContent = email;
+      $('form').classList.add('hidden'); $('done').classList.remove('hidden');
+    } catch (err) { say(err.message, true); $('go').disabled = false; }
+  };
+})();
+</script>
+</body>
+</html>

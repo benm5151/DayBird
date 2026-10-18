@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200" viewBox="0 0 200 200" role="img" aria-label="Daybird mascot, alert: a tufted titmouse perched upright on a branch, crest up, looking right">
+  <path fill="#1F2A37" fill-rule="evenodd" d="M 176 74 L 163 64 C 162 49 152 36 138 30 C 130 26 122 18 114 6 C 116 22 112 32 106 40 C 79 45 60 69 55 101 C 52 119 44 142 23 170 L 35 176 C 49 162 63 153 77 149 C 93 161 125 156 142 137 C 157 122 163 103 164 86 Z M 146 61 a 5 5 0 1 0 10 0 a 5 5 0 1 0 -10 0 Z M 123 88 C 96 87 72 106 56 131 C 76 115 98 99 123 88 Z"/>
+  <path d="M110 155 L112 178 M97 153 L93 178" fill="none" stroke="#1F2A37" stroke-width="4" stroke-linecap="round"/>
+  <path d="M186 181 C139 176 77 176 30 181" fill="none" stroke="#E8833A" stroke-width="7" stroke-linecap="round"/>
+</svg>

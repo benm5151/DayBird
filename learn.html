@@ -1,0 +1,380 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Daybird — Learn the birds</title>
+<link rel="stylesheet" href="css/style.css">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#1F2A37">
+<link rel="icon" href="icon.svg">
+<link rel="apple-touch-icon" href="icon.svg">
+<style>
+.anchors{display:flex;gap:6px;flex-wrap:wrap;margin:4px 0 18px}
+.anchors a{text-decoration:none;font-size:13px;font-weight:600;color:var(--muted);background:var(--card);border:1px solid var(--line);border-radius:999px;padding:5px 12px}
+.anchors a:hover{color:var(--ink);border-color:var(--accent)}
+section{scroll-margin-top:12px}
+.bar{height:8px;background:var(--bg);border:1px solid var(--line);border-radius:999px;overflow:hidden;margin:8px 0 4px}
+.bar i{display:block;height:100%;background:var(--green);border-radius:999px;transition:width .2s}
+.count{font-family:var(--serif);font-size:22px;font-weight:700}
+.learn-card h3{font-family:var(--serif);font-size:18px}
+.learn-card .pill,#bingoScore{white-space:nowrap}
+.learn-card .hint{margin:2px 0 6px}
+.check{background:transparent;color:var(--brand);border:1px solid var(--line);font-weight:500}
+.check.on{background:var(--green-ink);color:var(--green);border-color:var(--green)}
+@media (prefers-color-scheme:dark){.check{color:var(--ink)}}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0}
+.chips .chip{margin:0;background:var(--bg)}
+.chips .chip small{color:var(--muted);margin-left:4px}
+.chips button.chip{cursor:pointer;font:inherit;font-size:13px;padding:4px 10px;color:var(--ink);border-radius:999px}
+.chips button.chip.on{background:var(--green-ink);color:var(--green);border-color:var(--green)}
+.bingo{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin:12px auto;max-width:640px}
+.sq{aspect-ratio:1;display:flex;align-items:center;justify-content:center;text-align:center;padding:4px;font-size:13px;line-height:1.2;font-weight:500;background:var(--bg);color:var(--ink);border:1px solid var(--line);border-radius:10px;cursor:pointer;font-family:var(--sans);overflow:hidden;word-break:break-word;hyphens:auto}
+.sq.on{background:var(--green);color:#fff;border-color:var(--green)}
+.sq.near{border-style:solid;border-color:color-mix(in srgb,var(--accent) 55%,var(--line))}
+@media (max-width:600px){.sq{font-size:10px;padding:2px;border-radius:7px}.bingo{gap:4px}}
+.bigday{display:flex;gap:16px;align-items:center;flex-wrap:wrap}
+.bigday .num{font-family:var(--serif);font-size:56px;line-height:1;font-weight:700;color:var(--green)}
+.celebrate{background:var(--green-ink);border-color:color-mix(in srgb,var(--green) 40%,transparent)}
+.celebrate h3{color:var(--green)}
+.q{border-top:1px solid var(--line);padding:12px 0}
+.q:first-of-type{border-top:0}
+.q .inline button.right{background:var(--green-ink);color:var(--green);border-color:var(--green)}
+.q .inline button.wrong{background:var(--red-ink);color:var(--red);border-color:var(--red)}
+.step{display:flex;gap:12px;align-items:flex-start;padding:12px 0;border-top:1px solid var(--line)}
+.step:first-of-type{border-top:0}
+.step .n{flex:none;width:28px;height:28px;border-radius:50%;background:var(--brand-ink);color:var(--brand);display:grid;place-items:center;font-weight:700;font-size:13px}
+.step.done .n{background:var(--green);color:#fff}
+.step.done h4{text-decoration:line-through;text-decoration-color:var(--green);text-decoration-thickness:2px}
+.step h4{margin:2px 0 4px;font-size:15px}
+.step .body{flex:1}
+.step .do{flex:none}
+details.track summary{cursor:pointer;font-family:var(--serif);font-size:18px;font-weight:700;display:flex;justify-content:space-between;align-items:center;gap:10px}
+details.track summary .meta{font-family:var(--sans);font-weight:500}
+.src{font-size:12px;color:var(--muted)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <a class="brand" href="index.html"><img src="mark.svg" alt=""><span>Daybird<small>Learn</small></span></a>
+    <a class="btn ghost" href="settings.html">Settings</a>
+  </header>
+  <nav class="tabs">
+    <a href="index.html">Brief</a>
+    <a href="id.html">ID</a>
+    <a href="passes.html">Passes</a>
+    <a href="feed.html">Feed</a>
+    <a href="profile.html">Profile</a>
+    <a href="host.html">Host land</a>
+  </nav>
+
+  <h1>Learn the birds</h1>
+  <p class="lead">Ten birds to start with, what is moving this week, a bingo card for the month, and a path for your first six months. Everything here is built from the species being reported near you, so it changes as the season does.</p>
+  <p class="src" id="source"></p>
+  <div class="anchors">
+    <a href="#today">Today</a><a href="#first10">First 10</a><a href="#week">This week</a><a href="#bingo">Bingo</a><a href="#challenges">Challenges</a><a href="#quiz">Quick quiz</a><a href="#path">Your path</a><a href="#tracks">Tracks</a>
+  </div>
+
+  <section id="today">
+    <div class="grid">
+      <div class="card learn-card" id="bird"></div>
+      <div class="card" id="streak"></div>
+    </div>
+  </section>
+
+  <section id="first10">
+    <h2>Your first 10 birds</h2>
+    <p class="lead" style="font-size:15px">The ten easiest birds to learn from what is around right now: common, out in the open, with one thing to remember about each. Check them off as you hear or see them.</p>
+    <div class="card">
+      <div class="pass-head"><div><span class="count" id="f10count">0 of 10</span> <span class="meta">learned</span></div><span class="meta" id="f10note"></span></div>
+      <div class="bar"><i id="f10bar" style="width:0%"></i></div>
+    </div>
+    <div class="grid" id="f10cards"></div>
+  </section>
+
+  <section id="week">
+    <h2>What to look for this week</h2>
+    <p class="lead" style="font-size:15px" id="weekLead"></p>
+    <div id="weekGroups"></div>
+  </section>
+
+  <section id="bingo">
+    <h2>Seasonal bingo</h2>
+    <p class="lead" style="font-size:15px">Twenty-five birds that are likely this month. Tap a square when you see or hear one. Friends in the same town get the same card, so compare notes. It resets on the first of the month.</p>
+    <div class="card">
+      <div class="pass-head"><div><b id="bingoTitle"></b><div class="meta" id="bingoMeta"></div></div><div class="meta" id="bingoScore"></div></div>
+      <div class="bingo" id="bingoGrid"></div>
+      <div class="inline"><button class="ghost" id="bingoShare" type="button">Share card</button><span class="meta">Squares with an orange edge were reported nearby this week.</span></div>
+      <p class="meta" id="bingoLast"></p>
+    </div>
+  </section>
+
+  <section id="challenges">
+    <h2>Learn five</h2>
+    <p class="lead" style="font-size:15px">Pick one group and learn five of them. Small, finishable, and it changes how a whole kind of bird looks to you.</p>
+    <div class="grid" id="chCards"></div>
+  </section>
+
+  <section id="quiz">
+    <h2>Quick quiz</h2>
+    <p class="lead" style="font-size:15px">Five field marks, five birds. The same kind of question the Brief asks on a STAY IN morning.</p>
+    <div class="card" id="quizCard"></div>
+  </section>
+
+  <section id="path">
+    <h2>Your first six months, in order</h2>
+    <div class="card" id="pathCard"></div>
+  </section>
+
+  <section id="tracks">
+    <h2>Specialty tracks</h2>
+    <p class="lead" style="font-size:15px">One group at a time, six steps each, in the order that makes the next step easier. Pick the one that matches the season.</p>
+    <div id="trackCards"></div>
+  </section>
+
+  <footer>Species lists via eBird (Cornell Lab of Ornithology); sample data when no brief is available. Song links open xeno-canto.org; photo links open All About Birds. Nothing here is safety advice; check the weather and footing yourself. <a href="about.html">About Daybird</a>.</footer>
+</div>
+
+<script src="data/mock.js"></script>
+<script src="data/passes.js"></script>
+<script src="data/feed.js"></script>
+<script src="data/challenges.js"></script>
+<script src="data/tracks.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="js/config.js"></script>
+<script src="js/cloud.js"></script>
+<script src="data/traits.js"></script>
+<script src="js/brief.js"></script>
+<script src="js/app.js"></script>
+<script src="js/footer.js"></script>
+<script src="js/learn.js"></script>
+<script>
+(async () => {
+  await DB.ready;
+  const $ = (id) => document.getElementById(id);
+  const L = DAYBIRD_LEARN, T = DAYBIRD_TRAITS, esc = DB.esc;
+  const s = DB.settings();
+  const now = new Date();
+  const today = new Date(now.getTime() - now.getTimezoneOffset() * 60000).toISOString().slice(0, 10);
+  const month = today.slice(0, 7);
+  const monthName = (yyyymm) => new Intl.DateTimeFormat('en-US', { timeZone: 'UTC', month: 'long', year: 'numeric' }).format(new Date(`${yyyymm}-15T12:00:00Z`));
+  const shortDate = (d) => new Intl.DateTimeFormat('en-US', { timeZone: 'UTC', month: 'short', day: 'numeric' }).format(new Date(`${d}T12:00:00Z`));
+  let prog = await DB.loadLearned();
+  const save = () => { prog = DB.saveLearned(prog); };
+
+  // ---- what is around: this morning's brief, else the sample list
+  let recent = [], grade = null, source = 'sample';
+  try {
+    const r = await fetch('data/brief.json', { cache: 'no-store' });
+    if (r.ok) { const j = await r.json(); recent = L.names((j.recent && j.recent.length) ? j.recent : (j.lookFor || []).flatMap((g) => g.species || [])); grade = j.grade || null; if (recent.length) source = 'daily'; }
+  } catch {}
+  if (!recent.length) recent = L.names(DAYBIRD_MOCK.sightings.recent);
+  $('source').textContent = source === 'daily'
+    ? `Built from ${recent.length} species reported near ${s.placeLabel || 'you'} in the last few days (eBird).`
+    : `Built from a sample species list. The morning brief fills this in once it has eBird data; see Settings.`;
+  if (grade === 'stay') { DB.markPaused(today); prog = DB.learned(); }
+
+  // ---- bird of the day
+  const bird = L.birdOfDay(recent, T, today);
+  $('bird').innerHTML = bird ? `
+    <span class="pill info">Bird of the day</span>
+    <h3 style="margin-top:8px">${esc(bird.name)}</h3>
+    <p class="hint">${esc(bird.hint)}</p>
+    <p class="meta">${esc(bird.sizeWord)}${bird.group ? ` · ${esc(bird.group)}` : ''}${bird.where ? ` · look ${esc(bird.where)}` : ''}${bird.nearby ? ' · reported nearby' : ''}</p>
+    <div class="inline"><a class="btn ghost" href="${esc(bird.song)}" target="_blank" rel="noopener">Hear its song</a><a class="btn ghost" href="${esc(bird.photos)}" target="_blank" rel="noopener">See photos</a></div>
+    <p class="tagline">Opens xeno-canto.org (community recordings) and All About Birds (Cornell Lab).</p>` : '<p class="meta">No species to pick from yet.</p>';
+
+  // ---- streak
+  function renderStreak() {
+    const st = DB.streak(prog);
+    const n = st.current;
+    const line = st.today === 'out' ? 'Marked for this morning.'
+      : st.today === 'paused' ? 'Streak paused for the weather. A STAY IN morning never counts against you.'
+      : n > 0 ? 'Out this morning? Tap and keep it going.' : 'Any morning outside counts, even ten minutes on the porch.';
+    $('streak').innerHTML = `
+      <span class="pill ${st.today === 'paused' ? 'stay' : 'go'}">Mornings outside</span>
+      <div class="bigday" style="margin-top:8px"><div class="num" id="streakNum">${n}</div><div><b>${n === 1 ? 'morning in a row' : 'mornings in a row'}</b><div class="meta">Best: <span id="streakBest">${st.best}</span> · ${st.total} ${st.total === 1 ? 'morning' : 'mornings'} total</div></div></div>
+      <p class="meta" id="streakLine">${esc(line)}</p>
+      <button id="outBtn" type="button" ${st.today === 'out' ? 'disabled' : ''}>${st.today === 'out' ? 'Went out this morning' : 'I went out this morning'}</button>`;
+    $('outBtn').onclick = () => { DB.markOutside(today); prog = DB.learned(); renderStreak(); };
+  }
+  renderStreak();
+  // The live call (weather) records today's word in the Brief history; a STAY IN there pauses the streak too.
+  DB.loadBrief().then(() => { prog = DB.learned(); renderStreak(); }).catch(() => {});
+
+  // ---- first ten
+  const ten = L.firstTen(recent, T);
+  function renderFirst10() {
+    const f = prog.first10;
+    const got = ten.filter((b) => f[b.name] && (f[b.name].heard || f[b.name].saw)).length;
+    $('f10count').textContent = `${got} of ${ten.length}`;
+    $('f10bar').style.width = `${Math.round(100 * got / ten.length)}%`;
+    $('f10note').textContent = got === ten.length ? 'All ten. Time for a track below.' : got >= 5 ? 'Halfway. The rest come faster.' : '';
+    $('f10cards').innerHTML = ten.map((b) => {
+      const p = f[b.name] || {};
+      return `<div class="card learn-card">
+        <div class="pass-head"><h3>${esc(b.name)}</h3><span class="pill info">${esc(b.sizeWord)}</span></div>
+        <p class="hint">${esc(b.hint)}</p>
+        <p class="meta">Look ${esc(b.where)}.${b.nearby ? ' Reported nearby this week.' : ''}</p>
+        <div class="inline">
+          <button type="button" class="check small ${p.heard ? 'on' : ''}" data-sp="${esc(b.name)}" data-k="heard">${p.heard ? 'Heard it' : 'Heard it?'}</button>
+          <button type="button" class="check small ${p.saw ? 'on' : ''}" data-sp="${esc(b.name)}" data-k="saw">${p.saw ? 'Saw it' : 'Saw it?'}</button>
+          <a class="meta" href="${esc(L.allAboutBirdsUrl(b.name))}" target="_blank" rel="noopener">photos</a>
+        </div></div>`;
+    }).join('');
+  }
+  renderFirst10();
+  $('f10cards').addEventListener('click', (e) => {
+    const b = e.target.closest('button[data-sp]'); if (!b) return;
+    const p = prog.first10[b.dataset.sp] = prog.first10[b.dataset.sp] || {};
+    p[b.dataset.k] = !p[b.dataset.k]; save(); renderFirst10();
+  });
+
+  // ---- this week
+  const wk = L.weekGroups(recent, T, s.level);
+  $('weekLead').textContent = `Week of ${shortDate(L.weekOf(today))}. The kinds of birds showing up most in nearby reports, with a tip for each${s.level === 'new' ? '' : ' at your level'}.`;
+  $('weekGroups').innerHTML = wk.length ? wk.map((g) => `<div class="card">
+      <div class="pass-head"><h3 style="text-transform:capitalize">${esc(g.key)}</h3><span class="pill go">${g.count} ${g.count === 1 ? 'kind' : 'kinds'} reported</span></div>
+      ${g.tip ? `<p>${esc(g.tip)}</p>` : ''}
+      <div class="chips">${g.members.map((m) => `<span class="chip">${esc(m.name)}${m.hint ? `<small>${esc(m.hint)}</small>` : ''}</span>`).join('')}</div>
+    </div>`).join('') : '<div class="card"><p class="meta">No groups yet. The morning brief fills this in.</p></div>';
+
+  // ---- bingo
+  const card = L.bingoCard(recent, T, month, s.lat, s.lng);
+  const cards = prog.bingo.cards;
+  // retire last month's card into history (once), keep this month's
+  for (const k of Object.keys(cards)) {
+    if (k.slice(0, 7) < month) {
+      const old = cards[k]; const lines = L.bingoLines((old.squares || []).map((n) => ({ name: n })), old.marked || []);
+      if (!prog.bingo.history.some((h) => h.key === k)) prog.bingo.history.push({ key: k, month: k.slice(0, 7), marked: (old.marked || []).length, total: (old.squares || []).length || 25, lines: lines.length });
+      delete cards[k]; save();
+    }
+  }
+  // always read through prog: DB.markOutside() and friends hand back a fresh object
+  const mine = () => { const c = prog.bingo.cards; const m = c[card.key] = c[card.key] || { squares: card.squares.map((q) => q.name), marked: [] }; return m; };
+  if (mine().squares.join('|') !== card.squares.map((q) => q.name).join('|')) { mine().squares = card.squares.map((q) => q.name); save(); }
+  $('bingoTitle').textContent = `${monthName(month)} · ${s.placeLabel || card.place}`;
+  $('bingoMeta').textContent = `A ${card.season} card. Same card for everyone within about a kilometer, all month.`;
+  function renderBingo() {
+    const m = new Set(mine().marked); const lines = L.bingoLines(card.squares, mine().marked);
+    $('bingoGrid').innerHTML = card.squares.map((q) => `<button type="button" class="sq ${m.has(q.name) ? 'on' : ''} ${q.nearby ? 'near' : ''}" data-sq="${esc(q.name)}" title="${esc(q.hint || '')}" aria-pressed="${m.has(q.name)}">${esc(q.name)}</button>`).join('');
+    $('bingoScore').innerHTML = `<b>${m.size} of ${card.squares.length}</b>${lines.length ? ` · ${lines.length === 1 ? 'one line' : lines.length + ' lines'}` : ''}${m.size === card.squares.length ? ' · full card' : ''}`;
+    const last = prog.bingo.history.slice().sort((a, b) => b.month.localeCompare(a.month))[0];
+    $('bingoLast').textContent = last ? `Last card (${monthName(last.month)}): ${last.marked} of ${last.total} squares${last.lines ? `, ${last.lines === 1 ? 'one line' : last.lines + ' lines'}` : ''}.` : '';
+  }
+  renderBingo();
+  $('bingoGrid').addEventListener('click', (e) => {
+    const b = e.target.closest('button[data-sq]'); if (!b) return;
+    const mk = mine().marked; const i = mk.indexOf(b.dataset.sq); if (i >= 0) mk.splice(i, 1); else mk.push(b.dataset.sq);
+    save(); renderBingo();
+  });
+  // PNG of the grid, drawn on a canvas; shares where the browser can, downloads elsewhere
+  $('bingoShare').onclick = () => {
+    const n = 5, cell = 150, pad = 28, head = 96, foot = 44;
+    const c = document.createElement('canvas'); c.width = pad * 2 + n * cell; c.height = head + n * cell + foot;
+    const x = c.getContext('2d'); const m = new Set(mine().marked);
+    x.fillStyle = '#f6f3ec'; x.fillRect(0, 0, c.width, c.height);
+    x.fillStyle = '#E8833A'; x.font = 'bold 13px Arial'; x.fillText('DAYBIRD · SEASONAL BINGO', pad, 34);
+    x.fillStyle = '#1F2A37'; x.font = 'bold 28px Georgia'; x.fillText(`${monthName(month)} · ${s.placeLabel || card.place}`, pad, 68);
+    x.font = '14px Arial'; x.fillStyle = '#5f6b63'; x.fillText(`${m.size} of ${card.squares.length} · ${card.season} card`, pad, 88);
+    const wrap = (t, w) => { const words = t.split(' '), lines = []; let cur = ''; for (const wd of words) { const tryLine = cur ? `${cur} ${wd}` : wd; if (x.measureText(tryLine).width > w && cur) { lines.push(cur); cur = wd; } else cur = tryLine; } if (cur) lines.push(cur); return lines; };
+    card.squares.forEach((q, i) => {
+      const r = Math.floor(i / n), col = i % n, X = pad + col * cell, Y = head + r * cell; const on = m.has(q.name);
+      x.fillStyle = on ? '#2f6b4f' : '#fffdf8'; x.strokeStyle = on ? '#2f6b4f' : '#e3ddd0'; x.lineWidth = 2;
+      x.beginPath(); if (x.roundRect) x.roundRect(X + 4, Y + 4, cell - 8, cell - 8, 12); else x.rect(X + 4, Y + 4, cell - 8, cell - 8); x.fill(); x.stroke();
+      x.fillStyle = on ? '#ffffff' : '#1F2A37'; x.font = 'bold 15px Arial'; x.textAlign = 'center';
+      const ls = wrap(q.name, cell - 24); ls.forEach((t, j) => x.fillText(t, X + cell / 2, Y + cell / 2 + (j - (ls.length - 1) / 2) * 18 + 5));
+      x.textAlign = 'left';
+    });
+    x.fillStyle = '#5f6b63'; x.font = '12px Arial'; x.fillText('Species via eBird (Cornell Lab of Ornithology). Daybird is a free, non-commercial prototype.', pad, c.height - 16);
+    c.toBlob(async (blob) => {
+      const name = `daybird-bingo-${month}.png`; const file = new File([blob], name, { type: 'image/png' });
+      if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) { try { await navigator.share({ files: [file], title: 'Daybird bingo' }); return; } catch {} }
+      const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = name; document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 5000);
+    }, 'image/png');
+  };
+
+  // ---- learn-five challenges
+  const CH = DAYBIRD_CHALLENGES.map((ch) => ({ ...ch, count: ch.count || 5, list: L.challengeSpecies(ch, T) }));
+  function renderChallenges() {
+    $('chCards').innerHTML = CH.map((ch) => {
+      const p = prog.challenges[ch.id];
+      const due = ch.due ? ` Aim for ${shortDate(`${today.slice(0, 4)}-${ch.due}`)}.` : '';
+      if (!p || !p.started) return `<div class="card learn-card"><h3>${esc(ch.title)}</h3><p class="hint">${esc(ch.blurb)}${esc(due)}</p><p class="meta">${ch.list.length} to choose from; any ${ch.count} finish it.</p><button type="button" class="ghost" data-start="${ch.id}">Start</button></div>`;
+      const got = p.marked.filter((n) => ch.list.some((r) => r.name === n)).length;
+      if (p.finished) return `<div class="card learn-card celebrate"><span class="pill go">Done ${esc(shortDate(p.finished))}</span><h3 style="margin-top:8px">${esc(ch.title)}</h3><p>${esc(ch.done)}</p><div class="chips">${p.marked.map((n) => `<span class="chip">${esc(n)}</span>`).join('')}</div><button type="button" class="ghost small" data-reset="${ch.id}">Do it again</button></div>`;
+      return `<div class="card learn-card"><div class="pass-head"><h3>${esc(ch.title)}</h3><span class="count">${got} of ${ch.count}</span></div>
+        <div class="bar"><i style="width:${Math.round(100 * Math.min(got, ch.count) / ch.count)}%"></i></div>
+        <p class="meta">${esc(ch.blurb)}${esc(due)}</p>
+        <div class="chips">${ch.list.map((r) => `<button type="button" class="chip ${p.marked.includes(r.name) ? 'on' : ''}" data-ch="${ch.id}" data-sp="${esc(r.name)}" title="${esc(r.hint)}">${esc(r.name)}</button>`).join('')}</div>
+        <p class="tagline">Tap a bird once you can name it in the field. Hover or long-press for its field mark.</p></div>`;
+    }).join('');
+  }
+  renderChallenges();
+  $('chCards').addEventListener('click', (e) => {
+    const b = e.target.closest('button'); if (!b) return;
+    if (b.dataset.start) { prog.challenges[b.dataset.start] = { started: today, marked: [], finished: null }; save(); return renderChallenges(); }
+    if (b.dataset.reset) { prog.challenges[b.dataset.reset] = { started: today, marked: [], finished: null }; save(); return renderChallenges(); }
+    if (b.dataset.ch) {
+      const ch = CH.find((c) => c.id === b.dataset.ch), p = prog.challenges[ch.id];
+      const i = p.marked.indexOf(b.dataset.sp); if (i >= 0) p.marked.splice(i, 1); else p.marked.push(b.dataset.sp);
+      if (p.marked.length >= ch.count && !p.finished) p.finished = today;
+      save(); renderChallenges();
+    }
+  });
+
+  // ---- quick quiz
+  function renderQuiz() {
+    const attempt = prog.quiz.attempt || 0;
+    const seed = L.hash(`${today}|${attempt}`);
+    const qs = L.quiz(T, seed);
+    const answers = {};
+    $('quizCard').dataset.seed = seed;
+    $('quizCard').innerHTML = `<div class="pass-head"><span class="meta">Set ${attempt + 1} for ${shortDate(today)}${prog.quiz.best != null ? ` · best so far ${prog.quiz.best} of 5` : ''}</span><span class="count" id="quizScore"></span></div>` +
+      qs.map((q, i) => `<div class="q" data-q="${i}"><p style="margin:0 0 6px"><b>${i + 1}.</b> ${esc(q.question)}</p><div class="inline">${q.options.map((o) => `<button type="button" class="ghost small" data-q="${i}" data-opt="${esc(o)}">${esc(o)}</button>`).join('')}</div><p class="meta" id="qmsg${i}"></p></div>`).join('') +
+      `<div class="inline" style="margin-top:10px"><button type="button" class="ghost" id="quizNext">Another five</button></div>`;
+    $('quizCard').onclick = (e) => {
+      const b = e.target.closest('button[data-opt]');
+      if (b) {
+        const i = Number(b.dataset.q); if (answers[i] != null) return;
+        const q = qs[i]; const right = b.dataset.opt === q.answer; answers[i] = right;
+        b.classList.add(right ? 'right' : 'wrong');
+        if (!right) $('quizCard').querySelector(`button[data-q="${i}"][data-opt="${CSS.escape(q.answer)}"]`).classList.add('right');
+        $(`qmsg${i}`).textContent = right ? `Right: ${q.answer}.` : `Not that one. It's the ${q.answer}.`;
+        const done = Object.keys(answers).length, score = Object.values(answers).filter(Boolean).length;
+        $('quizScore').textContent = `${score} of ${done}`;
+        if (done === qs.length) { $('quizScore').textContent = `${score} of ${qs.length}`; prog.quiz.last = { date: today, score }; if (prog.quiz.best == null || score > prog.quiz.best) prog.quiz.best = score; save(); }
+      }
+      if (e.target.id === 'quizNext') { prog.quiz.attempt = attempt + 1; save(); renderQuiz(); }
+    };
+  }
+  renderQuiz();
+
+  // ---- paths: the six-month sequence, then the specialty tracks
+  const TR = DAYBIRD_TRACKS; const byName = L.byName(T);
+  const stepsHtml = (t) => t.steps.map((st, i) => {
+    const done = (prog.tracks[t.id] || []).includes(i);
+    return `<div class="step ${done ? 'done' : ''}"><div class="n">${done ? '✓' : i + 1}</div><div class="body"><h4>${esc(st.title)}</h4><p class="meta" style="margin:0 0 4px">${esc(st.text)}</p>
+      <div class="chips">${st.species.map((n) => { const r = byName.get(n); return `<span class="chip">${esc(n)}${r ? `<small>${esc(r[5])}</small>` : ''}</span>`; }).join('')}</div></div>
+      <div class="do"><button type="button" class="check small ${done ? 'on' : ''}" data-track="${t.id}" data-step="${i}">${done ? 'Done' : 'Mark done'}</button></div></div>`;
+  }).join('');
+  const progressOf = (t) => { const d = (prog.tracks[t.id] || []).length; return `${d} of ${t.steps.length} steps`; };
+  function renderPaths(openIds) {
+    const open = openIds || new Set([...document.querySelectorAll('details.track[open]')].map((d) => d.dataset.id));
+    const P = TR.path;
+    $('pathCard').innerHTML = `<div class="pass-head"><p style="margin:0">${esc(P.why)}</p></div><p class="meta" id="pathProgress"><b>${progressOf(P)}</b></p><div class="bar"><i style="width:${Math.round(100 * (prog.tracks[P.id] || []).length / P.steps.length)}%"></i></div>${stepsHtml(P)}`;
+    $('trackCards').innerHTML = TR.tracks.map((t) => `<details class="track card" data-id="${t.id}" ${open.has(t.id) ? 'open' : ''}><summary>${esc(t.title)}<span class="meta">${progressOf(t)}</span></summary><p class="meta" style="margin-top:10px">${esc(t.why)}</p>${stepsHtml(t)}</details>`).join('');
+  }
+  renderPaths(new Set());
+  const onStep = (e) => {
+    const b = e.target.closest('button[data-track]'); if (!b) return;
+    const arr = prog.tracks[b.dataset.track] = prog.tracks[b.dataset.track] || []; const i = Number(b.dataset.step);
+    const k = arr.indexOf(i); if (k >= 0) arr.splice(k, 1); else arr.push(i); arr.sort((a, c) => a - c);
+    save(); renderPaths();
+  };
+  $('pathCard').addEventListener('click', onStep); $('trackCards').addEventListener('click', onStep);
+})();
+</script>
+</body>
+</html>

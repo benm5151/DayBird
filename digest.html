@@ -1,0 +1,155 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Daybird — This week in birds</title>
+<link rel="stylesheet" href="css/style.css">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#1F2A37">
+<link rel="icon" href="icon.svg">
+<link rel="apple-touch-icon" href="icon.svg">
+<style>
+.item{padding:12px 0;border-top:1px solid var(--line)}
+.item:first-of-type{border-top:0}
+.item h4{margin:0 0 2px;font-size:16px}
+.item h4 a{text-decoration:none}
+.item h4 a:hover{text-decoration:underline}
+.item .src{font-size:13px;color:var(--muted)}
+.item p{margin:6px 0 0;font-size:15px}
+.item blockquote{margin:6px 0 0;padding-left:10px;border-left:3px solid var(--line);color:var(--muted);font-size:14px}
+.note{font-size:13px;color:var(--muted)}
+#notable .row .r{white-space:nowrap}
+footer ul{padding-left:18px;margin:6px 0}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <a class="brand" href="index.html"><img src="mark.svg" alt=""><span>Daybird<small>This week in birds</small></span></a>
+    <a class="btn ghost" href="settings.html">Settings</a>
+  </header>
+  <nav class="tabs">
+    <a href="index.html">Brief</a>
+    <a href="id.html">ID</a>
+    <a href="passes.html">Passes</a>
+    <a href="feed.html">Feed</a>
+    <a href="profile.html">Profile</a>
+    <a href="host.html">Host land</a>
+  </nav>
+
+  <p class="meta" id="when"></p>
+  <h1 id="title">This week around <span id="place">your area</span></h1>
+  <p class="lead" id="lead">Loading this week's digest…</p>
+  <div id="banner"></div>
+  <p class="note" id="scope"></p>
+
+  <div class="card" id="seasonalCard" style="display:none">
+    <h3>Christmas Bird Count season</h3>
+    <p id="seasonal" style="margin:0"></p>
+  </div>
+
+  <div class="card">
+    <h3>Rare and notable</h3>
+    <p class="tagline">eBird "notable" reports within 50 km over the last 7 days, grouped by species. Tap a checklist to see the report.</p>
+    <div id="notable"></div>
+  </div>
+  <div class="card">
+    <h3>Video of the week</h3>
+    <p class="tagline">One species from the list above, on the Cornell Lab's channel.</p>
+    <div id="video"></div>
+  </div>
+
+  <div class="card">
+    <h3>News</h3>
+    <p class="tagline">Short summaries with a link to the source. Daybird never reprints an article.</p>
+    <div id="news"></div>
+  </div>
+
+  <div class="card">
+    <h3>From the journals</h3>
+    <p class="tagline">Recent open-access research on birds, found through OpenAlex, with one plain sentence each.</p>
+    <div id="papers"></div>
+  </div>
+
+  <footer id="sources"></footer>
+</div>
+
+<script src="data/mock.js"></script>
+<script src="data/passes.js"></script>
+<script src="data/feed.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="js/config.js"></script>
+<script src="js/cloud.js"></script>
+<script src="data/traits.js"></script>
+<script src="js/brief.js"></script>
+<script src="js/app.js"></script>
+<script src="js/footer.js"></script>
+<script>
+(async () => {
+  await DB.ready;
+  const $ = (id) => document.getElementById(id);
+  const B = globalThis.DAYBIRD_BRIEF, esc = B.esc, safeId = B.safeId;
+  const safeUrl = (u) => { try { const x = new URL(u); return /^https?:$/.test(x.protocol) ? x.href : ''; } catch { return ''; } };
+  const link = (href, text) => { const h = safeUrl(href); return h ? `<a href="${esc(h)}" target="_blank" rel="noopener noreferrer">${esc(text)}</a>` : esc(text); };
+  const dateLabel = (iso) => { const t = Date.parse(iso); return Number.isFinite(t) ? new Date(t).toLocaleDateString(undefined, { month: 'short', day: 'numeric' }) : ''; };
+
+  const place = DB.briefPlace();
+  $('place').textContent = place.label;
+  $('scope').innerHTML = `Covers about 50 km around <b>${esc(place.label)}</b>. Change the place on the <a href="index.html#sendcard">Brief page</a>. One digest is built per area per week and shared by everyone who reads it.`;
+
+  const empty = (id, msg) => $(id).innerHTML = `<p class="meta">${msg}</p>`;
+  function render(d) {
+    $('when').textContent = `Week of ${new Date(d.week + 'T12:00:00').toLocaleDateString(undefined, { month: 'long', day: 'numeric' })}${d.generated ? ` · built ${new Date(d.generated).toLocaleDateString(undefined, { weekday: 'long' })}` : ''}`;
+    if (d.place) $('place').textContent = d.place;
+    $('lead').textContent = d.lead || (d.notable.length || d.news.length || d.papers.length ? 'The plain-language summary is not available this week, so here are the items themselves, each with a link to its source.' : 'Nothing came in this week. Try again later.');
+    if (d.seasonal) { $('seasonal').textContent = d.seasonal; $('seasonalCard').style.display = ''; }
+    // errors look like "feed Audubon: 503" or "ebird: no EBIRD_KEY"; show only the source name
+    const names = { ebird: 'eBird', openalex: 'OpenAlex', claude: 'the plain-language summary' };
+    const errNames = (d.errors || []).map(e => { const k = e.split(':')[0].trim(); return names[k] || k.replace(/^feed /, ''); });
+    if (d.partial && errNames.length) $('banner').innerHTML = `<div class="banner">Some sources were unavailable this week: ${esc(errNames.join(', '))}.</div>`;
+
+    $('notable').innerHTML = d.notable.length ? d.notable.map(n => `
+      <div class="row"><span><span class="l">${esc(n.name)}</span><br><span class="meta">${esc(n.places.join(' · '))}</span></span>
+      <span class="r">${n.reports} report${n.reports === 1 ? '' : 's'}${n.count > n.reports ? ` · ${n.count} birds` : ''}<br>${(n.subIds || []).filter(safeId).slice(0, 2).map((s, i) => `<a href="https://ebird.org/checklist/${s}" target="_blank" rel="noopener noreferrer">checklist${i ? ' ' + (i + 1) : ''}</a>`).join(' · ')}</span></div>`).join('')
+      : '<p class="meta">No notable reports nearby this week.</p>';
+    $('video').innerHTML = d.video && d.video.species ? `<p style="margin:0"><b>${esc(d.video.species)}</b></p><p class="meta" style="margin:4px 0 10px">Watch it before you go looking: the Cornell Lab's clips show how it moves and sounds.</p>${link(d.video.url, 'Search the Cornell Lab channel')}` : '<p class="meta">No pick this week.</p>';
+
+    $('news').innerHTML = d.news.length ? d.news.map(n => `
+      <div class="item">
+        <h4>${link(n.link, n.title)}</h4>
+        <div class="src">${esc(n.source)}${n.date ? ' · ' + dateLabel(n.date) : ''}</div>
+        ${n.line ? `<p>${esc(n.line)}</p>` : n.summary ? `<blockquote>“${esc(n.summary.slice(0, 160))}${n.summary.length > 160 ? '…' : ''}” — ${esc(n.source)}</blockquote>` : ''}
+      </div>`).join('') : '<p class="meta">No news items this week.</p>';
+
+    $('papers').innerHTML = d.papers.length ? d.papers.map(p => `
+      <div class="item">
+        <h4>${link(p.link, p.title)}</h4>
+        <div class="src">${esc(p.journal || 'Open-access paper')}${p.date ? ' · ' + dateLabel(p.date) : ''}</div>
+        ${p.line ? `<p>${esc(p.line)}</p>` : p.abstract ? `<blockquote>“${esc(p.abstract.slice(0, 200))}${p.abstract.length > 200 ? '…' : ''}” — from the abstract</blockquote>` : ''}
+      </div>`).join('') : '<p class="meta">No new papers found this week.</p>';
+
+    const ok = d.sources.filter(s => s.ok), bad = d.sources.filter(s => !s.ok);
+    $('sources').innerHTML = `<b>Sources</b><ul>${ok.map(s => `<li>${link(s.url, s.name)}</li>`).join('')}</ul>` +
+      (bad.length ? `<p>Not reachable this week: ${bad.map(s => esc(s.name)).join(', ')}.</p>` : '') +
+      `<p>Sightings via eBird (Cornell Lab of Ornithology). Research via OpenAlex. News items are summarized and linked, not reproduced; headlines and short quotes belong to their publishers. Summaries are written by a language model from the sources above and can be wrong; the links are the record. Daybird is a guide, not safety advice.</p>`;
+  }
+
+  if (!DB.online() && !CLOUD.ready) {
+    $('lead').textContent = 'The digest needs the online connection, which is not set up in this copy of Daybird.';
+    ['notable', 'video', 'news', 'papers'].forEach(id => empty(id, '—'));
+    return;
+  }
+  try {
+    const d = await CLOUD.digest({ lat: place.lat, lng: place.lng, place: place.label });
+    d.notable = d.notable || []; d.news = d.news || []; d.papers = d.papers || []; d.sources = d.sources || [];
+    render(d);
+  } catch (e) {
+    $('lead').textContent = 'Could not load this week\'s digest.';
+    $('banner').innerHTML = `<div class="banner">${esc(e.message)}</div>`;
+    ['notable', 'video', 'news', 'papers'].forEach(id => empty(id, '—'));
+  }
+})();
+</script>
+</body>
+</html>

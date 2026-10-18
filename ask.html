@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Daybird — Ask Daybird</title>
+<link rel="stylesheet" href="css/style.css">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#1F2A37">
+<link rel="icon" href="icon.svg">
+<link rel="apple-touch-icon" href="icon.svg">
+<style>
+.chat{display:flex;flex-direction:column;gap:10px;min-height:120px;margin-bottom:12px}
+.msg{max-width:85%;padding:10px 14px;border-radius:14px;line-height:1.45;white-space:pre-wrap}
+.msg.me{align-self:flex-end;background:var(--brand);color:#fff;border-bottom-right-radius:4px}
+@media (prefers-color-scheme:dark){.msg.me{color:#141922}}
+.msg.bot{align-self:flex-start;background:var(--bg);border:1px solid var(--line);border-bottom-left-radius:4px}
+.msg.bot.err{color:var(--red);background:var(--red-ink);border-color:transparent}
+.starters{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0 12px}
+.starters button{background:var(--bg);color:var(--ink);border:1px solid var(--line);font-weight:500;text-align:left}
+.askrow{display:flex;gap:8px;align-items:flex-end}
+.askrow textarea{flex:1;min-height:44px;max-height:140px;resize:vertical}
+.ctx{font-size:13px;color:var(--muted)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <a class="brand" href="index.html"><img src="mark.svg" alt=""><span>Daybird<small>Ask Daybird</small></span></a>
+    <a class="btn ghost" href="settings.html">Settings</a>
+  </header>
+  <nav class="tabs">
+    <a href="index.html">Brief</a>
+    <a href="id.html">ID</a>
+    <a href="passes.html">Passes</a>
+    <a href="feed.html">Feed</a>
+    <a href="profile.html">Profile</a>
+    <a href="host.html">Host land</a>
+  </nav>
+
+  <h1>Ask Daybird</h1>
+  <p class="lead">Questions about this morning's brief and your list, answered in a few plain sentences.</p>
+
+  <div class="card">
+    <p class="ctx" id="ctx">Loading this morning's brief…</p>
+    <div class="chat" id="chat" aria-live="polite"></div>
+    <div class="starters" id="starters">
+      <button type="button">Should I go Saturday?</button>
+      <button type="button">What am I most likely to add to my list this week?</button>
+      <button type="button">What's the warbler I keep seeing with the yellow rump?</button>
+    </div>
+    <div id="gate" class="banner hidden"></div>
+    <div class="askrow">
+      <textarea id="q" rows="1" maxlength="500" placeholder="Ask about today's call, the birds around, or your list"></textarea>
+      <button id="send" type="button">Ask</button>
+    </div>
+    <p class="meta" id="msg" role="status"></p>
+    <p class="tagline">What is sent: your question, a trimmed copy of today's brief (about 2 KB) and a life-list summary (totals and your last ten lifers). What is stored: a count and cost per question, never the text. The transcript lives only in this tab and clears when you close it. Answers can be wrong; check <a href="https://dashboard.birdcast.info/" target="_blank" rel="noopener noreferrer">BirdCast</a> and <a href="https://ebird.org/" target="_blank" rel="noopener noreferrer">eBird</a> for live data. Daybird is not safety advice.</p>
+  </div>
+</div>
+
+<script src="data/mock.js"></script>
+<script src="data/passes.js"></script>
+<script src="data/feed.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="js/config.js"></script>
+<script src="js/cloud.js"></script>
+<script src="data/traits.js"></script>
+<script src="js/brief.js"></script>
+<script src="js/app.js"></script>
+<script src="js/footer.js"></script>
+<script>
+(async () => {
+  await DB.ready;
+  const $ = (id) => document.getElementById(id);
+  const esc = DB.esc;
+  const KEY = 'daybird:ask';
+  const load = () => { try { return JSON.parse(sessionStorage.getItem(KEY) || '[]'); } catch { return []; } };
+  const save = (t) => { try { sessionStorage.setItem(KEY, JSON.stringify(t.slice(-20))); } catch {} };
+  let transcript = load();
+  let remaining = null;
+
+  // The brief, trimmed to what the model needs (about 2 KB): the call, the why, weather, the groups, spots and notable birds.
+  function trimBrief(b) {
+    if (!b) return null;
+    const t = {
+      place: b.place, date: b.date, when: b.whenLabel, call: b.call && { word: b.call.word, score: b.call.score, headline: b.call.headline },
+      whyLine: b.whyLine, weather: b.wxLine, wear: b.wear, times: [b.firstSong, b.leaveBy, b.bestWindow].filter(Boolean).join(' '),
+      lookFor: (b.lookFor || []).map(g => ({ group: g.label, kinds: g.count, species: (g.species || []).slice(0, 6), tip: g.tip })),
+      soaring: b.soaring && b.soaring.line, tomorrow: b.tomorrow && `${b.tomorrow.word} (score ${b.tomorrow.score}), ${b.tomorrow.temp}°, wind ${b.tomorrow.wind}, rain ${b.tomorrow.rain}%`,
+      spots: (b.spots || []).slice(0, 5).map(s => ({ name: s.name, species: s.species })),
+      notable: (b.notable || []).slice(0, 8).map(n => ({ bird: n.comName, where: n.locName, when: n.obsDt })),
+      migration: b.migration || 0, mode: b.mode, level: b.level,
+    };
+    const shrink = [() => t.lookFor.forEach(g => g.species = g.species.slice(0, 3)), () => t.notable = t.notable.slice(0, 4), () => t.spots = t.spots.slice(0, 3), () => t.lookFor.forEach(g => delete g.tip), () => delete t.notable];
+    for (const step of shrink) { if (JSON.stringify(t).length <= 2000) break; step(); }
+    return t;
+  }
+
+  let brief = null, life = null;
+  try { const r = await DB.loadBrief(); brief = trimBrief(r.brief); } catch (e) { brief = null; }
+  try { const L = await DB.lifeList(); const p = await DB.profile(); if (L) life = { total: L.total, thisYear: L.thisYear, yearList: L.yearList, checklists: L.checklists, recentLifers: (L.recentLifers || []).slice(0, 10), favorite: p.favorite || '' }; } catch {}
+  $('ctx').textContent = brief
+    ? `Knows: today's ${brief.call ? brief.call.word : ''} call for ${brief.place}${life ? `, and your list (${life.total} species, ${life.thisYear} new this year)` : ', no life list imported'}.`
+    : 'Could not load this morning\'s brief; answers will be general.';
+
+  function render() {
+    $('chat').innerHTML = transcript.map(m => `<div class="msg ${m.role === 'user' ? 'me' : 'bot'}${m.err ? ' err' : ''}">${esc(m.text)}</div>`).join('');
+    $('starters').classList.toggle('hidden', transcript.length > 0);
+    $('chat').scrollTop = $('chat').scrollHeight;
+  }
+  function gate() {
+    if (!CLOUD.ready) { $('gate').textContent = 'Ask Daybird needs the online connection, which is not set up in this copy.'; $('gate').classList.remove('hidden'); $('send').disabled = true; $('q').disabled = true; return false; }
+    if (!DB.online()) { $('gate').textContent = 'Sign in (top of the page) to ask. Twenty questions a day, free.'; $('gate').classList.remove('hidden'); $('send').disabled = true; $('q').disabled = true; return false; }
+    $('gate').classList.add('hidden'); $('send').disabled = false; $('q').disabled = false; return true;
+  }
+  render(); gate();
+  document.addEventListener('daybird:auth', gate);
+
+  async function ask(question) {
+    question = question.trim(); if (!question || !gate()) return;
+    if (remaining === 0) { $('msg').textContent = 'That was today\'s last question. The limit resets at midnight Eastern.'; return; }
+    transcript.push({ role: 'user', text: question }); save(transcript); render();
+    $('q').value = ''; $('send').disabled = true; $('msg').textContent = 'Thinking…';
+    try {
+      const history = transcript.slice(0, -1).filter(m => !m.err).slice(-6).map(m => ({ role: m.role, text: m.text }));
+      const r = await CLOUD.ask({ question, brief, life, history });
+      transcript.push({ role: 'assistant', text: r.answer });
+      remaining = typeof r.remaining === 'number' ? r.remaining : null;
+      $('msg').textContent = remaining == null ? '' : `${remaining} question${remaining === 1 ? '' : 's'} left today.`;
+    } catch (e) {
+      transcript.push({ role: 'assistant', text: e.message, err: true });
+      $('msg').textContent = '';
+    }
+    save(transcript); render(); $('send').disabled = false; $('q').focus();
+  }
+  $('send').onclick = () => ask($('q').value);
+  $('q').addEventListener('keydown', (e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); ask($('q').value); } });
+  $('starters').querySelectorAll('button').forEach(b => b.onclick = () => ask(b.textContent));
+})();
+</script>
+</body>
+</html>

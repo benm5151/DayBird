@@ -89,8 +89,10 @@ const CLOUD = (() => {
       window: l.window, trigger: l.trigger, host: l.host_notes, dates: l.dates, sample: false, hostName: l.profiles?.name, mine: l.host_id === _user?.id, cloud: true }));
   }
   async function createListing(l) {
-    const { data, error } = await sb.from('listings').insert({ host_id: _user.id, title: l.title, area: l.area, habitat: l.habitat, targets: l.targets,
-      price: l.price, seats: l.seats, window: l.window, trigger: l.trigger, host_notes: l.host, dates: l.dates }).select('id').single();
+    const row = { host_id: _user.id, title: l.title, area: l.area, habitat: l.habitat, targets: l.targets,
+      price: l.price, seats: l.seats, window: l.window, trigger: l.trigger, host_notes: l.host, dates: l.dates };
+    if (l.hostWaiverAcceptedAt) row.host_waiver_accepted_at = l.hostWaiverAcceptedAt;   // host ticked the host agreement (migration 9)
+    const { data, error } = await sb.from('listings').insert(row).select('id').single();
     if (error) throw error;
     if (l.location || l.directions) {
       const { error: e2 } = await sb.from('listing_private').upsert({ listing_id: data.id, host_id: _user.id, location: l.location || '', directions: l.directions || '' });
@@ -114,10 +116,75 @@ const CLOUD = (() => {
     const { data } = await sb.from('bookings').select('id,date,seats,created_at,listing_id,listings(title,price)').eq('user_id', _user.id).order('created_at', { ascending: false });
     return (data || []).map(b => ({ id: b.id, listingId: b.listing_id, title: b.listings?.title, price: b.listings?.price || 0, date: b.date, seats: b.seats, at: b.created_at, cloud: true }));
   }
-  async function book(listingId, date, seats) {
-    const { error } = await sb.from('bookings').insert({ user_id: _user.id, listing_id: listingId, date, seats });
+  // waiverAcceptedAt: ISO time the guest ticked the waiver box (passes.html). Stored on the booking (migration 9).
+  async function book(listingId, date, seats, waiverAcceptedAt = null) {
+    const row = { user_id: _user.id, listing_id: listingId, date, seats };
+    if (waiverAcceptedAt) row.waiver_accepted_at = waiverAcceptedAt;
+    const { error } = await sb.from('bookings').insert(row);
     if (error) throw error;
   }
+
+  // ---- delete my account (edge function 'delete-account') ----
+  // Removes every row and photo that belongs to the signed-in user, then the auth user itself. Returns the function's report.
+  async function deleteAccount() {
+    const { data, error } = await sb.functions.invoke('delete-account', { body: { confirm: 'DELETE' } });
+    if (error) {
+      let msg = error.message || String(error);
+      try { const ctx = error.context; if (ctx && ctx.json) { const j = await ctx.json(); if (j.error) msg = j.error; } } catch {}
+      if (/not found|404/i.test(msg)) msg = 'delete-account function is not deployed yet';
+      throw new Error(msg);
+    }
+    return data;
+  }
+
+  // ---- friend circles (migration 9) ----
+  // Private groups. Reads are limited by RLS to circles the user is in; joining goes through the join_circle() function
+  // so invite codes are never listable. Words are GO | MAYBE | STAY (the brief's "STAY IN" is shortened by the caller).
+  const circles = {
+    async list() {
+      const { data, error } = await sb.from('circles').select('id,name,owner_id,invite_code,created_at').order('created_at');
+      if (error) throw error;
+      return (data || []).map(c => ({ id: c.id, name: c.name, ownerId: c.owner_id, code: c.invite_code, at: c.created_at, mine: c.owner_id === _user?.id }));
+    },
+    async create(name) {
+      const { data, error } = await sb.rpc('create_circle', { p_name: name });
+      if (error) throw error;
+      const c = Array.isArray(data) ? data[0] : data;
+      return { id: c.id, name: c.name, ownerId: c.owner_id, code: c.invite_code, at: c.created_at, mine: true };
+    },
+    async join(code) {
+      const { data, error } = await sb.rpc('join_circle', { p_code: code });
+      if (error) throw error;
+      const c = Array.isArray(data) ? data[0] : data;
+      return { id: c.id, name: c.name, ownerId: c.owner_id, code: c.invite_code, at: c.created_at, mine: c.owner_id === _user?.id };
+    },
+    async members(circleId) {
+      const { data, error } = await sb.from('circle_members').select('user_id,joined_at,profiles(name,photo_url)').eq('circle_id', circleId).order('joined_at');
+      if (error) throw error;
+      return (data || []).map(m => ({ userId: m.user_id, name: m.profiles?.name || 'Birder', avatar: m.profiles?.photo_url || null, joinedAt: m.joined_at, me: m.user_id === _user?.id }));
+    },
+    // Mornings from sinceDate (YYYY-MM-DD) on, oldest first.
+    async mornings(circleId, sinceDate) {
+      let q = sb.from('circle_mornings').select('id,user_id,date,word,note,spot,created_at').eq('circle_id', circleId).order('date');
+      if (sinceDate) q = q.gte('date', sinceDate);
+      const { data, error } = await q;
+      if (error) throw error;
+      return (data || []).map(m => ({ id: m.id, userId: m.user_id, date: m.date, word: m.word, note: m.note || '', spot: m.spot || '', at: m.created_at, mine: m.user_id === _user?.id }));
+    },
+    // One row per person per day: posting twice replaces the earlier line.
+    async post(circleId, { date, word, note = '', spot = '' }) {
+      const row = { circle_id: circleId, user_id: _user.id, date, word, note: String(note).slice(0, 140) || null, spot: String(spot).slice(0, 80) || null };
+      const { error } = await sb.from('circle_mornings').upsert(row, { onConflict: 'circle_id,user_id,date' });
+      if (error) throw error;
+    },
+    // Leaving a circle you own deletes it for everyone (RLS lets only the owner delete the circle row).
+    async leave(circleId, isOwner = false) {
+      const { error } = isOwner
+        ? await sb.from('circles').delete().eq('id', circleId)
+        : await sb.from('circle_members').delete().match({ circle_id: circleId, user_id: _user.id });
+      if (error) throw error;
+    },
+  };
 
   // ---- photo ID (edge function 'bird-id') ----
   async function photoId(payload) {
@@ -144,6 +211,43 @@ const CLOUD = (() => {
     return data;
   }
 
-  return { ready, init, user, signIn, signOut, photoId, sendBrief, getProfile, saveProfile, uploadPhoto, listPosts, createPost, deletePost, addComment, deleteComment, toggleLike,
-           listListings, createListing, deleteListing, privateLocations, hostBookings, cancelBooking, myBookings, book };
+  // ---- weekly news digest (edge function 'digest') ----
+  // GET with the anon key (or the session token when signed in). The function caches one digest per region per week,
+  // so reading it costs nothing per reader. params: { lat, lng, place }
+  async function digest(params) {
+    const token = (await sb.auth.getSession()).data.session?.access_token || cfg.supabaseAnonKey;
+    const q = new URLSearchParams({ lat: String(params.lat), lng: String(params.lng), place: params.place || '' });
+    const r = await fetch(`${cfg.supabaseUrl}/functions/v1/digest?${q}`, { headers: { apikey: cfg.supabaseAnonKey, authorization: `Bearer ${token}` } });
+    let body = null; try { body = await r.json(); } catch {}
+    if (!r.ok) throw new Error(body?.error || (r.status === 404 ? 'digest function is not deployed yet' : `digest ${r.status}`));
+    return body;
+  }
+
+  // ---- Ask Daybird (edge function 'ask') ----
+  // payload: { question, brief (trimmed), life (summary), history: [{ role, text }] }
+  async function ask(payload) {
+    const { data, error } = await sb.functions.invoke('ask', { body: payload });
+    if (error) {
+      let msg = error.message || String(error);
+      try { const ctx = error.context; if (ctx && ctx.json) { const j = await ctx.json(); if (j.error) msg = j.error; } } catch {}
+      if (/not found|404/i.test(msg)) msg = 'ask function is not deployed yet';
+      throw new Error(msg);
+    }
+    return data;
+  }
+
+  // ---- any edge function that needs the signed-in user's token (stats.html uses 'stats') ----
+  async function invoke(name, body = {}) {
+    const { data, error } = await sb.functions.invoke(name, { body });
+    if (error) {
+      let msg = error.message || String(error);
+      try { const ctx = error.context; if (ctx && ctx.json) { const j = await ctx.json(); if (j.error) msg = j.error; } } catch {}
+      if (/not found|404/i.test(msg)) msg = `${name} function is not deployed yet`;
+      throw new Error(msg);
+    }
+    return data;
+  }
+
+  return { ready, init, user, signIn, signOut, photoId, sendBrief, digest, ask, invoke, getProfile, saveProfile, uploadPhoto, listPosts, createPost, deletePost, addComment, deleteComment, toggleLike,
+           listListings, createListing, deleteListing, privateLocations, hostBookings, cancelBooking, myBookings, book, deleteAccount, circles };
 })();

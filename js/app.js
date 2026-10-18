@@ -17,6 +17,9 @@ const DB = (() => {
     ebirdName: '',           // your eBird display name, exactly as it appears on your checklists
     ebirdRegions: 'US-NH,US-VT',
     migration: 0,            // 0 = unknown, 1..5 from BirdCast local dashboard
+    mode: 'any',             // where you'll be: any | porch | woods | water | commute | campus (see js/brief.js)
+    level: 'new',            // new | some | keen — how much jargon and how many ID tips the brief uses
+    placeLabel: 'Lebanon, New Hampshire',
     birdcastUrl: 'https://dashboard.birdcast.info/region/US-NH-009', // Grafton County
   };
   const settings = () => Object.assign({}, DEFAULTS, store.get('settings', {}));
@@ -49,46 +52,24 @@ const DB = (() => {
     ]);
     return { notable, recent, hotspots };
   }
+  const B = globalThis.DAYBIRD_BRIEF;
   async function weather(s) {
-    const u = `https://api.open-meteo.com/v1/forecast?latitude=${s.lat}&longitude=${s.lng}` +
-      `&hourly=temperature_2m,precipitation_probability,wind_speed_10m,wind_direction_10m,cloud_cover` +
-      `&daily=sunrise,sunset&timezone=auto&forecast_days=2&wind_speed_unit=mph&temperature_unit=fahrenheit`;
-    const w = await getJSON(u);
-    // morning window: 6–9am local today
-    const idx = w.hourly.time.map((t, i) => ({ t, i })).filter(x => /T0[6-9]:/.test(x.t)).slice(0, 4).map(x => x.i);
-    const avg = (arr) => idx.reduce((a, i) => a + arr[i], 0) / idx.length;
-    return {
-      temp: Math.round(avg(w.hourly.temperature_2m)),
-      wind: Math.round(avg(w.hourly.wind_speed_10m)),
-      windDir: Math.round(avg(w.hourly.wind_direction_10m)),
-      rain: Math.round(avg(w.hourly.precipitation_probability)),
-      cloud: Math.round(avg(w.hourly.cloud_cover)),
-      sunrise: w.daily.sunrise[0].slice(11, 16),
-    };
+    // The engine owns the URL and the parsing; the site only fetches. forceToday: the page is always "this morning".
+    return B.parseWeather(await getJSON(B.weatherUrl(s.lat, s.lng)), { forceToday: true });
   }
 
-  // ---------- the call ----------
-  function dirName(deg) { return ['N','NE','E','SE','S','SW','W','NW'][Math.round(deg / 45) % 8]; }
+  // ---------- the call (scoring lives in js/brief.js) ----------
+  const dirName = B.dirName;
   function makeCall(wx, mig, notableCount) {
-    let score = 50; const why = [];
-    if (wx.wind <= 8) { score += 15; why.push('calm winds'); } else if (wx.wind >= 18) { score -= 20; why.push('windy'); }
-    if (wx.rain <= 20) { score += 10; } else if (wx.rain >= 60) { score -= 25; why.push('rain likely'); }
-    if (mig >= 4) { score += 25; why.push('big overnight migration'); } else if (mig === 3) { score += 10; why.push('moderate migration'); } else if (mig === 1) { score -= 10; }
-    const d = dirName(wx.windDir);
-    const month = new Date().getMonth() + 1;
-    if (month >= 8 && month <= 11 && (d === 'N' || d === 'NW')) { score += 10; why.push('NW tailwind for fall migrants'); }
-    if (month >= 3 && month <= 6 && (d === 'S' || d === 'SW')) { score += 10; why.push('SW tailwind for spring migrants'); }
-    if (notableCount >= 3) { score += 10; why.push(`${notableCount} notable reports nearby`); }
-    const grade = score >= 70 ? 'go' : score >= 45 ? 'maybe' : 'stay';
-    const word = { go: 'GO', maybe: 'MAYBE', stay: 'STAY IN' }[grade];
-    return { score, grade, word, why };
+    const c = B.score({ wx, month: new Date().getMonth() + 1, notableCount, migration: mig });
+    return { score: c.score, grade: c.grade, word: c.word, why: B.whyTags(c, notableCount) };
   }
 
   // ---------- public API ----------
   async function loadBrief() {
     const s = settings();
-    let source = 'mock', sightings, wx, errors = [];
-    try { wx = await weather(s); } catch (e) { errors.push('weather: ' + e.message); }
+    let source = 'mock', sightings, wx, tomorrow = null, errors = [];
+    try { const w = await weather(s); wx = w.wx; tomorrow = w.tomorrow; } catch (e) { errors.push('weather: ' + e.message); }
     if (s.ebirdKey) {
       try { sightings = await liveSightings(s); source = 'live'; }
       catch (e) { errors.push('eBird: ' + e.message + ' (CORS or key problem — see README)'); }
@@ -96,10 +77,11 @@ const DB = (() => {
     if (!sightings || !wx) {
       // prefer the brief the GitHub Action committed this morning over the static sample
       let live = null; try { const r = await fetch('data/brief.json', { cache: 'no-store' }); if (r.ok) live = await r.json(); } catch {}
-      if (live && live.wx && !wx) { wx = live.wx; errors = errors.filter(e => !e.startsWith('weather')); }
+      if (live && live.wx && !wx) { wx = live.wx; tomorrow = live.tomorrow || null; errors = errors.filter(e => !e.startsWith('weather')); }
       if (live && !sightings && (live.spots || []).length) {
         sightings = { notable: live.notable || [], recent: [] };
         sightings._spots = live.spots;
+        sightings._recent = live.recent || (live.lookFor || []).flatMap(g => g.species || []);
         if (!s.ebirdKey) { errors.push(`Showing this morning's brief built at ${new Date(live.generated).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })}. Add your eBird key in Settings for live data.`); source = 'daily'; }
       }
       const mock = window.DAYBIRD_MOCK;
@@ -109,30 +91,26 @@ const DB = (() => {
     }
     // group hotspots by activity (eBird gives numSpeciesAllTime; recent list gives locations)
     const byLoc = {};
-    (sightings.recent || []).forEach(o => { const k = o.locId || o.locName; byLoc[k] = byLoc[k] || { name: o.locName, locId: o.locId, species: 0 }; byLoc[k].species++; });
+    (sightings.recent || []).forEach(o => { const k = o.locId || o.locName; byLoc[k] = byLoc[k] || { name: o.locName, locId: o.locId, lat: o.lat, lng: o.lng, species: 0 }; byLoc[k].species++; });
     const spots = sightings._spots || Object.values(byLoc).sort((a, b) => b.species - a.species).slice(0, 5);
     const notable = (sightings.notable || []).slice(0, 8);
     const call = makeCall(wx, s.migration, notable.length);
+    const recentNames = sightings._recent || [...new Set((sightings.recent || []).map(o => o.comName))];
+    const brief = B.compose({ place: s.placeLabel || 'your area', date: new Date().toISOString().slice(0, 10), whenLabel: 'this morning', wx, tomorrow, notable, spots, recent: recentNames,
+      migration: s.migration, mode: s.mode, level: s.level, traits: globalThis.DAYBIRD_TRAITS });
     // call history: one entry per day, kept 60 days, with optional "was it right?" verdict
     const today = new Date().toISOString().slice(0, 10);
     const hist = store.get('calls', []).filter(h => h.date >= new Date(Date.now() - 60 * 864e5).toISOString().slice(0, 10));
     const idx = hist.findIndex(h => h.date === today);
     if (idx < 0) hist.unshift({ date: today, word: call.word, score: call.score, verdict: null });
     store.set('calls', hist);
-    return { s, source, wx, spots, notable, call, errors, history: hist, speciesCount: new Set((sightings.recent || []).map(o => o.comName)).size };
+    return { s, source, wx, spots, notable, call, brief, errors, history: hist, recent: recentNames, speciesCount: new Set((sightings.recent || []).map(o => o.comName)).size };
   }
   function gradeCall(date, verdict) {
     const h = store.get('calls', []); const e = h.find(x => x.date === date); if (e) e.verdict = verdict; store.set('calls', h); return h;
   }
   function briefText(b) {
-    const d = new Date().toLocaleDateString(undefined, { weekday: 'long', month: 'short', day: 'numeric' });
-    const lines = [`Daybird — ${d}: ${b.call.word}`,
-      `${b.wx.temp}°, wind ${b.wx.wind} mph ${dirName(b.wx.windDir)}, rain ${b.wx.rain}%, sunrise ${b.wx.sunrise}${b.s.migration ? `, migration ${b.s.migration}/5` : ''}`,
-      b.call.why.length ? b.call.why.join(', ') : ''];
-    if (b.spots.length) lines.push('', 'Where: ' + b.spots.map(x => `${x.name} (${x.species} spp)`).join('; '));
-    if (b.notable.length) lines.push('Notable: ' + b.notable.map(o => `${o.comName} @ ${o.locName}`).join('; '));
-    lines.push('', 'Full brief: ' + location.href.split('?')[0]);
-    return lines.filter(l => l !== undefined).join('\n');
+    return B.text(b.brief, { site: location.href.split('?')[0] });
   }
 
   // ---------- place picker (for "email me this brief") ----------
@@ -184,10 +162,11 @@ const DB = (() => {
     const local = store.get('bookings', []);
     return online() ? [...await CLOUD.myBookings().catch(() => []), ...local] : local;
   }
-  async function book(pass, date, seats) {
-    if (online() && pass.cloud) return CLOUD.book(pass.id, date, seats);
+  // waiverAt: when the guest ticked the waiver box (passes.html); kept on the booking either way.
+  async function book(pass, date, seats, waiverAt = null) {
+    if (online() && pass.cloud) return CLOUD.book(pass.id, date, seats, waiverAt);
     const b = store.get('bookings', []);
-    b.unshift({ id: 'b' + Date.now(), passId: pass.id, title: pass.title, date, seats, price: pass.price, at: new Date().toISOString() });
+    b.unshift({ id: 'b' + Date.now(), passId: pass.id, title: pass.title, date, seats, price: pass.price, at: new Date().toISOString(), waiverAt });
     store.set('bookings', b);
   }
   async function addListing(l) {
@@ -264,6 +243,17 @@ const DB = (() => {
     const dates = obs.map(o => o['Date']).filter(Boolean).sort();
     const checklists = new Set(obs.map(o => o['Submission ID'])).size;
     const yr = new Date().getFullYear();
+    // Per-month aggregates for the recap page (recap.html): species seen, checklists, lifer names and the best day.
+    // Small (one entry per month you birded), so it fits in localStorage and the profile row.
+    const months = {};
+    const monthOf = (ym) => months[ym] || (months[ym] = { species: new Set(), lists: new Set(), lifers: [], days: {} });
+    obs.forEach(o => { const d = o['Date'] || ''; if (d.length < 7) return; const m = monthOf(d.slice(0, 7)); m.species.add(o['Common Name']); m.lists.add(o['Submission ID']); });
+    species.forEach(s => { if (!s.first || s.first.length < 7) return; const m = monthOf(s.first.slice(0, 7)); m.lifers.push(s.name); m.days[s.first] = (m.days[s.first] || 0) + 1; });
+    Object.keys(months).forEach(ym => {
+      const m = months[ym];
+      const best = Object.entries(m.days).sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))[0];
+      months[ym] = { species: m.species.size, checklists: m.lists.size, lifers: m.lifers, bestDay: best ? { date: best[0], n: best[1] } : null };
+    });
     const life = {
       importedAt: new Date().toISOString(), checklists, observations: obs.length,
       total: species.length, thisYear: species.filter(s => s.first.startsWith(String(yr))).length,
@@ -274,9 +264,10 @@ const DB = (() => {
       topPlaces: Object.entries(places).sort((a, b) => b[1] - a[1]).slice(0, 5).map(([name, n]) => ({ name, n })),
       byMonth: Array.from({ length: 12 }, (_, m) => species.filter(s => +s.first.slice(5, 7) === m + 1).length),
       allSpecies: species.map(s => s.name).sort(),
+      months,
     };
     store.set('life', life);
-    if (online()) CLOUD.saveProfile({ life }).catch(() => {});
+    if (online()) CLOUD.saveProfile({ life: withLearned(life) }).catch(() => {});
     return life;
   }
   // ---- live sync: pull your recent checklists by region, merge new species into the life list ----
@@ -315,6 +306,13 @@ const DB = (() => {
           newSpecies.push({ name, first: date, loc: l.loc?.name || cl.locId || '', sightings: 1 });
           if (date) L.byMonth[+date.slice(5, 7) - 1]++;
           if (date.startsWith(String(new Date().getFullYear()))) L.thisYear++;
+          if (date.length >= 7) { // keep the recap's month aggregates in step (lifer names and best day; species counts come from the CSV)
+            L.months = L.months || {};
+            const m = L.months[date.slice(0, 7)] = L.months[date.slice(0, 7)] || { species: 0, checklists: 0, lifers: [], bestDay: null };
+            m.lifers.push(name);
+            const n = newSpecies.filter(x => x.first === date).length;
+            if (!m.bestDay || n > m.bestDay.n) m.bestDay = { date, n };
+          }
         }
       }
       L.checklists++;
@@ -325,7 +323,7 @@ const DB = (() => {
     L.recentLifers = [...newSpecies.sort((a, b) => b.first.localeCompare(a.first)), ...L.recentLifers].slice(0, 10);
     L.lastSync = new Date().toISOString();
     store.set('life', L); store.set('syncedSubIds', seen.slice(-2000));
-    if (online()) CLOUD.saveProfile({ life: L }).catch(() => {});
+    if (online()) CLOUD.saveProfile({ life: withLearned(L) }).catch(() => {});
     return { newChecklists: mine.length, newSpecies, checked: regions };
   }
   const _nameCache = {};
@@ -355,16 +353,79 @@ const DB = (() => {
     store.set('profile', up);
   }
 
+  // ---------- learn and play (learn.html; the picking logic is js/learn.js) ----------
+  // One progress object in localStorage ('daybird:learned'). Signed in, a copy rides along in profiles.life.learned
+  // so it follows you between phone and laptop. Merging is a union: nothing you checked anywhere gets unchecked.
+  const LEARNED_EMPTY = () => ({ first10: {}, bingo: { cards: {}, history: [] }, challenges: {}, outside: [], paused: [], tracks: {}, quiz: {} });
+  function mergeLearned(a, b) {
+    if (Array.isArray(a) && Array.isArray(b)) return [...new Set([...a, ...b])];
+    if (a && b && typeof a === 'object' && typeof b === 'object' && !Array.isArray(a) && !Array.isArray(b)) {
+      const out = { ...a }; for (const k of Object.keys(b)) out[k] = k in out ? mergeLearned(out[k], b[k]) : b[k]; return out;
+    }
+    if (typeof a === 'boolean' || typeof b === 'boolean') return !!(a || b);
+    return a == null ? b : a;
+  }
+  const learned = () => mergeLearned(LEARNED_EMPTY(), store.get('learned', {}));
+  const withLearned = (life) => { const l = store.get('learned', null); if (l) (life = life || {}).learned = l; return life; };
+  function saveLearned(l) {
+    store.set('learned', l);
+    if (online()) CLOUD.saveProfile({ life: withLearned(store.get('life', null)) }).catch(() => {});
+    return l;
+  }
+  // Pull the cloud copy once (page load), union it with what this browser has, write both back.
+  async function loadLearned() {
+    if (!online()) return learned();
+    const p = await CLOUD.getProfile().catch(() => null);
+    const merged = mergeLearned(learned(), (p && p.life && p.life.learned) || {});
+    return saveLearned(merged);
+  }
+  // Local calendar date (a 9 PM tap must not land on tomorrow).
+  const today = () => { const d = new Date(); return new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 10); };
+  // STAY IN days neither count nor break the streak: the Brief page's call history plus anything learn.html recorded.
+  const pausedDays = (l) => [...new Set([...(l.paused || []), ...store.get('calls', []).filter(h => h.word === 'STAY IN').map(h => h.date)])];
+  const prevDay = (d) => { const t = new Date(`${d}T12:00:00Z`); t.setUTCDate(t.getUTCDate() - 1); return t.toISOString().slice(0, 10); };
+  const nextDay = (d) => { const t = new Date(`${d}T12:00:00Z`); t.setUTCDate(t.getUTCDate() + 1); return t.toISOString().slice(0, 10); };
+  // outside: days you went out. paused: STAY IN days, which neither count nor break. Today is not over, so an
+  // unmarked today does not end the run; an unmarked yesterday does.
+  function streakOf(outside, paused, day) {
+    const out = new Set(outside || []), pz = new Set((paused || []).filter(d => !out.has(d)));
+    let d = day, current = 0;
+    if (!out.has(d) && !pz.has(d)) d = prevDay(d);
+    while (out.has(d) || pz.has(d)) { if (out.has(d)) current++; d = prevDay(d); }
+    const days = [...new Set([...out, ...pz])].sort();
+    let best = 0, run = 0;
+    for (let i = 0; i < days.length; i++) {
+      if (i > 0 && days[i] !== nextDay(days[i - 1])) run = 0;
+      if (out.has(days[i])) run++;
+      best = Math.max(best, run);
+    }
+    return { current, best: Math.max(best, current), today: out.has(day) ? 'out' : pz.has(day) ? 'paused' : 'open', total: out.size };
+  }
+  const streak = (l = learned()) => streakOf(l.outside, pausedDays(l), today());
+  // "I went out this morning." Any page can call DB.markOutside(); returns the new streak.
+  function markOutside(date = today()) {
+    const l = learned(); if (!l.outside.includes(date)) { l.outside.push(date); l.outside.sort(); saveLearned(l); }
+    return streak(l);
+  }
+  function markPaused(date = today()) {
+    const l = learned(); if (!l.paused.includes(date)) { l.paused.push(date); l.paused.sort(); saveLearned(l); }
+    return streak(l);
+  }
+
   const ready = CLOUD.ready ? CLOUD.init() : Promise.resolve(null);
 
   return { ready, online, settings, saveSettings, loadBrief, gradeCall, briefText, findPlaces, briefPlace, saveBriefPlace, loadPasses, bookings, book, cancelBooking, addListing, loadFeed, post, deletePost, toggleLike,
-           fileToDataURL, importLifeList, syncFromEbird, lifeList, profile, saveProfile, esc, fmtDate, ago, dirName };
+           fileToDataURL, importLifeList, syncFromEbird, lifeList, profile, saveProfile, esc, fmtDate, ago, dirName,
+           learned, saveLearned, loadLearned, mergeLearned, streak, streakOf, markOutside, markPaused };
 })();
 
 // nav highlight + sign-in widget
 document.addEventListener('DOMContentLoaded', async () => {
   const here = location.pathname.split('/').pop() || 'index.html';
-  document.querySelectorAll('nav.tabs a').forEach(a => { if (a.getAttribute('href') === here) a.classList.add('active'); });
+  const tabs = [...document.querySelectorAll('nav.tabs a')];
+  tabs.forEach(a => { if (a.getAttribute('href') === here) a.classList.add('active'); });
+  // pages that live under the More hub (passes, host, settings, about, builders' pages) light up the More tab
+  if (!tabs.some(a => a.classList.contains('active'))) { const m = tabs.find(a => a.getAttribute('href') === 'more.html'); if (m) m.classList.add('active'); }
 
   const head = document.querySelector('header.top'); if (!head) return;
   const box = document.createElement('div'); box.id = 'authbox'; box.style.cssText = 'display:flex;gap:8px;align-items:center;flex-wrap:wrap';

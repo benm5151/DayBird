@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240" role="img" aria-label="Dark-eyed Junco: white outer tail">
+<path fill="#1F2A37" fill-rule="evenodd" d="M52 106C57 102.4 61.8 100.5 66 96C70.7 91.1 71.4 85 76 80C82.7 72.8 88.4 66 98 64C107.4 62.1 116.1 64.5 124 70C130.4 74.4 130.8 82.2 136 88C144.2 97.2 153.4 101.3 162 110C169.9 118 174.2 125.9 182 134C195.4 148 207.6 157 222 170C219.1 175 216.9 179 214 184C199.6 175.4 190.7 158.3 174 160C162.3 161.2 160.7 177.1 150 182C138.8 187.1 128 188.8 116 186C101.8 182.7 92.2 174.4 82 164C72.5 154.3 65.7 145.1 62 132C60.2 125.8 62 120.5 62 114C58.4 111.1 55.6 108.9 52 106ZM69.5 98a4.5 4.5 0 1 0 9 0a4.5 4.5 0 1 0 -9 0ZM118 108Q144.7 141.8 186 154Q148.1 136.8 118 108Z"/>
+<path d="M112 184L106 210M130 185L136 210" fill="none" stroke="#1F2A37" stroke-width="5" stroke-linecap="round"/>
+<path d="M34 214C96 207 158 207 214 214" fill="none" stroke="#1F2A37" stroke-width="7" stroke-linecap="round"/>
+<path fill="#E8833A" d="M176 158C189.7 167.4 200.3 174.6 214 184C215.4 181.5 216.6 179.5 218 177C204.7 168 194.3 161 181 152C179.2 154.2 177.8 155.8 176 158Z"/>
+<path d="M198 172L226 74" fill="none" stroke="#E8833A" stroke-width="1.5" stroke-linecap="round"/>
+<circle cx="198" cy="172" r="2.6" fill="#E8833A"/>
+<text x="221" y="63.5" text-anchor="end" font-family="Iowan Old Style,Palatino Linotype,Palatino,Georgia,serif" font-size="13" fill="#1F2A37">white outer</text>
+<text x="221" y="78.5" text-anchor="end" font-family="Iowan Old Style,Palatino Linotype,Palatino,Georgia,serif" font-size="13" fill="#1F2A37">tail</text>
+</svg>

@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240" role="img" aria-label="Downy Woodpecker silhouette on a trunk, amber nape spot">
+<path fill="#1F2A37" fill-rule="evenodd" d="M60 52C64.3 49.1 67.3 46.3 72 44C78.1 41 83.2 37.8 90 38C97.8 38.2 104.8 40.2 110 46C115.5 52.1 114.1 60 116 68C118.5 78.7 120.6 87.1 122 98C123.4 108.7 125 117.2 124 128C122.9 139.1 120.7 147.9 116 158C112.3 166 107.6 171.3 102 178C92.2 189.7 82.8 197.2 72 208C68.4 205.8 65.6 204.2 62 202C67.8 190.5 75.6 182.6 78 170C79.6 161.5 76.9 154.6 76 146C74.8 133.7 73.1 124.3 72 112C71 101.2 71.9 92.7 70 82C68.7 74.6 66.5 69.1 64 62C62.7 58.3 61.4 55.6 60 52ZM78 54a4 4 0 1 0 8 0a4 4 0 1 0 -8 0ZM108 76Q103.2 115.2 122 150Q109.1 114.1 108 76Z"/>
+<path d="M78 134L50 128M78 148L50 150" fill="none" stroke="#1F2A37" stroke-width="5" stroke-linecap="round"/>
+<path d="M44 16C40 80 40 160 44 232" fill="none" stroke="#1F2A37" stroke-width="16" stroke-linecap="round"/>
+<path fill="#E8833A" d="M105 56a6 6 0 1 0 12 0a6 6 0 1 0 -12 0Z"/>
+</svg>

@@ -1,7 +1,7 @@
 // Field-mark trait table for common Northeast US birds. Hand-authored for the ID helper; not exhaustive.
 // size: tiny | sparrow | robin | jay | crow | hawk | goose   colors: dominant colors a beginner would name
 // hab: feeder yard forest edge field marsh pond river lake shore sky   beh: perched ground feeder flying soaring swimming wading flocking hovering trunk hopping singing diving
-window.DAYBIRD_TRAITS = [
+globalThis.DAYBIRD_TRAITS = [
 ["Black-capped Chickadee","sparrow",["black","white","gray"],["feeder","yard","forest","edge"],["feeder","perched","flocking"],"black cap and bib, tiny, acrobatic"],
 ["Tufted Titmouse","sparrow",["gray","white","buff"],["feeder","yard","forest"],["feeder","perched"],"gray with a crest, peach flanks"],
 ["White-breasted Nuthatch","sparrow",["gray","white","black"],["feeder","forest","yard"],["trunk","feeder"],"walks head-first down trunks"],
