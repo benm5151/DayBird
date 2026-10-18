@@ -13,4 +13,6 @@ globalThis.DAYBIRD_PAGES = [
   { href: 'terms.html', title: 'Terms', blurb: 'The plain-English rules for using Daybird. Not safety advice; eBird data is non-commercial.', group: 'about' },
   { href: 'plan.html', title: 'Plan a morning', blurb: 'Odds for today, the best morning this week for a bird you want, migration windows and a hotspot head-to-head. Premium preview, free for now.', group: 'plan' },
   { href: 'route.html', title: 'Hotspots along your route', blurb: 'Pick a start and an end and see the eBird hotspots within a few minutes of the road, on a map, with a brief for the far end. Premium preview.', group: 'plan' },
+  { href: 'art.html', title: 'Our birds: the Daybird art', blurb: 'Twelve ink silhouettes, one amber mark each, and a card maker.', group: 'about' },
+  { href: 'stickers.html', title: 'Sticker sheet', blurb: 'Twelve 2.5-inch circles on a letter page, ready to print.', group: 'about' },
 ];
