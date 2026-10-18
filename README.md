@@ -55,6 +55,22 @@ Sign-in is a magic link by email (no passwords). When signed in: profile, life-l
 
 `supabase/functions/bird-id/index.ts` is a Supabase Edge Function. Deploy it from the dashboard: Edge Functions → Deploy a new function → via Editor → name `bird-id` → paste the file → Deploy. Then Edge Functions → Secrets → add `ANTHROPIC_API_KEY` (from console.anthropic.com). The browser never sees the key. Each ID is one Claude call with one resized photo (cents). Spend cap: run `migration-3.sql` (creates a locked `usage` table). The function logs tokens and cost per call and refuses once today's total (midnight Eastern) reaches `DAILY_CAP_USD` (default $1.00); signed-in users get `PER_USER_DAILY` calls (default 25), anonymous callers 5. Both are optional secrets. Check spend in Supabase → Table Editor → usage.
 
+## Email a brief on demand (send-brief)
+
+The Brief page has an **Email me this brief** card: type a town, pick it, tap **Send me the brief**. The server builds a fresh brief for that place (weather for 6–9 AM, plus eBird sightings within 25 km over the last 3 days) and emails it. After 9 AM local it covers tomorrow morning. **Send it to someone else** emails one brief to a friend. You must be signed in; "Send me" always goes to your verified sign-in address, never to an address typed into the form.
+
+Guards, because the form can email strangers: per-user daily caps (10 to yourself, 5 to friends), one brief per recipient per day and three per week, a site-wide daily cap (50), and an unsubscribe link in every friend email that stops friends from sending to that address again. Recipient addresses are stored only as keyed hashes. Change the caps with the optional secrets below.
+
+Setup (about 20 minutes, once):
+
+1. **Database.** Run `migration-4.sql` in the Supabase SQL Editor. It creates `brief_sends` (the counters) and `email_suppressions` (the opt-outs), both locked to the edge functions.
+2. **Email service.** Create a free account at resend.com and make an API key. Until you verify a sending domain there, Resend only delivers to the address you signed up with, so "Send me" works for you straight away but "send to someone else" will not. Verifying a domain you own (a few DNS records) removes that limit.
+3. **Secrets** (Edge Functions → Secrets): `EBIRD_KEY` (your eBird key, same one as the GitHub secret), `RESEND_API_KEY`, and `UNSUB_SECRET` (any long random string, e.g. `openssl rand -hex 32`; keep it, because changing it later breaks old unsubscribe links). Optional: `FROM_EMAIL` (e.g. `Daybird <brief@yourdomain.com>` once the domain is verified), `MAILING_ADDRESS` (printed in the footer), `SITE_URL`, `SELF_PER_DAY`, `OTHER_PER_DAY`, `DAILY_SEND_CAP`.
+4. **Deploy two functions** the same way as `bird-id`: `send-brief` with "Verify JWT" left **on**, and `unsubscribe` with "Verify JWT" **off** (people clicking the link in an email are not signed in; the link's signed token is the check instead).
+5. **Try it.** Sign in, tap "Send me the brief", and check your inbox and spam folder. Check the `brief_sends` table in the Table Editor to see the row it logged.
+
+`unsubscribe.html` is the page those unsubscribe links open. eBird terms still apply: this is free, non-commercial use, and a server key making calls for more people makes the Cornell Lab permission question more pressing.
+
 ## Still faked
 
 - Payments, host payouts, insurance, messaging, moderation.
@@ -72,6 +88,8 @@ feed.html      social
 host.html      landowner listing form
 profile.html   life list stats + favorite bird
 settings.html  key + location + migration
+unsubscribe.html  opt-out page linked from emailed briefs
+supabase/functions/  bird-id, send-brief, unsubscribe (edge functions)
 js/app.js      data layer + scoring
 css/style.css
 data/mock.js     sample sightings/weather (fallback)

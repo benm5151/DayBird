@@ -131,6 +131,19 @@ const CLOUD = (() => {
     return data;
   }
 
-  return { ready, init, user, signIn, signOut, photoId, getProfile, saveProfile, uploadPhoto, listPosts, createPost, deletePost, addComment, deleteComment, toggleLike,
+  // ---- email a brief (edge function 'send-brief') ----
+  // payload: { to: 'self' | 'other', email? (for 'other'), lat, lng, place }
+  async function sendBrief(payload) {
+    const { data, error } = await sb.functions.invoke('send-brief', { body: payload });
+    if (error) {
+      let msg = error.message || String(error);
+      try { const ctx = error.context; if (ctx && ctx.json) { const j = await ctx.json(); if (j.error) msg = j.error; } } catch {}
+      if (/not found|404/i.test(msg)) msg = 'send-brief function is not deployed yet';
+      throw new Error(msg);
+    }
+    return data;
+  }
+
+  return { ready, init, user, signIn, signOut, photoId, sendBrief, getProfile, saveProfile, uploadPhoto, listPosts, createPost, deletePost, addComment, deleteComment, toggleLike,
            listListings, createListing, deleteListing, privateLocations, hostBookings, cancelBooking, myBookings, book };
 })();

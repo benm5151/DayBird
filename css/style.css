@@ -73,6 +73,14 @@ label{display:block;font-size:13px;font-weight:600;color:var(--muted);margin:10p
 .chip{display:inline-block;background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:2px 8px;font-size:12px;margin:2px 4px 2px 0}
 footer{color:var(--muted);font-size:12px;margin-top:40px;border-top:1px solid var(--line);padding-top:14px}
 .hidden{display:none !important}
+/* email-me-this-brief card */
+.inline{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.inline input{flex:1;min-width:180px;width:auto}
+.picks{display:flex;flex-direction:column;gap:6px;margin:8px 0}
+.picks:empty{display:none}
+.picks button{text-align:left;background:var(--bg);color:var(--ink);border:1px solid var(--line);font-weight:500}
+details.more{margin-top:14px;border-top:1px solid var(--line);padding-top:10px}
+details.more summary{cursor:pointer;font-weight:600;color:var(--brand)}
 @media (max-width:600px){h1{font-size:28px}.call .big{font-size:40px}}
 
 /* phone: tabs become a fixed bottom bar */

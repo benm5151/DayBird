@@ -40,6 +40,31 @@
     </div>
   </div>
 
+  <div class="card" id="sendcard">
+    <h3>Email me this brief</h3>
+    <p class="tagline">Pick a place, then tap send for a fresh brief any time of day. After 9 AM it covers tomorrow morning.</p>
+    <label for="placeQ">Place</label>
+    <div class="inline">
+      <input id="placeQ" placeholder="Town, e.g. Hanover, NH" autocomplete="off">
+      <button class="ghost small" id="placeFind" type="button">Find</button>
+      <button class="ghost small" id="placeGeo" type="button">Use my location</button>
+    </div>
+    <div class="picks" id="placePicks"></div>
+    <p class="meta">Brief covers: <b id="placeNow"></b></p>
+    <button id="sendMe" type="button">Send me the brief</button>
+    <p class="meta" id="sendGate"></p>
+    <details class="more">
+      <summary>Send it to someone else</summary>
+      <label for="otherEmail">Their email</label>
+      <div class="inline">
+        <input id="otherEmail" type="email" placeholder="friend@email.com" autocomplete="off">
+        <button class="ghost" id="sendOther" type="button">Send</button>
+      </div>
+      <p class="tagline">They'll see your Daybird name, <b id="asName">…</b>. One brief per person per day, and there's an unsubscribe link in the email.</p>
+    </details>
+    <p class="meta" id="sendMsg" role="status" aria-live="polite"></p>
+  </div>
+
   <div class="grid">
     <div class="card">
       <h3>Where to go</h3>
@@ -137,6 +162,64 @@
     const t = DB.briefText(b);
     try { await navigator.clipboard.writeText(t); $('copyMsg').textContent = 'Copied.'; }
     catch { prompt('Copy this:', t); }
+  };
+
+  // ---- email this brief ----
+  // The server builds the brief for the chosen place and emails it (supabase/functions/send-brief), so the
+  // eBird key never reaches the browser and the page above is untouched by the place you pick here.
+  let place = DB.briefPlace();
+  const say = (t, bad) => { $('sendMsg').textContent = t; $('sendMsg').style.color = bad ? 'var(--red)' : ''; };
+  const showPlace = () => { $('placeNow').textContent = place.label; };
+  showPlace();
+  DB.profile().then(p => { $('asName').textContent = p.name || 'your name'; }).catch(() => { $('asName').textContent = 'your name'; });
+
+  const gate = () => {
+    const ok = DB.online();
+    $('sendMe').disabled = !ok; $('sendOther').disabled = !ok;
+    $('sendGate').textContent = ok ? '' : (CLOUD.ready ? 'Sign in (top right) to send briefs by email.' : 'Emailing briefs needs the online connection, which is off here.');
+  };
+  gate();
+  document.addEventListener('daybird:auth', gate);
+
+  $('placeFind').onclick = async () => {
+    const q = $('placeQ').value.trim(); if (!q) return;
+    $('placePicks').innerHTML = ''; say('Looking…');
+    try {
+      const r = await DB.findPlaces(q);
+      if (!r.length) return say('No match. Try the town name with its state, like "Hanover, NH".', true);
+      say('Pick one:');
+      $('placePicks').innerHTML = r.map((p, i) => `<button type="button" data-i="${i}">${DB.esc(p.label)}</button>`).join('');
+      $('placePicks').onclick = (e) => {
+        const b = e.target.closest('button[data-i]'); if (!b) return;
+        place = r[+b.dataset.i]; DB.saveBriefPlace(place); showPlace(); $('placePicks').innerHTML = ''; say('');
+      };
+    } catch (e) { say('Place search failed: ' + e.message, true); }
+  };
+  $('placeQ').addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); $('placeFind').click(); } });
+  $('placeGeo').onclick = () => {
+    if (!navigator.geolocation) return say('This device has no location access.', true);
+    say('Asking your device for its location…');
+    navigator.geolocation.getCurrentPosition((p) => {
+      // rounded to 2 decimals (about 1 km): plenty for a brief, and nothing more precise leaves the browser
+      place = { label: 'My current location', lat: +p.coords.latitude.toFixed(2), lng: +p.coords.longitude.toFixed(2) };
+      DB.saveBriefPlace(place); showPlace(); $('placePicks').innerHTML = ''; say('');
+    }, (e) => say(e.message || 'Could not get your location.', true), { timeout: 15000 });
+  };
+
+  async function send(extra, btn) {
+    btn.disabled = true; say('Sending…');
+    try {
+      const r = await CLOUD.sendBrief({ lat: place.lat, lng: place.lng, place: place.label, ...extra });
+      if (extra.to === 'self') say(`Sent to ${r.to}: ${r.word} for ${r.place}, ${r.when}.` + (r.partial ? ' Some data was unavailable, so it may be incomplete.' : ''));
+      else { say("If that address accepts Daybird briefs, it's on its way."); $('otherEmail').value = ''; }
+    } catch (e) { say(e.message, true); }
+    setTimeout(gate, 4000);   // a short pause so a double tap doesn't send twice
+  }
+  $('sendMe').onclick = () => send({ to: 'self' }, $('sendMe'));
+  $('sendOther').onclick = () => {
+    const email = $('otherEmail').value.trim();
+    if (!email) return say("Enter their email first.", true);
+    send({ to: 'other', email }, $('sendOther'));
   };
 
   const passes = (await DB.loadPasses()).filter(p => p.price >= 0).slice(0, 3);

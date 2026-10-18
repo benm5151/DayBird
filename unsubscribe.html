@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Daybird — Unsubscribe</title>
+<link rel="stylesheet" href="css/style.css">
+<meta name="theme-color" content="#1F2A37">
+<link rel="icon" href="icon.svg">
+<meta name="robots" content="noindex">
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <a class="brand" href="index.html"><img src="mark.svg" alt=""><span>Daybird<small>Unsubscribe</small></span></a>
+  </header>
+
+  <div class="card" id="box">
+    <h1 id="title">Checking your link…</h1>
+    <p class="lead" id="text"></p>
+    <button id="go" class="hidden" type="button">Unsubscribe</button>
+    <p class="meta" id="msg" role="status" aria-live="polite"></p>
+  </div>
+  <footer>Daybird briefs are shared by people who use the site. Unsubscribing here stops friends from sending briefs to your address. <a href="index.html">Back to Daybird</a></footer>
+</div>
+
+<script src="js/config.js"></script>
+<script>
+(async () => {
+  const $ = (id) => document.getElementById(id);
+  const q = new URLSearchParams(location.search);
+  const email = (q.get('e') || '').trim(), token = (q.get('t') || '').trim();
+  const cfg = window.DAYBIRD_CONFIG || {};
+  const url = cfg.supabaseUrl ? `${cfg.supabaseUrl}/functions/v1/unsubscribe?e=${encodeURIComponent(email)}&t=${encodeURIComponent(token)}` : '';
+  const headers = cfg.supabaseAnonKey ? { apikey: cfg.supabaseAnonKey, authorization: 'Bearer ' + cfg.supabaseAnonKey } : {};
+  const bad = (why) => { $('title').textContent = "This link doesn't work"; $('text').textContent = why || 'Open the unsubscribe link from the email again, or reply to the person who shared the brief.'; };
+
+  if (!email || !token || !url) return bad();
+  try {
+    const r = await fetch(url, { headers });
+    const j = await r.json();
+    if (!j.valid) return bad();
+  } catch { return bad("Couldn't reach Daybird just now. Try again in a minute."); }
+
+  $('title').textContent = 'Stop briefs from friends?';
+  $('text').textContent = 'Daybird will stop emailing this address when someone shares a brief with it. Confirm below.';
+  $('go').classList.remove('hidden');
+  $('go').onclick = async () => {
+    $('go').disabled = true; $('msg').textContent = 'Saving…';
+    try {
+      const r = await fetch(url, { method: 'POST', headers });
+      const j = await r.json();
+      if (!r.ok) throw new Error(j.error || 'Something went wrong.');
+      $('title').textContent = "You're unsubscribed";
+      $('text').textContent = 'No more shared briefs will be sent to this address.';
+      $('go').classList.add('hidden'); $('msg').textContent = '';
+    } catch (e) { $('go').disabled = false; $('msg').textContent = e.message; }
+  };
+})();
+</script>
+</body>
+</html>
