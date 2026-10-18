@@ -242,6 +242,17 @@ const DB = (() => {
     const dates = obs.map(o => o['Date']).filter(Boolean).sort();
     const checklists = new Set(obs.map(o => o['Submission ID'])).size;
     const yr = new Date().getFullYear();
+    // Per-month aggregates for the recap page (recap.html): species seen, checklists, lifer names and the best day.
+    // Small (one entry per month you birded), so it fits in localStorage and the profile row.
+    const months = {};
+    const monthOf = (ym) => months[ym] || (months[ym] = { species: new Set(), lists: new Set(), lifers: [], days: {} });
+    obs.forEach(o => { const d = o['Date'] || ''; if (d.length < 7) return; const m = monthOf(d.slice(0, 7)); m.species.add(o['Common Name']); m.lists.add(o['Submission ID']); });
+    species.forEach(s => { if (!s.first || s.first.length < 7) return; const m = monthOf(s.first.slice(0, 7)); m.lifers.push(s.name); m.days[s.first] = (m.days[s.first] || 0) + 1; });
+    Object.keys(months).forEach(ym => {
+      const m = months[ym];
+      const best = Object.entries(m.days).sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))[0];
+      months[ym] = { species: m.species.size, checklists: m.lists.size, lifers: m.lifers, bestDay: best ? { date: best[0], n: best[1] } : null };
+    });
     const life = {
       importedAt: new Date().toISOString(), checklists, observations: obs.length,
       total: species.length, thisYear: species.filter(s => s.first.startsWith(String(yr))).length,
@@ -252,6 +263,7 @@ const DB = (() => {
       topPlaces: Object.entries(places).sort((a, b) => b[1] - a[1]).slice(0, 5).map(([name, n]) => ({ name, n })),
       byMonth: Array.from({ length: 12 }, (_, m) => species.filter(s => +s.first.slice(5, 7) === m + 1).length),
       allSpecies: species.map(s => s.name).sort(),
+      months,
     };
     store.set('life', life);
     if (online()) CLOUD.saveProfile({ life: withLearned(life) }).catch(() => {});
@@ -293,6 +305,13 @@ const DB = (() => {
           newSpecies.push({ name, first: date, loc: l.loc?.name || cl.locId || '', sightings: 1 });
           if (date) L.byMonth[+date.slice(5, 7) - 1]++;
           if (date.startsWith(String(new Date().getFullYear()))) L.thisYear++;
+          if (date.length >= 7) { // keep the recap's month aggregates in step (lifer names and best day; species counts come from the CSV)
+            L.months = L.months || {};
+            const m = L.months[date.slice(0, 7)] = L.months[date.slice(0, 7)] || { species: 0, checklists: 0, lifers: [], bestDay: null };
+            m.lifers.push(name);
+            const n = newSpecies.filter(x => x.first === date).length;
+            if (!m.bestDay || n > m.bestDay.n) m.bestDay = { date, n };
+          }
         }
       }
       L.checklists++;

@@ -106,6 +106,26 @@ Hand-written and worth tuning: the season rules in `js/learn.js`, everything in 
 Progress lives in localStorage under `daybird:learned` (`first10`, `bingo`, `challenges`, `outside`, `paused`, `tracks`, `quiz`). Merging with the cloud copy is a union, so nothing checked on one device gets unchecked by another. A profile whose `life` holds only `learned` is treated as "no life list yet" on the Profile page.
 
 Test: `node tests/learn.test.mjs` (Playwright, network stubbed; serves the repo, stubs `data/brief.json` with 40 species and with a 404, checks every section, the streak arithmetic and that every page still loads; screenshots go to `OUT` or `.test-out/`).
+## Recap, digest and Ask Daybird
+
+Three pages, listed in `data/pages.js` for the hub, plus two edge functions and one migration.
+
+**Your month in birds (`recap.html`)** reads the life list imported on the profile page (nothing is fetched). Pick a month (default: the last full month) and it shows the lifers you added, your best day (most lifers in one day), species and checklist counts, the same month last year when the list has it, and "likely next lifers": species in the Northeast trait table that are not on your list, with the ones in this morning's `data/brief.json` nearby list first and feeder and yard birds as the fallback. The month counts come from a `months` field that the CSV import now writes (`js/app.js`); a list imported before this change still works from the ten most recent lifers until you re-import the CSV. The live eBird sync adds lifer names to a month but not species counts, and the page says nothing about counts for those months. **Make my card** draws a 1080×1920 PNG on a canvas (lifers this year, latest lifer, favorite bird, top spot, a lifers-by-month strip, the titmouse mark and wordmark) and shares it with the system share sheet or downloads it. The **spark bird** variant asks for the bird that got you started and one line about why; those two fields are saved as your favorite bird on the profile (in the browser, and online when signed in) and nothing else is stored.
+
+**This week in birds (`digest.html`)** calls the `digest` edge function for the place set on the Brief page and renders: a three-sentence lead, "Rare and notable" (eBird notable reports within 50 km over the last 7 days, grouped by species, with checklist links), a "Video of the week" link to a Cornell Lab channel search for the top notable species (a link, never an embed), "News" (one plain sentence per item plus a link to the source, or a short attributed quote when the summary is missing), "From the journals" (recent open-access papers from OpenAlex with DOI links) and a Sources footer. Article text is never reproduced beyond a short quote. The function builds one digest per 0.1° cell (about 10 km) per week (Monday, Eastern), stores it in the `digests` table and serves that row to everyone else, so the cost is one Claude call per area per week (about a cent or two at Sonnet prices) and nothing per reader. A digest that Claude could not summarize is kept for six hours and then rebuilt on the next read.
+
+Feeds are an allowlist in `DIGEST_FEEDS` at the top of `supabase/functions/digest/index.ts`: All About Birds news, Audubon, NH Audubon and BirdCast. The parser is a small hand-written RSS 2.0 / Atom reader (no library), tested on hand-made samples only, so **check each feed URL once the function is live**: open Edge Functions → digest → Logs after the first call and look for `feed <name>:` lines, and the page's Sources footer lists any feed that did not parse under "Not reachable this week". To add a feed, append `{ name, url, home }` and redeploy; to drop one, delete its line. Items older than 10 days are skipped, 4 per feed are kept, and only the title, link, date and the first 300 characters of the description are stored. The OpenAlex queries (`bird migration`, `ornithology citizen science`) are in `OPENALEX_QUERIES` next to the feeds. From December 1 to January 5 the lead gets a short Christmas Bird Count note.
+
+**Ask Daybird (`ask.html`)** is a chat box that answers questions about this morning's brief and your list. Sign-in required; 20 questions per user per day (`ASK_PER_USER_DAILY`). What is sent to the `ask` function: the question, the brief trimmed to about 2 KB (call, why line, weather, groups, spots, notable birds) and a life-list summary (totals and your last ten lifers, never the full list). The system prompt tells the model what Daybird is, to answer in two to four plain sentences, to say "I don't know" when the data does not cover it, never to give safety or medical advice, and to point to BirdCast and eBird for live data. Only token counts and cost are stored (`usage` rows with kind `ask`), never the text; the transcript lives in the tab's sessionStorage and clears when the tab closes. Each question is one short Claude call, about half a cent.
+
+Setup:
+
+1. **Database.** Run `migration-7.sql` in the SQL Editor. It creates `digests` (locked to the service role; readers go through the function). Both functions reuse the `usage` table from `migration-3.sql`, so run that first if you have not.
+2. **Secrets** (Edge Functions → Secrets): `ANTHROPIC_API_KEY` (the one bird-id already uses) and `EBIRD_KEY` (the one send-brief uses). Optional: `DAILY_CAP_USD` (default $1.00, one shared budget across bird-id, digest and ask; when it is spent, the digest is served without the summary and ask refuses until midnight Eastern), `DIGEST_RADIUS_KM` (default 50, max 100), `ASK_PER_USER_DAILY` (default 20).
+3. **Deploy two functions** the same way as `bird-id`: `digest` and `ask`, both with "Verify JWT" left **on**. The digest page calls its function with the anon key, which passes that check; ask also verifies the user's token with Supabase Auth itself.
+4. **Try it.** Open `digest.html` (the first load of the week takes 10 to 20 seconds while the sources are fetched; the next loads are instant) and check the `digests` and `usage` tables. Sign in and ask a starter question on `ask.html`.
+
+Approximate or hand-written: the feed parser (regex over the XML, fine for well-formed feeds), the "likely next lifers" ranking (presence in this morning's nearby list, then feeder birds), the card layout (fixed positions tuned for 1080×1920), and the Claude prices in the functions (list prices, update if they change). eBird data in the digest is non-commercial use and is attributed on the page.
 
 ## Still faked
 
@@ -128,6 +148,12 @@ settings.html  key + location + migration
 unsubscribe.html  opt-out page linked from emailed briefs
 learn.html     learn and play: first 10, weekly groups, bingo, challenges, quiz, streak, tracks
 supabase/functions/  bird-id, send-brief, unsubscribe (edge functions)
+recap.html     your month in birds + the share card
+digest.html    this week in birds (news digest)
+ask.html       Ask Daybird (chat about the brief and your list)
+data/pages.js  pages beyond the main tabs, for the hub
+supabase/functions/  bird-id, send-brief, unsubscribe, digest, ask (edge functions)
+migration-N.sql  database changes, run in order in the SQL Editor
 js/brief.js    the brief engine (scoring + wording, shared everywhere)
 js/app.js      data layer (incl. learn progress + streak)
 js/share.js    share card (canvas PNG) + "You in?" text

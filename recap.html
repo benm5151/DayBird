@@ -1,0 +1,362 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Daybird — Your month in birds</title>
+<link rel="stylesheet" href="css/style.css">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#1F2A37">
+<link rel="icon" href="icon.svg">
+<link rel="apple-touch-icon" href="icon.svg">
+<style>
+.monthbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:6px 0 14px}
+.monthbar select{width:auto;min-width:200px}
+.bars{display:flex;gap:4px;align-items:flex-end;height:70px;margin-top:8px}
+.bars div{flex:1;background:var(--accent);border-radius:3px 3px 0 0;min-height:2px;position:relative;opacity:.55}
+.bars div.now{opacity:1}
+.bars div span{position:absolute;top:-18px;left:0;right:0;text-align:center;font-size:11px;color:var(--muted)}
+.months{display:flex;gap:4px;font-size:10px;color:var(--muted)}
+.months span{flex:1;text-align:center}
+.cardwrap{display:grid;grid-template-columns:minmax(0,1fr) minmax(220px,300px);gap:18px;align-items:start}
+@media (max-width:700px){.cardwrap{grid-template-columns:1fr}}
+#cardCanvas{width:100%;max-width:300px;aspect-ratio:9/16;border-radius:16px;box-shadow:var(--shadow);background:#1F2A37;display:block}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:10px;overflow:hidden}
+.seg button{border:0;border-radius:0;background:transparent;color:var(--ink);font-weight:500;padding:7px 12px}
+.seg button.on{background:var(--brand);color:#fff}
+@media (prefers-color-scheme:dark){.seg button.on{color:#141922}}
+.empty{text-align:center;padding:30px 10px}
+.empty h2{margin-top:0}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <a class="brand" href="index.html"><img src="mark.svg" alt=""><span>Daybird<small>Your month in birds</small></span></a>
+    <a class="btn ghost" href="settings.html">Settings</a>
+  </header>
+  <nav class="tabs">
+    <a href="index.html">Brief</a>
+    <a href="id.html">ID</a>
+    <a href="passes.html">Passes</a>
+    <a href="feed.html">Feed</a>
+    <a href="profile.html">Profile</a>
+    <a href="host.html">Host land</a>
+  </nav>
+
+  <div id="empty" class="card empty hidden">
+    <h2>No life list yet</h2>
+    <p class="meta">The recap reads the life list you import on your profile. Download <b>MyEBirdData.csv</b> from eBird, import it there, and come back.</p>
+    <a class="btn" href="profile.html">Go to Profile</a>
+  </div>
+
+  <div id="recap" class="hidden">
+    <h1 id="title">Your month in birds</h1>
+    <div class="monthbar">
+      <label for="month" style="margin:0">Month</label>
+      <select id="month"></select>
+      <span class="meta" id="monthNote"></span>
+    </div>
+    <p class="lead" id="lead"></p>
+
+    <div class="card">
+      <div class="stat" id="stats"></div>
+    </div>
+
+    <div class="grid">
+      <div class="card">
+        <h3 id="lifersTitle">New lifers</h3>
+        <div id="lifers"></div>
+      </div>
+      <div class="card">
+        <h3>Best day</h3>
+        <div id="bestDay"></div>
+        <h3 style="margin-top:14px">Compared with</h3>
+        <div id="compare" class="meta"></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>Lifers by month, all years</h3>
+      <p class="tagline">First-ever sightings by calendar month. The chosen month is highlighted.</p>
+      <div class="bars" id="bars"></div>
+      <div class="months"><span>J</span><span>F</span><span>M</span><span>A</span><span>M</span><span>J</span><span>J</span><span>A</span><span>S</span><span>O</span><span>N</span><span>D</span></div>
+    </div>
+
+    <div class="card">
+      <h3>Likely next lifers</h3>
+      <p class="tagline" id="nextNote"></p>
+      <div id="next"></div>
+    </div>
+
+    <h2>Make my card</h2>
+    <div class="card">
+      <div class="cardwrap">
+        <div>
+          <div class="seg" role="group" aria-label="Card style">
+            <button type="button" id="styleYear" class="on">This year</button>
+            <button type="button" id="styleSpark">Spark bird</button>
+          </div>
+          <p class="tagline" style="margin-top:8px" id="styleNote">A 1080×1920 image for stories and group chats: lifers this year, your latest lifer, your favorite bird and your top spot.</p>
+          <div id="sparkForm" class="hidden">
+            <label for="sparkBird">Your spark bird</label>
+            <input id="sparkBird" list="speciesList" placeholder="The bird that got you started">
+            <datalist id="speciesList"></datalist>
+            <label for="sparkWhy">Why that one</label>
+            <input id="sparkWhy" maxlength="140" placeholder="One line, up to 140 characters">
+            <p class="tagline">Saved as your favorite bird on your profile (in this browser, and online when you're signed in). Nothing else is stored.</p>
+          </div>
+          <div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap">
+            <button id="makeCard" type="button">Make my card</button>
+            <button id="shareCard" type="button" class="ghost" disabled>Share or save</button>
+          </div>
+          <p class="meta" id="cardMsg" role="status" aria-live="polite"></p>
+        </div>
+        <canvas id="cardCanvas" width="1080" height="1920" aria-label="Your Daybird card"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <footer>Sightings via eBird (Cornell Lab of Ornithology); your list stays in your browser unless you sign in. Daybird is a guide, not safety advice.</footer>
+</div>
+
+<script src="data/mock.js"></script>
+<script src="data/passes.js"></script>
+<script src="data/feed.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="js/config.js"></script>
+<script src="js/cloud.js"></script>
+<script src="data/traits.js"></script>
+<script src="js/brief.js"></script>
+<script src="js/app.js"></script>
+<script>
+(async () => {
+  await DB.ready;
+  const $ = (id) => document.getElementById(id);
+  const esc = DB.esc;
+  const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+  const ymLabel = (ym) => `${MONTHS[+ym.slice(5, 7) - 1]} ${ym.slice(0, 4)}`;
+  const dayLabel = (d) => new Date(d + 'T12:00:00').toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric' });
+  const plural = (n, w) => `${n} ${w}${n === 1 || w === 'species' ? '' : 's'}`;
+
+  const L = await DB.lifeList();
+  let prof = await DB.profile();
+  if (!L || !L.total) { $('empty').classList.remove('hidden'); return; }
+  $('recap').classList.remove('hidden');
+
+  // ---------- which months can we talk about?
+  // months: per-month aggregates written by the CSV import (newer imports). Fallback: the ten most recent lifers.
+  const months = L.months || {};
+  const lifersIn = (ym) => months[ym] ? months[ym].lifers.map(n => ({ name: n, first: '', loc: '' })) : (L.recentLifers || []).filter(x => (x.first || '').startsWith(ym));
+  const now = new Date();
+  const lastFull = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+  const lastFullYm = `${lastFull.getFullYear()}-${String(lastFull.getMonth() + 1).padStart(2, '0')}`;
+  const thisYm = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+  let choices = Object.keys(months).sort().reverse();
+  if (!choices.length) choices = [...new Set((L.recentLifers || []).map(x => (x.first || '').slice(0, 7)).filter(x => x.length === 7))].sort().reverse();
+  if (!choices.includes(lastFullYm)) choices.unshift(lastFullYm);
+  if (!choices.includes(thisYm)) choices.unshift(thisYm);
+  choices = choices.filter(ym => ym <= thisYm).sort().reverse().slice(0, 36);
+  $('month').innerHTML = choices.map(ym => `<option value="${ym}">${ymLabel(ym)}</option>`).join('');
+  $('month').value = choices.includes(lastFullYm) ? lastFullYm : choices[0];
+  $('monthNote').textContent = months[lastFullYm] || Object.keys(months).length ? '' : 'Showing the lifers in your ten most recent; re-import your eBird CSV on the profile page for full month stats.';
+
+  // ---------- recent list near you (for "likely next lifers")
+  let recentNearby = [];
+  try { const r = await fetch('data/brief.json', { cache: 'no-store' }); if (r.ok) { const b = await r.json(); recentNearby = b.recent || (b.lookFor || []).flatMap(g => g.species || []); } } catch {}
+  const have = new Set(L.allSpecies || []);
+  const traits = globalThis.DAYBIRD_TRAITS || [];
+  const recentSet = new Set(recentNearby);
+  let next = traits.filter(t => !have.has(t[0]) && recentSet.has(t[0])).map(t => ({ name: t[0], hint: t[5], why: 'reported near you this week' }));
+  if (next.length < 5) {
+    const yard = traits.filter(t => !have.has(t[0]) && !recentSet.has(t[0]) && (t[3].includes('feeder') || t[3].includes('yard'))).map(t => ({ name: t[0], hint: t[5], why: 'a feeder and yard bird' }));
+    next = next.concat(yard);
+  }
+  next = next.slice(0, 8);
+  $('nextNote').textContent = recentNearby.length
+    ? 'Birds on the common Northeast list that are not on yours yet. Ones reported near you this week come first.'
+    : 'Birds on the common Northeast list that are not on yours yet. This morning\'s brief had no nearby species list, so these are feeder and yard birds.';
+  $('next').innerHTML = next.map(x => `<div class="row"><span><span class="l">${esc(x.name)}</span><br><span class="meta">${esc(x.hint)}</span></span><span class="r">${esc(x.why)}</span></div>`).join('') || '<p class="meta">You have every bird on the common list. Impressive.</p>';
+
+  // ---------- render the chosen month
+  function render() {
+    const ym = $('month').value, mAgg = months[ym] || null, lifers = lifersIn(ym);
+    // Months added by the live eBird sync carry lifer names but no species or checklist counts (those come from the CSV),
+    // so only talk about counts when the month has them.
+    const m = mAgg && mAgg.species > 0 ? mAgg : null;
+    const [y, mo] = [ym.slice(0, 4), +ym.slice(5, 7)];
+    $('title').textContent = `${MONTHS[mo - 1]} in birds`;
+    $('lifersTitle').textContent = `New lifers in ${MONTHS[mo - 1]}`;
+    const lead = lifers.length
+      ? `You added ${plural(lifers.length, 'lifer')} in ${ymLabel(ym)}${m ? `, saw ${plural(m.species, 'species')} across ${plural(m.checklists, 'checklist')}` : ''}.`
+      : m ? `No new lifers in ${ymLabel(ym)}, but you saw ${plural(m.species, 'species')} across ${plural(m.checklists, 'checklist')}. The regulars count.`
+          : `No new lifers in ${ymLabel(ym)}. Your list stands at ${L.total}.`;
+    $('lead').textContent = lead;
+    $('stats').innerHTML = `
+      <div><b>${lifers.length}</b><span>lifers</span></div>
+      ${m ? `<div><b>${m.species}</b><span>species seen</span></div><div><b>${m.checklists}</b><span>checklists</span></div>` : ''}
+      <div><b>${L.total}</b><span>life list</span></div>
+      <div><b>${L.thisYear}</b><span>lifers ${now.getFullYear()}</span></div>`;
+    $('lifers').innerHTML = lifers.length
+      ? lifers.map(x => `<div class="row"><span class="l">${esc(x.name)}</span><span class="r">${esc(x.first)}${x.loc ? '<br>' + esc(x.loc) : ''}</span></div>`).join('')
+      : '<p class="meta">None this month.</p>';
+    // best day: from the month aggregates, else from the dated lifers we do have
+    let best = mAgg ? mAgg.bestDay : null;
+    if (!best && lifers.length) { const by = {}; lifers.forEach(x => { if (x.first) by[x.first] = (by[x.first] || 0) + 1; }); const e = Object.entries(by).sort((a, b) => b[1] - a[1])[0]; if (e) best = { date: e[0], n: e[1] }; }
+    $('bestDay').innerHTML = best ? `<b>${dayLabel(best.date)}</b><div class="meta">${plural(best.n, 'lifer')} in one day, your best of the month.</div>` : '<p class="meta">No lifer days to rank this month.</p>';
+    // compare: same month last year when the aggregates have it, else all-time count for that calendar month
+    const lastYear = `${+y - 1}-${String(mo).padStart(2, '0')}`;
+    const ly = months[lastYear] && months[lastYear].species > 0 ? months[lastYear] : null;
+    if (ly) {
+      const d = (m ? m.species : 0) - ly.species;
+      $('compare').innerHTML = `${MONTHS[mo - 1]} ${+y - 1}: ${plural(ly.species, 'species')} and ${plural(ly.lifers.length, 'lifer')}. ${m ? (d === 0 ? 'Same species count this year.' : `${Math.abs(d)} ${d > 0 ? 'more' : 'fewer'} species this year.`) : ''}`;
+    } else {
+      const all = (L.byMonth || [])[mo - 1] || 0;
+      $('compare').innerHTML = `${plural(all, 'lifer')} in ${MONTHS[mo - 1]}s over all your years of birding${Object.keys(months).length ? '' : '. Re-import your eBird CSV on the profile page to compare year to year'}.`;
+    }
+    const mx = Math.max(1, ...(L.byMonth || []));
+    $('bars').innerHTML = (L.byMonth || Array(12).fill(0)).map((n, i) => `<div class="${i === mo - 1 ? 'now' : ''}" style="height:${Math.round(n / mx * 100)}%"><span>${n || ''}</span></div>`).join('');
+  }
+  $('month').onchange = render;
+  render();
+
+  // ---------- the card
+  $('speciesList').innerHTML = (L.allSpecies || []).map(n => `<option value="${esc(n)}">`).join('');
+  $('sparkBird').value = prof.favorite || ''; $('sparkWhy').value = prof.favoriteWhy || '';
+  let style = 'year';
+  const setStyle = (s) => {
+    style = s;
+    $('styleYear').classList.toggle('on', s === 'year'); $('styleSpark').classList.toggle('on', s === 'spark');
+    $('sparkForm').classList.toggle('hidden', s !== 'spark');
+    $('styleNote').textContent = s === 'year' ? 'A 1080×1920 image for stories and group chats: lifers this year, your latest lifer, your favorite bird and your top spot.' : 'Your spark bird: the one that made you look twice. Type it and one line about why.';
+  };
+  $('styleYear').onclick = () => setStyle('year'); $('styleSpark').onclick = () => setStyle('spark');
+
+  // Palette from the light-scheme CSS variables (the card is always navy on cream, whatever the page's theme).
+  function palette() {
+    const cs = getComputedStyle(document.documentElement);
+    const lum = (hex) => { const m = hex.trim().match(/^#([0-9a-f]{6})$/i); if (!m) return 1; const n = parseInt(m[1], 16); return ((n >> 16) * 299 + ((n >> 8) & 255) * 587 + (n & 255) * 114) / 255000; };
+    const brand = cs.getPropertyValue('--brand').trim(), accent = cs.getPropertyValue('--accent').trim();
+    return { navy: lum(brand) < 0.5 ? brand : '#1F2A37', orange: /^#/.test(accent) ? accent : '#E8833A', cream: '#F6F3EC', mist: 'rgba(246,243,236,0.72)' };
+  }
+  const markImg = new Promise((res) => { const i = new Image(); i.onload = () => res(i); i.onerror = () => res(null); i.src = 'mark.svg'; });
+  function wrapText(ctx, text, maxW, maxLines) {
+    const words = String(text).split(/\s+/), lines = []; let cur = '';
+    for (const w of words) { const t = cur ? cur + ' ' + w : w; if (ctx.measureText(t).width > maxW && cur) { lines.push(cur); cur = w; } else cur = t; }
+    if (cur) lines.push(cur);
+    if (lines.length > maxLines) { lines.length = maxLines; lines[maxLines - 1] = lines[maxLines - 1].replace(/\s*\S*$/, '') + '…'; }
+    return lines;
+  }
+  function fitFont(ctx, text, family, maxW, start, min) { let s = start; do { ctx.font = `700 ${s}px ${family}`; if (ctx.measureText(text).width <= maxW) break; s -= 4; } while (s > min); return s; }
+  async function drawCard() {
+    const c = $('cardCanvas'), ctx = c.getContext('2d'), W = c.width, H = c.height, P = palette();
+    const serif = '"Iowan Old Style","Palatino Linotype",Georgia,serif', sans = 'ui-sans-serif,system-ui,-apple-system,"Segoe UI",Helvetica,Arial,sans-serif';
+    const year = now.getFullYear();
+    const latest = (L.recentLifers || [])[0];
+    const place = (L.topPlaces || [])[0];
+    const spark = $('sparkBird').value.trim(), why = $('sparkWhy').value.trim();
+    ctx.clearRect(0, 0, W, H);
+    ctx.fillStyle = P.navy; ctx.fillRect(0, 0, W, H);
+    // branch line, like the mark: sits between the content and the footer line
+    ctx.strokeStyle = P.orange; ctx.lineWidth = 14; ctx.lineCap = 'round';
+    ctx.beginPath(); ctx.moveTo(90, H - 170); ctx.quadraticCurveTo(W / 2, H - 210, W - 90, H - 170); ctx.stroke();
+    // header: mark badge + wordmark
+    const img = await markImg;
+    const bx = 90, by = 110, bs = 150;
+    ctx.fillStyle = P.cream; roundRect(ctx, bx, by, bs, bs, 34); ctx.fill();
+    ctx.strokeStyle = P.orange; ctx.lineWidth = 8; roundRect(ctx, bx, by, bs, bs, 34); ctx.stroke();
+    if (img) ctx.drawImage(img, bx + 18, by + 18, bs - 36, bs - 36);
+    ctx.fillStyle = P.cream; ctx.font = `700 92px ${serif}`; ctx.textBaseline = 'alphabetic'; ctx.fillText('daybird', bx + bs + 36, by + 108);
+    ctx.fillStyle = P.mist; ctx.font = `400 34px ${sans}`;
+    ctx.fillText(style === 'year' ? `${year} so far · ${prof.name || DB.settings().name || 'a birder'}` : `my spark bird · ${prof.name || DB.settings().name || 'a birder'}`, bx + bs + 40, by + 160);
+
+    if (style === 'year') {
+      // the big number
+      ctx.fillStyle = P.orange; ctx.font = `700 380px ${serif}`; ctx.fillText(String(L.thisYear), 80, 700);
+      ctx.fillStyle = P.cream; ctx.font = `400 54px ${sans}`; ctx.fillText(`lifer${L.thisYear === 1 ? '' : 's'} this year`, 100, 790);
+      ctx.fillStyle = P.mist; ctx.font = `400 38px ${sans}`; ctx.fillText(`${L.total} species on the life list · ${L.yearList || 0} seen in ${year}`, 100, 850);
+      // three facts, 165px each, so three of them end above the month strip
+      const facts = [
+        latest ? ['Latest lifer', latest.name, latest.loc ? `${latest.loc}${latest.first ? ' · ' + latest.first : ''}` : latest.first || ''] : null,
+        prof.favorite ? ['Favorite bird', prof.favorite, prof.favoriteWhy || ''] : null,
+        place ? ['Top spot', place.name, `${place.n} observations`] : null,
+      ].filter(Boolean);
+      let y = 960;
+      for (const [k, v, sub] of facts) {
+        ctx.fillStyle = P.orange; ctx.font = `600 30px ${sans}`; ctx.fillText(k.toUpperCase(), 100, y);
+        ctx.fillStyle = P.cream; const fs = fitFont(ctx, v, serif, W - 200, 68, 40); ctx.font = `700 ${fs}px ${serif}`; ctx.fillText(v, 100, y + 70);
+        if (sub) { ctx.fillStyle = P.mist; ctx.font = `400 32px ${sans}`; ctx.fillText(wrapText(ctx, sub, W - 200, 1)[0], 100, y + 118); }
+        y += 165;
+      }
+      // 12-bar strip: lifers by month, this year's months lit. Ends well above the branch line and the footer.
+      const strip = L.byMonth || Array(12).fill(0), mx = Math.max(1, ...strip);
+      const sx = 100, sw = W - 200, sy = H - 405, sh = 120, gap = 14, bw = (sw - gap * 11) / 12;
+      strip.forEach((n, i) => {
+        const h = Math.max(6, Math.round(n / mx * sh));
+        ctx.fillStyle = i <= now.getMonth() ? P.orange : P.mist; ctx.globalAlpha = i <= now.getMonth() ? 1 : 0.35;
+        roundRect(ctx, sx + i * (bw + gap), sy + sh - h, bw, h, 6); ctx.fill(); ctx.globalAlpha = 1;
+      });
+      ctx.fillStyle = P.mist; ctx.font = `400 26px ${sans}`;
+      'JFMAMJJASOND'.split('').forEach((ch, i) => ctx.fillText(ch, sx + i * (bw + gap) + bw / 2 - 8, sy + sh + 40));
+      ctx.font = `400 28px ${sans}`; ctx.fillText('lifers by month, all years', sx, sy - 24);
+    } else {
+      ctx.fillStyle = P.orange; ctx.font = `600 34px ${sans}`; ctx.fillText('MY SPARK BIRD', 100, 560);
+      const name = spark || 'Pick a bird';
+      ctx.fillStyle = P.cream;
+      const fs = fitFont(ctx, name, serif, W - 200, 150, 60);
+      const nameLines = wrapText(ctx, name, W - 200, 2);
+      nameLines.forEach((ln, i) => ctx.fillText(ln, 100, 700 + i * (fs + 10)));
+      let y = 700 + nameLines.length * (fs + 10) + 60;
+      if (why) {
+        ctx.fillStyle = P.mist; ctx.font = `400 46px ${serif}`;
+        ctx.fillText('“', 100, y + 40);
+        const lines = wrapText(ctx, why, W - 260, 6);
+        ctx.fillStyle = P.cream; ctx.font = `400 46px ${serif}`;
+        lines.forEach((ln, i) => ctx.fillText(ln, 150, y + 40 + i * 62));
+        ctx.fillStyle = P.mist; ctx.fillText('”', 150 + ctx.measureText(lines[lines.length - 1]).width + 10, y + 40 + (lines.length - 1) * 62);
+        y += 40 + lines.length * 62 + 40;
+      }
+      ctx.fillStyle = P.mist; ctx.font = `400 36px ${sans}`;
+      ctx.fillText(`${L.total} species on my life list · ${L.thisYear} new in ${year}`, 100, Math.max(y + 30, H - 480));
+      if (latest) ctx.fillText(`Latest lifer: ${latest.name}`, 100, Math.max(y + 86, H - 424));
+    }
+    // footer
+    ctx.fillStyle = P.mist; ctx.font = `400 28px ${sans}`;
+    ctx.fillText('Sightings via eBird · day-bird.com', 100, H - 95);
+    return c;
+  }
+  function roundRect(ctx, x, y, w, h, r) { r = Math.min(r, w / 2, h / 2); ctx.beginPath(); ctx.moveTo(x + r, y); ctx.arcTo(x + w, y, x + w, y + h, r); ctx.arcTo(x + w, y + h, x, y + h, r); ctx.arcTo(x, y + h, x, y, r); ctx.arcTo(x, y, x + w, y, r); ctx.closePath(); }
+
+  $('makeCard').onclick = async () => {
+    $('makeCard').disabled = true; $('cardMsg').textContent = '';
+    try {
+      if (style === 'spark') {
+        const favorite = $('sparkBird').value.trim(), favoriteWhy = $('sparkWhy').value.trim();
+        if (!favorite) { $('cardMsg').textContent = 'Type your spark bird first.'; $('makeCard').disabled = false; return; }
+        if (favorite !== (prof.favorite || '') || favoriteWhy !== (prof.favoriteWhy || '')) {
+          prof = { ...prof, favorite, favoriteWhy };
+          try { await DB.saveProfile(prof); } catch (e) { $('cardMsg').textContent = 'Card made; could not save the spark bird to your profile: ' + e.message; }
+        }
+      }
+      await drawCard();
+      $('shareCard').disabled = false;
+      $('cardMsg').textContent = $('cardMsg').textContent || 'Card ready. Tap "Share or save" to send it.';
+    } catch (e) { $('cardMsg').textContent = 'Could not draw the card: ' + e.message; }
+    $('makeCard').disabled = false;
+  };
+  $('shareCard').onclick = async () => {
+    const blob = await new Promise(r => $('cardCanvas').toBlob(r, 'image/png'));
+    if (!blob) return $('cardMsg').textContent = 'Could not export the image.';
+    const file = new File([blob], `daybird-${style === 'year' ? now.getFullYear() : 'spark-bird'}.png`, { type: 'image/png' });
+    if (navigator.canShare && navigator.canShare({ files: [file] })) {
+      try { await navigator.share({ files: [file], title: 'My Daybird card' }); $('cardMsg').textContent = 'Shared.'; return; } catch (e) { if (e.name === 'AbortError') return; }
+    }
+    const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = file.name; document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+    $('cardMsg').textContent = 'Saved to your downloads.';
+  };
+  drawCard().catch(() => {});
+})();
+</script>
+</body>
+</html>
