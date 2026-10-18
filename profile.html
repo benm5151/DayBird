@@ -87,6 +87,7 @@
     <datalist id="speciesList"></datalist>
     <label>Why?</label><input id="favWhy" placeholder="One line">
     <label>Favorite bird photo</label><input type="file" id="favPhoto" accept="image/*">
+    <p class="meta" id="storeNotice"></p>
     <div style="margin-top:12px"><button id="save">Save profile</button> <button class="ghost" id="share">Share stats to feed</button></div>
     <p class="meta" id="msg"></p>
   </div>
@@ -102,6 +103,8 @@
 <script src="data/traits.js"></script>
 <script src="js/brief.js"></script>
 <script src="js/app.js"></script>
+<script src="js/footer.js"></script>
+<script src="js/notice.js"></script>
 <script>
 (async () => {
   await DB.ready;
@@ -161,6 +164,7 @@
   }
   render();
   if (isPublic) return;
+  DAYBIRD_NOTICE.attach($('storeNotice'), 'profile');
 
   $('csv').onchange = async (e) => {
     const f = e.target.files[0]; if (!f) return;

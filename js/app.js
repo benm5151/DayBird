@@ -162,10 +162,11 @@ const DB = (() => {
     const local = store.get('bookings', []);
     return online() ? [...await CLOUD.myBookings().catch(() => []), ...local] : local;
   }
-  async function book(pass, date, seats) {
-    if (online() && pass.cloud) return CLOUD.book(pass.id, date, seats);
+  // waiverAt: when the guest ticked the waiver box (passes.html); kept on the booking either way.
+  async function book(pass, date, seats, waiverAt = null) {
+    if (online() && pass.cloud) return CLOUD.book(pass.id, date, seats, waiverAt);
     const b = store.get('bookings', []);
-    b.unshift({ id: 'b' + Date.now(), passId: pass.id, title: pass.title, date, seats, price: pass.price, at: new Date().toISOString() });
+    b.unshift({ id: 'b' + Date.now(), passId: pass.id, title: pass.title, date, seats, price: pass.price, at: new Date().toISOString(), waiverAt });
     store.set('bookings', b);
   }
   async function addListing(l) {

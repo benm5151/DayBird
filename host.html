@@ -38,7 +38,9 @@
     <label>Exact location (private — only shown to people who book)</label><input id="location" placeholder="123 River Rd, Plainfield NH — or lat, long">
     <label>Directions and meeting point (private)</label><textarea id="directions" rows="2" placeholder="Park by the red barn. Meet at the gate at 6:30."></textarea>
     <label>Rules and notes (public)</label><textarea id="host" rows="2" placeholder="Parking, no dogs, stay on mowed paths…"></textarea>
-    <div style="margin-top:12px"><button id="save">Publish listing</button></div>
+    <label style="display:flex;gap:8px;align-items:flex-start;font-weight:400;margin-top:14px"><input type="checkbox" id="hostWaiver" style="width:auto;margin-top:3px"> <span>I accept the <a href="waiver.html#host">host agreement (template)</a>: I have the right to open this land, I will tell visitors the rules and hazards, and I know a fee can change my liability.</span></label>
+    <p class="meta" id="storeNotice"></p>
+    <div style="margin-top:12px"><button id="save" disabled>Publish listing</button> <span class="meta" id="msg"></span></div>
     <p class="meta" style="margin-top:10px">Signed in: your listing is published for everyone. Signed out: it stays in this browser only. Liability coverage and payouts are not built yet.</p>
   </div>
 </div>
@@ -52,18 +54,30 @@
 <script src="data/traits.js"></script>
 <script src="js/brief.js"></script>
 <script src="js/app.js"></script>
+<script src="js/footer.js"></script>
+<script src="js/notice.js"></script>
 <script>
+DAYBIRD_NOTICE.attach(document.getElementById('storeNotice'), 'listing');
+// The host agreement box gates the button; the time it was ticked is stored with the listing (migration 9).
+let hostWaiverAt = null;
+document.getElementById('hostWaiver').onchange = (e) => {
+  hostWaiverAt = e.target.checked ? new Date().toISOString() : null;
+  document.getElementById('save').disabled = !e.target.checked;
+  document.getElementById('msg').textContent = e.target.checked ? '' : 'Tick the host agreement to publish.';
+};
 document.getElementById('save').onclick = async () => {
   await DB.ready;
   const v = (id) => document.getElementById(id).value.trim();
   const split = (s) => s.split(',').map(x => x.trim()).filter(Boolean);
-  if (!v('title')) return alert('Give it a title.');
+  const msg = document.getElementById('msg');
+  if (!hostWaiverAt) return msg.textContent = 'Tick the host agreement to publish.';
+  if (!v('title')) return msg.textContent = 'Give it a title.';
   try { await DB.addListing({
     id: 'host-' + Date.now(), title: v('title'), area: v('area') + ' (exact location shared after booking)',
     habitat: split(v('habitat')), targets: split(v('targets')), price: +v('price') || 0, seats: +v('seats') || 6,
     window: v('window'), trigger: 'Host-selected dates', host: v('host'), dates: split(v('dates')), sample: false,
-    location: v('location'), directions: v('directions')
-  }); } catch (e) { return alert('Could not publish: ' + e.message); }
+    location: v('location'), directions: v('directions'), hostWaiverAcceptedAt: hostWaiverAt
+  }); } catch (e) { return msg.textContent = 'Could not publish: ' + e.message; }
   location.href = 'passes.html';
 };
 </script>
