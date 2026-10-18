@@ -135,7 +135,7 @@
     if (!isPublic) $('nameIn').value = prof.name || s.name || '';
     $('bio').textContent = prof.bio || '';
     $('avatarBox').innerHTML = photo ? `<img src="${photo}" alt="">` : `<div class="avatar">${DB.esc((prof.name || s.name || 'B')[0])}</div>`;
-    if (!L) {
+    if (!L || L.total == null) {   // profiles.life may hold only learn.html progress (life.learned) before a CSV import
       $('stats').innerHTML = `<p class="meta">${isPublic ? 'No life list shared yet.' : 'No life list yet — import your eBird CSV below.'}</p>`;
       ['lifers','most','places'].forEach(id => $(id).innerHTML = '<p class="meta">—</p>');
       $('bars').innerHTML = '';
@@ -186,7 +186,7 @@
     $('save').disabled = false;
   };
   $('share').onclick = async () => {
-    const L = await DB.lifeList(); if (!L) return $('msg').textContent = 'Import your CSV first.';
+    const L = await DB.lifeList(); if (!L || L.total == null) return $('msg').textContent = 'Import your CSV first.';
     const newest = L.recentLifers[0];
     await DB.post(`Life list: ${L.total} species (${L.thisYear} lifers this year). Latest lifer: ${newest.name} at ${newest.loc}.${prof.favorite ? ' Favorite bird: ' + prof.favorite + '.' : ''}`, ['lifelist'], favPhoto);
     location.href = 'feed.html';
