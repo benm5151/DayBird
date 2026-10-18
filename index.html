@@ -40,6 +40,18 @@
     </div>
   </div>
 
+  <div class="card" id="readcard">
+    <h3>Today's read</h3>
+    <p id="wear" class="meta"></p>
+    <p id="times" class="meta"></p>
+    <div id="lookfor"></div>
+    <div id="modetips"></div>
+    <p id="soaring" class="meta"></p>
+    <p id="tomorrow" class="meta"></p>
+    <div id="stayin"></div>
+    <p class="tagline">Tips change with where you'll be and how long you've birded. <a href="settings.html">Set your mode and level</a>.</p>
+  </div>
+
   <div class="card" id="sendcard">
     <h3>Email me this brief</h3>
     <p class="tagline">Pick a place, then tap send for a fresh brief any time of day. After 9 AM it covers tomorrow morning.</p>
@@ -114,6 +126,8 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script src="js/config.js"></script>
 <script src="js/cloud.js"></script>
+<script src="data/traits.js"></script>
+<script src="js/brief.js"></script>
 <script src="js/app.js"></script>
 <script>
 (async () => {
@@ -130,13 +144,27 @@
   const c = b.call;
   $('callword').textContent = c.word; $('callword').className = 'big ' + c.grade;
   $('headline').textContent = { go: 'Get out there.', maybe: 'Worth a look.', stay: 'Coffee first.' }[c.grade];
-  $('sub').textContent = c.why.length ? c.why.join(' · ') : 'Average conditions. Pick the closest spot and go.';
+  $('sub').textContent = b.brief.whyLine;
   $('why').innerHTML = `<span class="pill ${c.grade}">score ${c.score}</span> <span class="pill info">migration ${b.s.migration ? b.s.migration + '/5' : 'not set'}</span>`;
   $('wx').innerHTML = `
     <div><b>${b.wx.temp}°</b><span>6–9am</span></div>
     <div><b>${b.wx.wind} mph ${DB.dirName(b.wx.windDir)}</b><span>wind</span></div>
     <div><b>${b.wx.rain}%</b><span>rain</span></div>
     <div><b>${b.wx.sunrise}</b><span>sunrise</span></div>`;
+
+  // today's read (from js/brief.js)
+  const R = b.brief;
+  $('wear').innerHTML = R.wear ? `<b>Wear:</b> ${DB.esc(R.wear)}` : '';
+  $('times').innerHTML = R.firstSong ? `First song around <b>${DB.esc(R.firstSong)}</b> · leave by <b>${DB.esc(R.leaveBy)}</b> to catch sunrise · best window ${DB.esc(R.bestWindow)}` : '';
+  $('lookfor').innerHTML = R.groupsLine ? `<p><b>${DB.esc(R.groupsLine)}</b></p>` + R.lookFor.map(g => g.tip ? `<div class="row"><span class="l">${DB.esc(g.label)}</span><span class="r">${DB.esc(g.tip)}</span></div>` : '').join('') : '<p class="meta">Add your eBird key in Settings to see which kinds of birds are around.</p>';
+  $('modetips').innerHTML = R.modeTips.length ? `<p style="margin:12px 0 4px"><b>${DB.esc(DAYBIRD_BRIEF.modeTitle(R.mode))}</b></p>` + R.modeTips.map(t => `<p class="meta" style="margin:0 0 6px">${DB.esc(t)}</p>`).join('') : '';
+  $('soaring').textContent = R.soaring ? R.soaring.line : '';
+  $('tomorrow').textContent = R.tomorrow ? `Tomorrow looks like ${R.tomorrow.word} (${R.tomorrow.temp}°, wind ${R.tomorrow.wind} mph, rain ${R.tomorrow.rain}%).` : '';
+  if (R.stayIn) {
+    const q = R.stayIn;
+    $('stayin').innerHTML = `<p style="margin:12px 0 4px"><b>Stay-in quiz:</b> ${DB.esc(q.question)}</p><div class="inline">${q.options.map(o => `<button type="button" class="ghost small" data-opt="${DB.esc(o)}">${DB.esc(o)}</button>`).join('')}</div><p class="meta" id="quizMsg"></p><p class="meta">${DB.esc(q.feeder)}</p>`;
+    $('stayin').addEventListener('click', e => { const o = e.target.dataset.opt; if (!o) return; $('quizMsg').textContent = o === q.answer ? `Right: ${q.answer}.` : `Not that one. It's the ${q.answer}.`; });
+  }
 
   $('spots').innerHTML = b.spots.map(s => `<div class="row"><span class="l">${s.locId ? `<a href="https://ebird.org/hotspot/${s.locId}" target="_blank" rel="noopener">${DB.esc(s.name)}</a>` : DB.esc(s.name)}</span><span class="r">${s.species} species</span></div>`).join('') || '<p class="meta">No recent reports.</p>';
   $('notable').innerHTML = b.notable.map(o => `<div class="row"><span class="l">${o.subId ? `<a href="https://ebird.org/checklist/${o.subId}" target="_blank" rel="noopener">${DB.esc(o.comName)}</a>` : DB.esc(o.comName)}${o.howMany ? ' ×' + o.howMany : ''}</span><span class="r">${DB.esc(o.locName)}<br>${DB.esc(o.obsDt || '')}</span></div>`).join('') || '<p class="meta">Nothing notable in range.</p>';
@@ -209,7 +237,8 @@
   async function send(extra, btn) {
     btn.disabled = true; say('Sending…');
     try {
-      const r = await CLOUD.sendBrief({ lat: place.lat, lng: place.lng, place: place.label, ...extra });
+      const st = DB.settings();
+      const r = await CLOUD.sendBrief({ lat: place.lat, lng: place.lng, place: place.label, mode: st.mode, level: st.level, ...extra });
       if (extra.to === 'self') say(`Sent to ${r.to}: ${r.word} for ${r.place}, ${r.when}.` + (r.partial ? ' Some data was unavailable, so it may be incomplete.' : ''));
       else { say("If that address accepts Daybird briefs, it's on its way."); $('otherEmail').value = ''; }
     } catch (e) { say(e.message, true); }

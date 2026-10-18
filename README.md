@@ -55,6 +55,10 @@ Sign-in is a magic link by email (no passwords). When signed in: profile, life-l
 
 `supabase/functions/bird-id/index.ts` is a Supabase Edge Function. Deploy it from the dashboard: Edge Functions → Deploy a new function → via Editor → name `bird-id` → paste the file → Deploy. Then Edge Functions → Secrets → add `ANTHROPIC_API_KEY` (from console.anthropic.com). The browser never sees the key. Each ID is one Claude call with one resized photo (cents). Spend cap: run `migration-3.sql` (creates a locked `usage` table). The function logs tokens and cost per call and refuses once today's total (midnight Eastern) reaches `DAILY_CAP_USD` (default $1.00); signed-in users get `PER_USER_DAILY` calls (default 25), anonymous callers 5. Both are optional secrets. Check spend in Supabase → Table Editor → usage.
 
+## The brief engine (js/brief.js)
+
+Scoring and wording live in one file, `js/brief.js`, used by the site, the daily GitHub Action (`scripts/build_brief.mjs`, Node) and the `send-brief` edge function (which imports it from the live site URL, so a dashboard-pasted function needs no local files). It is pure: callers fetch Open-Meteo and eBird and hand the JSON over. What it produces per brief: the GO / MAYBE / STAY IN call and a plain "why this morning" sentence; a "what to wear" line; first-song and leave-by times from sunrise; the likeliest bird groups from the species reported nearby, with one tip each, filtered by **mode** (porch, woods, water, commute, campus) and **level** (new, knows the common birds, keeps a list), both set in Settings; a soaring-day rating for hawks from midday sun, warm-up and wind; a tomorrow line when tomorrow's call differs; and a quiz plus feeder nudge on STAY IN days. The group tips, mode tips and wear thresholds are hand-written at the top of the file and are the place to tune voice.
+
 ## Email a brief on demand (send-brief)
 
 The Brief page has an **Email me this brief** card: type a town, pick it, tap **Send me the brief**. The server builds a fresh brief for that place (weather for 6–9 AM, plus eBird sightings within 25 km over the last 3 days) and emails it. After 9 AM local it covers tomorrow morning. **Send it to someone else** emails one brief to a friend. You must be signed in; "Send me" always goes to your verified sign-in address, never to an address typed into the form.
@@ -90,7 +94,9 @@ profile.html   life list stats + favorite bird
 settings.html  key + location + migration
 unsubscribe.html  opt-out page linked from emailed briefs
 supabase/functions/  bird-id, send-brief, unsubscribe (edge functions)
-js/app.js      data layer + scoring
+js/brief.js    the brief engine (scoring + wording, shared everywhere)
+js/app.js      data layer
+scripts/build_brief.mjs  daily brief builder (GitHub Action)
 css/style.css
 data/mock.js     sample sightings/weather (fallback)
 data/passes.js   sample listings
