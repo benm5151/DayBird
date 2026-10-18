@@ -43,6 +43,7 @@
 <script src="data/traits.js"></script>
 <script src="js/brief.js"></script>
 <script src="js/app.js"></script>
+<script src="js/footer.js"></script>
 <script>
 (async () => {
   await DB.ready;
@@ -88,7 +89,8 @@
         <select id="d-${p.id}">${(p.dates||[]).map(d => `<option>${d}</option>`).join('') || '<option>Any</option>'}</select>
         <label>Seats</label>
         <select id="s-${p.id}">${[1,2,3,4].map(n => `<option>${n}</option>`).join('')}</select>
-        <div style="margin-top:10px"><button data-id="${p.id}" ${p.mine ? 'disabled' : ''}>${p.mine ? 'Your listing' : 'Book'}</button></div>
+        ${p.mine ? '' : `<label class="meta" style="display:flex;gap:8px;align-items:flex-start;font-weight:400;margin-top:12px"><input type="checkbox" id="w-${p.id}" data-waiver="${p.id}" style="width:auto;margin-top:3px"> <span>I accept the <a href="waiver.html#guest">guest waiver (template)</a></span></label>`}
+        <div style="margin-top:10px"><button data-id="${p.id}" ${p.mine ? 'disabled' : 'disabled title="Tick the waiver box first"'}>${p.mine ? 'Your listing' : 'Book'}</button> <span class="meta" id="m-${p.id}"></span></div>
       </div>`).join('');
   }
   async function all() { await load(); renderList(); await renderMine(); await renderHosting(); }
@@ -96,15 +98,26 @@
   document.addEventListener('daybird:refresh', all);
   if (CLOUD.ready && !DB.online()) $('notice').innerHTML = '<div class="banner">Sign in (top right) to book real listings and see hosts\' locations. Sample listings can be booked locally.</div>';
 
+  // The waiver box unlocks the Book button; the time it was ticked goes on the booking (migration 9).
+  const waiverAt = {};
+  document.addEventListener('change', e => {
+    const id = e.target.dataset?.waiver; if (!id) return;
+    waiverAt[id] = e.target.checked ? new Date().toISOString() : null;
+    const btn = document.querySelector(`button[data-id="${id}"]`);
+    if (btn) { btn.disabled = !e.target.checked; btn.title = e.target.checked ? '' : 'Tick the waiver box first'; }
+  });
+
   document.addEventListener('click', async e => {
     const d = e.target.dataset;
     if (d.id) {
       const p = passes.find(x => x.id === d.id);
       const date = $('d-' + d.id).value, seats = +$('s-' + d.id).value;
-      if (p.cloud && !DB.online()) return alert('Sign in (top right) to book this one.');
+      const msg = $('m-' + d.id);
+      if (!waiverAt[d.id] || !$('w-' + d.id)?.checked) return msg.textContent = 'Tick the waiver box first.';
+      if (p.cloud && !DB.online()) return msg.textContent = 'Sign in (top right) to book this one.';
       e.target.disabled = true;
-      try { await DB.book(p, date, seats); await DB.post(`Booked ${p.title} for ${date}. Anyone else going?`, ['passes']); }
-      catch (err) { alert('Could not book: ' + err.message); }
+      try { await DB.book(p, date, seats, waiverAt[d.id]); await DB.post(`Booked ${p.title} for ${date}. Anyone else going?`, ['passes']); }
+      catch (err) { msg.textContent = 'Could not book: ' + err.message; e.target.disabled = false; return; }
       await all(); window.scrollTo({ top: 0, behavior: 'smooth' });
     } else if (d.cancel && confirm('Cancel this pass?')) {
       const b = (await DB.bookings()).find(x => x.id === d.cancel); await DB.cancelBooking(b); await all();

@@ -53,6 +53,17 @@
     <div style="margin-top:12px"><button id="save">Save</button> <button class="ghost" id="reset">Reset bookings and posts</button></div>
     <p class="meta" id="msg"></p>
   </div>
+
+  <h2>Delete my account</h2>
+  <div class="card" id="deleteCard">
+    <p class="meta" id="deleteIntro">Checking your sign-in…</p>
+    <div id="deleteForm" class="hidden">
+      <p class="meta">This removes, in one step: your profile and photos, your posts, comments and likes, your land listings and every booking on them, the bookings you made on other people's land (hosts are not notified), the friend circles you own (for everyone in them) and your place in others, the record of briefs you emailed, and the account itself. It cannot be undone. Daybird will also clear what this browser holds.</p>
+      <label for="deleteConfirm">Type DELETE to confirm</label>
+      <div class="inline"><input id="deleteConfirm" autocomplete="off" spellcheck="false" placeholder="DELETE" style="max-width:200px"><button id="deleteBtn" disabled>Delete my account</button></div>
+      <p class="meta" id="deleteMsg" role="status" aria-live="polite"></p>
+    </div>
+  </div>
 </div>
 
 <script src="data/mock.js"></script>
@@ -64,6 +75,7 @@
 <script src="data/traits.js"></script>
 <script src="js/brief.js"></script>
 <script src="js/app.js"></script>
+<script src="js/footer.js"></script>
 <script>
 const fields = ['name','ebirdKey','ebirdName','ebirdRegions','lat','lng','dist','back','migration','birdcastUrl','mode','level','placeLabel'];
 const s = DB.settings();
@@ -82,6 +94,43 @@ document.getElementById('reset').onclick = () => {
   ['bookings','posts','likes','hostListings'].forEach(k => localStorage.removeItem('daybird:' + k));
   document.getElementById('msg').textContent = 'Cleared.';
 };
+
+// ---- delete my account (edge function 'delete-account'; typing DELETE is the only confirmation, no dialogs)
+(async () => {
+  const $ = (id) => document.getElementById(id);
+  await DB.ready;
+  let done = false;
+  const gate = () => {
+    if (done) return;
+    if (!CLOUD.ready) { $('deleteIntro').textContent = 'Offline mode: there is no online account to delete. "Reset bookings and posts" above clears this browser.'; $('deleteForm').classList.add('hidden'); return; }
+    if (!DB.online()) { $('deleteIntro').textContent = 'Sign in (top right) to delete your online account. Signed out, "Reset bookings and posts" above clears this browser.'; $('deleteForm').classList.add('hidden'); return; }
+    $('deleteIntro').textContent = `Signed in as ${CLOUD.user().email}.`;
+    $('deleteForm').classList.remove('hidden');
+  };
+  gate();
+  document.addEventListener('daybird:auth', gate);
+  $('deleteConfirm').oninput = () => { $('deleteBtn').disabled = $('deleteConfirm').value.trim() !== 'DELETE'; };
+  $('deleteBtn').onclick = async () => {
+    if ($('deleteConfirm').value.trim() !== 'DELETE') return $('deleteMsg').textContent = 'Type DELETE in capitals to confirm.';
+    $('deleteBtn').disabled = true; $('deleteConfirm').disabled = true;
+    $('deleteMsg').textContent = 'Deleting…';
+    try {
+      const r = await CLOUD.deleteAccount();
+      done = true;
+      Object.keys(localStorage).filter(k => k.startsWith('daybird:')).forEach(k => localStorage.removeItem(k));
+      try { await CLOUD.signOut(); } catch {}
+      const left = (r && r.partial) || [];
+      $('deleteMsg').textContent = left.length
+        ? `Your account is gone. A few items could not be removed automatically (${left.join(', ')}); email the address on the Privacy page and they will be cleared by hand.`
+        : 'Your account and data are gone. Thanks for birding with Daybird.';
+      $('deleteForm').querySelectorAll('input,button').forEach(el => el.disabled = true);
+      $('deleteIntro').textContent = 'Signed out.';
+    } catch (e) {
+      $('deleteMsg').textContent = 'Could not delete: ' + e.message;
+      $('deleteBtn').disabled = false; $('deleteConfirm').disabled = false;
+    }
+  };
+})();
 </script>
 </body>
 </html>
