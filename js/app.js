@@ -91,7 +91,7 @@ const DB = (() => {
     }
     // group hotspots by activity (eBird gives numSpeciesAllTime; recent list gives locations)
     const byLoc = {};
-    (sightings.recent || []).forEach(o => { const k = o.locId || o.locName; byLoc[k] = byLoc[k] || { name: o.locName, locId: o.locId, species: 0 }; byLoc[k].species++; });
+    (sightings.recent || []).forEach(o => { const k = o.locId || o.locName; byLoc[k] = byLoc[k] || { name: o.locName, locId: o.locId, lat: o.lat, lng: o.lng, species: 0 }; byLoc[k].species++; });
     const spots = sightings._spots || Object.values(byLoc).sort((a, b) => b.species - a.species).slice(0, 5);
     const notable = (sightings.notable || []).slice(0, 8);
     const call = makeCall(wx, s.migration, notable.length);
@@ -104,7 +104,7 @@ const DB = (() => {
     const idx = hist.findIndex(h => h.date === today);
     if (idx < 0) hist.unshift({ date: today, word: call.word, score: call.score, verdict: null });
     store.set('calls', hist);
-    return { s, source, wx, spots, notable, call, brief, errors, history: hist, speciesCount: new Set((sightings.recent || []).map(o => o.comName)).size };
+    return { s, source, wx, spots, notable, call, brief, errors, history: hist, recent: recentNames, speciesCount: new Set((sightings.recent || []).map(o => o.comName)).size };
   }
   function gradeCall(date, verdict) {
     const h = store.get('calls', []); const e = h.find(x => x.date === date); if (e) e.verdict = verdict; store.set('calls', h); return h;

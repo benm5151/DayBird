@@ -1,0 +1,207 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Daybird — Hotspots along your route</title>
+<link rel="stylesheet" href="css/style.css">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#1F2A37">
+<link rel="icon" href="icon.svg">
+<link rel="apple-touch-icon" href="icon.svg">
+<style>
+svg#map{display:block;width:100%;height:auto;background:var(--bg);border:1px solid var(--line);border-radius:10px;margin:8px 0}
+#map .route{fill:none;stroke:var(--brand);stroke-width:3;stroke-linejoin:round;stroke-linecap:round}
+#map .spot.in{fill:var(--accent);stroke:var(--card);stroke-width:1.5}
+#map .spot.out{fill:var(--line);opacity:.7}
+#map .end{fill:var(--green);stroke:var(--card);stroke-width:2}
+#map text{font:12px var(--sans);fill:var(--ink)}
+.budget{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.budget input[type=range]{flex:1;min-width:160px;width:auto;padding:0;background:none;border:0}
+.budget b{font-family:var(--serif);font-size:20px;min-width:64px}
+.legend{font-size:13px;color:var(--muted)}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:50%;margin:0 4px 0 10px;vertical-align:middle}
+.odds{font-family:var(--serif);font-size:22px;font-weight:700}
+.far .big{font-family:var(--serif);font-size:36px;font-weight:700;line-height:1}
+.far .big.go{color:var(--green)}.far .big.maybe{color:var(--amber)}.far .big.stay{color:var(--red)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <a class="brand" href="index.html"><img src="mark.svg" alt=""><span>Daybird<small>Hotspots along your route</small></span></a>
+    <a class="btn ghost" href="settings.html">Settings</a>
+  </header>
+  <nav class="tabs">
+    <a href="index.html">Brief</a>
+    <a href="id.html">ID</a>
+    <a href="passes.html">Passes</a>
+    <a href="feed.html">Feed</a>
+    <a href="profile.html">Profile</a>
+    <a href="host.html">Host land</a>
+  </nav>
+
+  <div id="banner"></div>
+  <h1>Hotspots along your route</h1>
+  <p class="lead">Driving somewhere? Pick a start and an end and Daybird lists the eBird hotspots within a few minutes of the road, with how many species have ever been seen there.</p>
+
+  <div class="card">
+    <h3>Your drive</h3>
+    <label for="startQ">Start</label>
+    <div class="inline">
+      <input id="startQ" placeholder="Town, e.g. Lebanon, NH" autocomplete="off">
+      <button class="ghost small" id="startFind" type="button">Find</button>
+    </div>
+    <div class="picks" id="startPicks"></div>
+    <label for="endQ">End</label>
+    <div class="inline">
+      <input id="endQ" placeholder="Town, e.g. Burlington, VT" autocomplete="off">
+      <button class="ghost small" id="endFind" type="button">Find</button>
+    </div>
+    <div class="picks" id="endPicks"></div>
+    <p class="meta">From <b id="startNow"></b> to <b id="endNow"></b>.</p>
+    <button id="go" type="button">Find hotspots along the way</button>
+    <p class="meta" id="routeMsg" role="status" aria-live="polite"></p>
+    <p class="tagline">Sign-in required: the eBird key stays on Daybird's server, and each person gets 30 searches a day. The route comes from the public OSRM demo server, which is for light use only.</p>
+  </div>
+
+  <div id="results" class="hidden">
+    <div class="card">
+      <h3>Map</h3>
+      <svg id="map" viewBox="0 0 640 380" role="img" aria-label="Route with hotspots marked"></svg>
+      <div class="budget">
+        <label for="budget" style="margin:0">Detour budget</label>
+        <input id="budget" type="range" min="0" max="40" step="2" value="10">
+        <b id="budgetLabel">10 min</b>
+        <span class="meta">showing <span id="count"></span></span>
+      </div>
+      <p class="legend"><i style="background:var(--green)"></i>start and end <i style="background:var(--accent)"></i>within budget <i style="background:var(--line)"></i>further off</p>
+      <p class="tagline">Detour is the straight-line distance from the nearest point on the route, there and back, at 50 km/h: a rough number, not directions. Map is a plain projection with no roads drawn; route © OpenStreetMap contributors via OSRM.</p>
+    </div>
+    <div class="card">
+      <h3>Hotspots within budget</h3>
+      <div id="list"></div>
+      <p class="tagline">Species counts are eBird's all-time totals for each hotspot, which favors well-watched places; a small count can still be a good morning. Hotspot data via eBird (Cornell Lab of Ornithology).</p>
+    </div>
+    <div class="card far">
+      <h3>Brief for the far end</h3>
+      <p class="tagline">The same morning call the Brief page makes, for where you're going: weather for 6 to 9 AM plus what has been reported there in the last three days.</p>
+      <button id="farBrief" type="button" class="ghost">Brief for the far end</button>
+      <p class="meta" id="farMsg" role="status" aria-live="polite"></p>
+      <div id="farOut"></div>
+    </div>
+  </div>
+
+  <div class="card" id="waitlist"></div>
+
+  <footer>Hotspots and sightings via eBird (Cornell Lab of Ornithology). Weather via Open-Meteo. Routing by the OSRM demo server, data © OpenStreetMap contributors. Daybird is a guide, not safety advice; eyes on the road. <a href="about.html">About Daybird</a>.</footer>
+</div>
+
+<script src="data/mock.js"></script>
+<script src="data/passes.js"></script>
+<script src="data/feed.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="js/config.js"></script>
+<script src="js/cloud.js"></script>
+<script src="data/traits.js"></script>
+<script src="js/brief.js"></script>
+<script src="js/app.js"></script>
+<script src="js/footer.js"></script>
+<script src="js/odds.js"></script>
+<script src="js/premium.js"></script>
+<script>
+(async () => {
+  await DB.ready;
+  const $ = (id) => document.getElementById(id);
+  const O = DAYBIRD_ODDS, B = DAYBIRD_BRIEF, esc = DB.esc;
+  PREMIUM.banner($('banner'));
+  PREMIUM.waitlist($('waitlist'), 'route');
+
+  const EKEY = 'daybird:routeEnd';
+  let start = DB.briefPlace(), end = null;
+  try { const e = JSON.parse(localStorage.getItem(EKEY)); if (e && Number.isFinite(e.lat) && Number.isFinite(e.lng)) end = e; } catch {}
+  const show = () => { $('startNow').textContent = start.label; $('endNow').textContent = end ? end.label : 'not picked yet'; };
+  $('startQ').value = start.label; if (end) $('endQ').value = end.label; show();
+  PREMIUM.placePicker({ input: $('startQ'), find: $('startFind'), picks: $('startPicks'), msg: $('routeMsg'), onPick: (p) => { start = p; show(); } });
+  PREMIUM.placePicker({ input: $('endQ'), find: $('endFind'), picks: $('endPicks'), msg: $('routeMsg'), onPick: (p) => { end = p; try { localStorage.setItem(EKEY, JSON.stringify(p)); } catch {} show(); } });
+
+  let route = null, hotspots = [];
+  $('go').onclick = async () => {
+    if (!end) { $('routeMsg').textContent = "Pick where you're going first."; return; }
+    if (!DB.online()) { $('routeMsg').textContent = "Sign in at the top of the page to search hotspots; the eBird key stays on Daybird's server."; return; }
+    $('go').disabled = true; $('routeMsg').textContent = 'Asking for the route…';
+    try {
+      const r = await PREMIUM.getJSON(`https://router.project-osrm.org/route/v1/driving/${start.lng},${start.lat};${end.lng},${end.lat}?overview=full&geometries=geojson`);
+      if (!r.routes || !r.routes.length || !r.routes[0].geometry) throw new Error('No driving route found between those two places.');
+      route = { coords: r.routes[0].geometry.coordinates, km: Math.round(r.routes[0].distance / 1000), min: Math.round(r.routes[0].duration / 60) };
+      const { samples, spacingKm } = O.samplePolyline(route.coords, 10, 20);
+      $('routeMsg').textContent = `Route is ${route.km} km, about ${route.min} min. Checking eBird hotspots within 5 km of ${samples.length} points along it…`;
+      const res = await CLOUD.invoke('hotspots', { points: samples.map((s) => ({ lat: s.lat, lng: s.lng })) });
+      const step = Math.max(1, Math.floor(route.coords.length / 2000));
+      hotspots = (res.hotspots || []).map((h) => ({ ...h, d: O.detour(h.lat, h.lng, route.coords, step) })).filter((h) => Number.isFinite(h.d.min))
+        .sort((a, b) => a.d.min - b.d.min || (b.numSpeciesAllTime || 0) - (a.numSpeciesAllTime || 0));
+      $('routeMsg').textContent = `${hotspots.length} hotspot${hotspots.length === 1 ? '' : 's'} within 5 km of the route, checked every ${spacingKm} km.${res.remaining != null ? ` ${res.remaining} searches left today.` : ''}`;
+      $('results').classList.remove('hidden');
+      render();
+    } catch (e) { $('routeMsg').textContent = /router\.project-osrm/.test(e.message) ? 'The route server did not answer. It is a free demo server; try again in a minute.' : e.message; }
+    $('go').disabled = false;
+  };
+
+  function render() {
+    const budget = Number($('budget').value);
+    $('budgetLabel').textContent = `${budget} min`;
+    const shown = hotspots.filter((h) => h.d.min <= budget);
+    $('count').textContent = `${shown.length} of ${hotspots.length}`;
+    $('list').innerHTML = shown.map((h) => `<div class="row"><span class="l">${B.safeId(h.locId) ? `<a href="https://ebird.org/hotspot/${h.locId}" target="_blank" rel="noopener">${esc(h.locName)}</a>` : esc(h.locName)}<br><span class="meta">${h.numSpeciesAllTime != null ? h.numSpeciesAllTime + ' species all-time' : 'species count unknown'}${h.latestObsDt ? ` · last report ${esc(String(h.latestObsDt).slice(0, 10))}` : ''}</span></span><span class="r"><b class="odds">~${h.d.min} min</b><br>${h.d.km} km off the road</span></div>`).join('')
+      || `<p class="meta">No hotspots within ${budget} minutes of the road. Slide the budget up.</p>`;
+    drawMap(shown);
+  }
+  $('budget').addEventListener('input', render);
+  window.addEventListener('resize', () => { if (route) drawMap(hotspots.filter((h) => h.d.min <= Number($('budget').value))); });
+
+  function drawMap(shown) {
+    const pts = [...route.coords.map((c) => ({ lat: c[1], lng: c[0] })), ...hotspots.map((h) => ({ lat: h.lat, lng: h.lng })), start, end];
+    // Fit the projection to the box the map actually gets, so labels and dots stay readable on a phone.
+    const W = Math.max(280, Math.min(640, $('map').clientWidth || 640)), H = Math.round(W * 0.6);
+    const P = O.projector(pts, W, H, 24); if (!P) return;
+    const step = Math.max(1, Math.floor(route.coords.length / 1500));
+    const d = route.coords.filter((_, i) => i % step === 0 || i === route.coords.length - 1).map((c, i) => { const q = P.project(c[1], c[0]); return `${i ? 'L' : 'M'}${q.x} ${q.y}`; }).join(' ');
+    const s = P.project(start.lat, start.lng), e = P.project(end.lat, end.lng);
+    const ids = new Set(shown.map((h) => h.locId));
+    const mark = (q, label) => `<circle class="end" cx="${q.x}" cy="${q.y}" r="6"/><text x="${q.x + 9}" y="${q.y + 4}">${esc(label.split(',')[0])}</text>`;
+    $('map').setAttribute('viewBox', `0 0 ${P.width} ${P.height}`);
+    $('map').innerHTML = `<path class="route" d="${d}"/>` +
+      hotspots.map((h) => { const q = P.project(h.lat, h.lng); return `<circle class="spot ${ids.has(h.locId) ? 'in' : 'out'}" cx="${q.x}" cy="${q.y}" r="${(4 + Math.min(6, (h.numSpeciesAllTime || 0) / 50)).toFixed(1)}"><title>${esc(h.locName)} · ${h.numSpeciesAllTime != null ? h.numSpeciesAllTime + ' species' : ''} · ~${h.d.min} min</title></circle>`; }).join('') +
+      mark(s, start.label) + mark(e, end.label);
+  }
+
+  // Brief for the far end: weather fetched here, eBird data through the hotspots function's recent route.
+  $('farBrief').onclick = async () => {
+    if (!end) { $('farMsg').textContent = "Pick where you're going first."; return; }
+    if (!DB.online()) { $('farMsg').textContent = 'Sign in at the top of the page first.'; return; }
+    $('farBrief').disabled = true; $('farMsg').textContent = `Building the brief for ${end.label}…`;
+    try {
+      const [wr, er] = await Promise.allSettled([
+        PREMIUM.getJSON(B.weatherUrl(end.lat, end.lng)).then((j) => B.parseWeather(j)),
+        CLOUD.invoke('hotspots', { recent: true, lat: end.lat, lng: end.lng }),
+      ]);
+      const w = wr.status === 'fulfilled' ? wr.value : null;
+      const eb = er.status === 'fulfilled' ? er.value : { recent: [], notable: [] };
+      if (!w && er.status === 'rejected') throw new Error(er.reason.message || 'Weather and sightings were both unavailable.');
+      const parsed = B.parseEbird(eb.notable || [], eb.recent || []);
+      const s = DB.settings();
+      const brief = B.compose({ place: end.label, date: w && w.date, whenLabel: w ? w.whenLabel : 'today', wx: w ? w.wx : null, tomorrow: w ? w.tomorrow : null, ...parsed, mode: s.mode, level: s.level, traits: window.DAYBIRD_TRAITS });
+      $('farOut').innerHTML = `<div class="call" style="margin-top:8px"><div class="big ${brief.call.grade}">${esc(brief.call.word)}</div><div><div><b>${esc(brief.call.headline)}</b> <span class="meta">${esc(brief.place)} · ${esc(brief.dateLabel)}, ${esc(brief.whenLabel)}</span></div><div class="meta">${esc(brief.whyLine)}</div></div></div>` +
+        (brief.wxLine ? `<p class="meta" style="margin:10px 0 2px">${esc(brief.wxLine)}</p>` : '') +
+        (brief.wear ? `<p class="meta"><b>Wear:</b> ${esc(brief.wear)}</p>` : '') +
+        (brief.groupsLine ? `<p style="margin:10px 0 2px"><b>${esc(brief.groupsLine)}</b></p>` + brief.lookFor.map((g) => g.tip ? `<p class="meta" style="margin:2px 0"><b>${esc(g.label)}:</b> ${esc(g.tip)}</p>` : '').join('') : '<p class="meta">No recent eBird reports within 25 km of there.</p>') +
+        (brief.spots.length ? `<p style="margin:12px 0 2px"><b>Where to go</b> <span class="meta">species in the last 3 days</span></p>` + brief.spots.map((sp) => `<div class="row"><span class="l">${B.safeId(sp.locId) ? `<a href="https://ebird.org/hotspot/${sp.locId}" target="_blank" rel="noopener">${esc(sp.name)}</a>` : esc(sp.name)}</span><span class="r">${sp.species} species</span></div>`).join('') : '') +
+        (brief.notable.length ? `<p style="margin:12px 0 2px"><b>Notable nearby</b></p>` + brief.notable.map((n) => `<div class="row"><span class="l">${esc(n.comName)}${n.howMany ? ' ×' + n.howMany : ''}</span><span class="r">${esc(n.locName)}</span></div>`).join('') : '');
+      $('farMsg').textContent = (wr.status === 'rejected' ? 'Weather was unavailable, so this is from the bird reports alone. ' : '') + (er.status === 'rejected' ? `Sightings were unavailable (${er.reason.message}).` : '');
+    } catch (e) { $('farMsg').textContent = e.message; }
+    $('farBrief').disabled = false;
+  };
+})();
+</script>
+</body>
+</html>
