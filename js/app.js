@@ -135,6 +135,43 @@ const DB = (() => {
     return lines.filter(l => l !== undefined).join('\n');
   }
 
+  // ---------- place picker (for "email me this brief") ----------
+  const US_STATES = { AL:'Alabama',AK:'Alaska',AZ:'Arizona',AR:'Arkansas',CA:'California',CO:'Colorado',CT:'Connecticut',DE:'Delaware',DC:'District of Columbia',FL:'Florida',GA:'Georgia',HI:'Hawaii',ID:'Idaho',IL:'Illinois',IN:'Indiana',IA:'Iowa',KS:'Kansas',KY:'Kentucky',LA:'Louisiana',ME:'Maine',MD:'Maryland',MA:'Massachusetts',MI:'Michigan',MN:'Minnesota',MS:'Mississippi',MO:'Missouri',MT:'Montana',NE:'Nebraska',NV:'Nevada',NH:'New Hampshire',NJ:'New Jersey',NM:'New Mexico',NY:'New York',NC:'North Carolina',ND:'North Dakota',OH:'Ohio',OK:'Oklahoma',OR:'Oregon',PA:'Pennsylvania',RI:'Rhode Island',SC:'South Carolina',SD:'South Dakota',TN:'Tennessee',TX:'Texas',UT:'Utah',VT:'Vermont',VA:'Virginia',WA:'Washington',WV:'West Virginia',WI:'Wisconsin',WY:'Wyoming' };
+  // The geocoder matches on the place name only, and "Lebanon" alone returns ten countries and states with
+  // New Hampshire last. So split "Lebanon, NH" / "Lebanon NH" / "Lebanon New Hampshire" into a name and a state hint.
+  function splitPlaceQuery(q) {
+    const clean = q.replace(/\s+/g, ' ').trim();
+    const stateOf = (s) => US_STATES[s.toUpperCase()] || Object.values(US_STATES).find(v => v.toLowerCase() === s.toLowerCase()) || '';
+    if (clean.includes(',')) {
+      const [name, ...rest] = clean.split(',');
+      const hint = rest.join(' ').trim();
+      return { name: name.trim(), hint: (stateOf(hint) || hint).toLowerCase() };
+    }
+    const words = clean.split(' ');
+    for (const n of [2, 1]) {
+      if (words.length > n) { const st = stateOf(words.slice(-n).join(' ')); if (st) return { name: words.slice(0, -n).join(' '), hint: st.toLowerCase() }; }
+    }
+    return { name: clean, hint: '' };
+  }
+  async function findPlaces(q) {
+    const { name, hint } = splitPlaceQuery(q);
+    if (name.length < 2) return [];
+    const search = async (n) => ((await getJSON(`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(n)}&count=20&language=en&format=json`)).results || [])
+      .map(x => ({ name: x.name, admin1: x.admin1 || '', country: x.country || '', lat: +(+x.latitude).toFixed(4), lng: +(+x.longitude).toFixed(4) }));
+    let res = await search(name);
+    if (hint) res = res.filter(p => (p.admin1 + ' ' + p.country).toLowerCase().includes(hint));
+    if (!res.length && hint) res = await search(q.trim());   // the "state" was really part of the name
+    return res.slice(0, 6).map(p => ({ ...p, label: [p.name, p.admin1, p.country === 'United States' ? '' : p.country].filter(Boolean).join(', ') }));
+  }
+  const DEFAULT_PLACE = { label: 'Lebanon, New Hampshire', lat: DEFAULTS.lat, lng: DEFAULTS.lng };
+  function briefPlace() {
+    const saved = store.get('briefPlace', null);
+    if (saved && Number.isFinite(saved.lat) && Number.isFinite(saved.lng)) return saved;
+    const s = settings();
+    return (s.lat === DEFAULTS.lat && s.lng === DEFAULTS.lng) ? DEFAULT_PLACE : { label: 'Your saved location', lat: s.lat, lng: s.lng };
+  }
+  const saveBriefPlace = (p) => store.set('briefPlace', { label: p.label, lat: p.lat, lng: p.lng });
+
   const online = () => CLOUD.ready && !!CLOUD.user();
 
   async function loadPasses() {
@@ -320,7 +357,7 @@ const DB = (() => {
 
   const ready = CLOUD.ready ? CLOUD.init() : Promise.resolve(null);
 
-  return { ready, online, settings, saveSettings, loadBrief, gradeCall, briefText, loadPasses, bookings, book, cancelBooking, addListing, loadFeed, post, deletePost, toggleLike,
+  return { ready, online, settings, saveSettings, loadBrief, gradeCall, briefText, findPlaces, briefPlace, saveBriefPlace, loadPasses, bookings, book, cancelBooking, addListing, loadFeed, post, deletePost, toggleLike,
            fileToDataURL, importLifeList, syncFromEbird, lifeList, profile, saveProfile, esc, fmtDate, ago, dirName };
 })();
 
