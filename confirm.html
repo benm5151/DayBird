@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Daybird — Confirm</title>
+<link rel="stylesheet" href="css/style.css">
+<meta name="theme-color" content="#1F2A37">
+<link rel="icon" href="icon.svg">
+<meta name="robots" content="noindex">
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <a class="brand" href="index.html"><img src="mark.svg" alt=""><span>Daybird<small>Confirm</small></span></a>
+  </header>
+
+  <div class="card" id="box">
+    <h1 id="title">Confirming…</h1>
+    <p class="lead" id="text"></p>
+    <p id="links" class="hidden"><a class="btn" href="index.html">See today's brief</a> <a class="btn ghost" id="manage" href="#">Change place or mode</a></p>
+  </div>
+  <footer>Daybird is a guide, not safety advice. Sightings via eBird (Cornell Lab of Ornithology). Weather via Open-Meteo. <a href="index.html">Back to Daybird</a></footer>
+</div>
+
+<script src="js/config.js"></script>
+<script src="js/subscribe.js"></script>
+<script>
+(async () => {
+  const $ = (id) => document.getElementById(id);
+  const token = (new URLSearchParams(location.search).get('t') || '').trim();
+  const bad = (why) => { $('title').textContent = "This link doesn't work"; $('text').textContent = why || 'Open the confirm link from the email again, or sign up again for a fresh one.'; };
+  if (!token) return bad();
+  try {
+    const j = await SUB.call('confirm', { token });
+    $('title').textContent = "You're in";
+    $('text').textContent = `The morning brief for ${j.place} starts tomorrow, early in the morning (about 5:40 AM Eastern).` + (j.go_only ? ' You asked for GO mornings only, so quiet days stay quiet.' : '');
+    $('manage').href = j.manage; $('links').classList.remove('hidden');
+  } catch (e) { bad(e.message); }
+})();
+</script>
+</body>
+</html>

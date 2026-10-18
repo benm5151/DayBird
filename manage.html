@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Daybird — Manage your brief</title>
+<link rel="stylesheet" href="css/style.css">
+<meta name="theme-color" content="#1F2A37">
+<link rel="icon" href="icon.svg">
+<meta name="robots" content="noindex">
+<style>
+.check{display:flex;gap:10px;align-items:flex-start;margin:12px 0;font-size:14px}
+.check input{width:auto;margin-top:4px;flex:none}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+@media (max-width:600px){.two{grid-template-columns:1fr}}
+#authbox{display:none !important}  /* the signed link in the email is the only key this page needs; no sign-in box */
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <a class="brand" href="index.html"><img src="mark.svg" alt=""><span>Daybird<small>Your morning brief</small></span></a>
+  </header>
+
+  <div class="card" id="status">
+    <h1 id="title">Checking your link…</h1>
+    <p class="lead" id="text"></p>
+  </div>
+
+  <form class="card hidden" id="form" novalidate>
+    <h3>Change your brief</h3>
+    <p class="meta">For <b id="who"></b>.</p>
+    <label for="placeQ">Where you bird</label>
+    <div class="inline">
+      <input id="placeQ" placeholder="Town, e.g. Hanover, NH" autocomplete="off">
+      <button class="ghost small" id="placeFind" type="button">Find</button>
+      <button class="ghost small" id="placeGeo" type="button">Use my location</button>
+    </div>
+    <div class="picks" id="placePicks"></div>
+    <p class="meta">Brief covers: <b id="placeNow"></b></p>
+    <p class="meta" id="placeMsg" role="status" aria-live="polite"></p>
+    <div class="two">
+      <div><label for="mode">Where you'll usually be</label><select id="mode"></select></div>
+      <div><label for="level">How long you've birded</label><select id="level"></select></div>
+    </div>
+    <label class="check"><input type="checkbox" id="goOnly"><span>Only email me on GO mornings</span></label>
+    <p class="tagline">What we store: your email, the place (rounded to about a kilometre), and these three choices.</p>
+    <button id="save" type="submit">Save changes</button>
+    <p class="meta" id="msg" role="status" aria-live="polite"></p>
+  </form>
+
+  <div class="card hidden" id="stop">
+    <h3>Stop the emails</h3>
+    <p class="meta">Unsubscribing stops the morning brief for good. You can sign up again any time.</p>
+    <button class="ghost" id="unsub" type="button">Unsubscribe for good</button>
+    <p class="meta" id="stopMsg" role="status" aria-live="polite"></p>
+  </div>
+
+  <footer>Daybird is a guide, not safety advice. Sightings via eBird (Cornell Lab of Ornithology). Weather via Open-Meteo. <a href="index.html">Back to Daybird</a></footer>
+</div>
+
+<script src="data/mock.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="js/config.js"></script>
+<script src="js/cloud.js"></script>
+<script src="data/traits.js"></script>
+<script src="js/brief.js"></script>
+<script src="js/app.js"></script>
+<script src="js/subscribe.js"></script>
+<script>
+(async () => {
+  const $ = (id) => document.getElementById(id);
+  const q = new URLSearchParams(location.search);
+  const e = (q.get('e') || '').trim().toLowerCase(), t = (q.get('t') || '').trim();
+  const bad = (why) => { $('title').textContent = "This link doesn't work"; $('text').textContent = why || 'Open the link from your latest Daybird email again.'; };
+  const gone = () => { $('title').textContent = "You're unsubscribed"; $('text').textContent = `No more morning briefs will go to ${e}. Changed your mind? Sign up again any time.`; $('text').insertAdjacentHTML('afterend', '<p><a class="btn ghost" href="signup.html">Sign up again</a></p>'); $('form').classList.add('hidden'); $('stop').classList.add('hidden'); };
+  if (!e || !t) return bad();
+
+  let prefs;
+  try { prefs = await SUB.call('get', { e, t }); } catch (err) { return bad(err.message); }
+  if (prefs.status === 'unsubscribed') return gone();
+  if (prefs.status === 'pending') { $('title').textContent = 'Almost there'; $('text').textContent = 'This address has not confirmed yet. Open the confirm link in the email we sent, or sign up again for a fresh one.'; $('stop').classList.remove('hidden'); }
+  else { $('title').textContent = 'Your morning brief'; $('text').textContent = `Daybird emails ${e} every morning for ${prefs.place}.`; $('form').classList.remove('hidden'); $('stop').classList.remove('hidden'); }
+
+  $('who').textContent = e;
+  $('mode').innerHTML = SUB.modeOptions(prefs.mode); $('level').innerHTML = SUB.levelOptions(prefs.level);
+  $('goOnly').checked = !!prefs.go_only;
+  const picker = SUB.picker({ q: 'placeQ', find: 'placeFind', geo: 'placeGeo', picks: 'placePicks', now: 'placeNow', msg: 'placeMsg' }, { label: prefs.place, lat: prefs.lat, lng: prefs.lng });
+  const say = (id, m, bad) => { $(id).textContent = m; $(id).style.color = bad ? 'var(--red)' : ''; };
+
+  $('form').onsubmit = async (ev) => {
+    ev.preventDefault();
+    const place = picker.get();
+    $('save').disabled = true; say('msg', 'Saving…');
+    try {
+      const r = await SUB.call('update', { e, t, lat: place.lat, lng: place.lng, place: place.label, mode: $('mode').value, level: $('level').value, go_only: $('goOnly').checked });
+      say('msg', `Saved. Tomorrow's brief covers ${r.place}.`);
+      $('text').textContent = `Daybird emails ${e} every morning for ${r.place}.`;
+    } catch (err) { say('msg', err.message, true); }
+    $('save').disabled = false;
+  };
+  $('unsub').onclick = async () => {
+    if (!confirm('Stop the morning brief for good?')) return;
+    $('unsub').disabled = true; say('stopMsg', 'Saving…');
+    try { await SUB.call('unsubscribe', { e, t }); gone(); }
+    catch (err) { say('stopMsg', err.message, true); $('unsub').disabled = false; }
+  };
+})();
+</script>
+</body>
+</html>
