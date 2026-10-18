@@ -75,6 +75,18 @@ Setup (about 20 minutes, once):
 
 `unsubscribe.html` is the page those unsubscribe links open. eBird terms still apply: this is free, non-commercial use, and a server key making calls for more people makes the Cornell Lab permission question more pressing.
 
+## Front door and sharing
+
+The Brief page opens on one screen: the mascot, the call (GO / MAYBE / STAY IN), the one-sentence "why this morning", "Leave by … · first song …", and the wear line, on a sky that follows the grade (amber sunrise for GO, gray-blue for MAYBE, deep navy for STAY IN; `.sky-go` / `.sky-maybe` / `.sky-stay` in `css/style.css`). Everything else on the page sits under one **More for this morning** toggle (`<details id="moreWrap">`); whether you left it open is remembered per browser in `localStorage` as `daybird:moreOpen`. Every element id from before is still there, so the existing scripts keep working. At 390px wide the mascot, call, why line and leave-by fit on the first screen without scrolling.
+
+**Navigation.** The tab bar on every page is Brief · ID · Feed · Profile · More. `more.html` is the hub: it lists Passes, Host land, Settings and About, plus every entry in `data/pages.js` (`DAYBIRD_PAGES`, entries of `{ href, title, blurb, group }`, group one of `learn | plan | you | about`), grouped. Builders add a page by appending to `data/pages.js`, never by editing the nav. The More tab lights up on any page that is not one of the four main tabs (`js/app.js`).
+
+**Share this morning** (`js/share.js`) draws a 1080×1350 PNG with the canvas API, in the browser, with nothing sent anywhere: sky by grade, the mascot pose, the word, the why line wrapped by hand, leave-by, place and date, and a small "daybird" wordmark. On phones it opens the native share sheet (`navigator.share` with the file); elsewhere it downloads `daybird-<date>-<grade>.png`. **You in?** is an `sms:?&body=…` link: "Sat 6:50 AM, it's a GO at Campbell Flats Road. You in? <site url>" (top spot from the brief; on STAY IN days it says "it's a STAY IN morning. Coffee instead?"). Both work offline, no Supabase.
+
+**Mascot poses** are three hand-drawn SVGs in `art/` (each under 1 KB, `viewBox 0 0 200 200`, no raster), the same tufted titmouse as `mark.svg`: `mascot-go.svg` alert and upright, crest up, facing right; `mascot-maybe.svg` fluffed with its head cocked, crest half; `mascot-stay.svg` tucked, eyes closed, crest down, sitting low. On the navy STAY IN sky the bird sits on a cream disc so it still shows. The card's text uses the page's own font stacks (`--serif`, `--sans`), so the picture looks slightly different per device; that is by design.
+
+No setup: no migration, no secrets, no deploy beyond publishing the files. The card draws from the same `art/` files the page shows, so it needs the site served over http(s) (GitHub Pages is fine); opened from disk as `file://`, some browsers refuse to export a canvas that drew a local SVG.
+
 ## Still faked
 
 - Payments, host payouts, insurance, messaging, moderation.
@@ -86,7 +98,8 @@ eBird API data is for non-commercial use without written permission from the Cor
 ## Files
 
 ```
-index.html     brief
+index.html     brief (front door + share)
+more.html      hub for pages off the tab bar (data/pages.js)
 passes.html    marketplace
 feed.html      social
 host.html      landowner listing form
@@ -96,6 +109,8 @@ unsubscribe.html  opt-out page linked from emailed briefs
 supabase/functions/  bird-id, send-brief, unsubscribe (edge functions)
 js/brief.js    the brief engine (scoring + wording, shared everywhere)
 js/app.js      data layer
+js/share.js    share card (canvas PNG) + "You in?" text
+art/           mascot poses (go, maybe, stay)
 scripts/build_brief.mjs  daily brief builder (GitHub Action)
 css/style.css
 data/mock.js     sample sightings/weather (fallback)
