@@ -25,7 +25,7 @@ const RADIUS_KM = 25, BACK_DAYS = 3; // same as scripts/build_brief.mjs
 
 const num = (name: string, d: number) => { const v = Number(Deno.env.get(name)); return Number.isFinite(v) && v > 0 ? v : d; };
 function config() {
-  const site = (Deno.env.get("SITE_URL") || "https://daybird.org/").trim();
+  const site = (Deno.env.get("SITE_URL") || "https://day-bird.com/").trim();
   return {
     ebirdKey: (Deno.env.get("EBIRD_KEY") || "").trim(),
     resendKey: (Deno.env.get("RESEND_API_KEY") || "").trim(),
@@ -175,8 +175,8 @@ async function senderLabel(c: Cfg, userId: string): Promise<string> {
 // Scoring, wording and the email body come from js/brief.js (the same engine the site and the daily
 // Action use), loaded from the live site so the dashboard-pasted function needs no local files.
 // Tests remap this URL to the local file with an import map.
-import "https://daybird.org/js/brief.js";
-import "https://daybird.org/data/traits.js";
+import "https://day-bird.com/js/brief.js";
+import "https://day-bird.com/data/traits.js";
 const B: any = (globalThis as any).DAYBIRD_BRIEF;
 const TRAITS: any[] = (globalThis as any).DAYBIRD_TRAITS || [];
 
