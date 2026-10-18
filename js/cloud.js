@@ -144,6 +144,31 @@ const CLOUD = (() => {
     return data;
   }
 
-  return { ready, init, user, signIn, signOut, photoId, sendBrief, getProfile, saveProfile, uploadPhoto, listPosts, createPost, deletePost, addComment, deleteComment, toggleLike,
+  // ---- weekly news digest (edge function 'digest') ----
+  // GET with the anon key (or the session token when signed in). The function caches one digest per region per week,
+  // so reading it costs nothing per reader. params: { lat, lng, place }
+  async function digest(params) {
+    const token = (await sb.auth.getSession()).data.session?.access_token || cfg.supabaseAnonKey;
+    const q = new URLSearchParams({ lat: String(params.lat), lng: String(params.lng), place: params.place || '' });
+    const r = await fetch(`${cfg.supabaseUrl}/functions/v1/digest?${q}`, { headers: { apikey: cfg.supabaseAnonKey, authorization: `Bearer ${token}` } });
+    let body = null; try { body = await r.json(); } catch {}
+    if (!r.ok) throw new Error(body?.error || (r.status === 404 ? 'digest function is not deployed yet' : `digest ${r.status}`));
+    return body;
+  }
+
+  // ---- Ask Daybird (edge function 'ask') ----
+  // payload: { question, brief (trimmed), life (summary), history: [{ role, text }] }
+  async function ask(payload) {
+    const { data, error } = await sb.functions.invoke('ask', { body: payload });
+    if (error) {
+      let msg = error.message || String(error);
+      try { const ctx = error.context; if (ctx && ctx.json) { const j = await ctx.json(); if (j.error) msg = j.error; } } catch {}
+      if (/not found|404/i.test(msg)) msg = 'ask function is not deployed yet';
+      throw new Error(msg);
+    }
+    return data;
+  }
+
+  return { ready, init, user, signIn, signOut, photoId, sendBrief, digest, ask, getProfile, saveProfile, uploadPhoto, listPosts, createPost, deletePost, addComment, deleteComment, toggleLike,
            listListings, createListing, deleteListing, privateLocations, hostBookings, cancelBooking, myBookings, book };
 })();
