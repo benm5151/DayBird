@@ -165,6 +165,45 @@ Approximate or hand-written: the 0.25° cell (about 28 km) means two subscribers
 How the privacy holds: `migration-9.sql` creates `circles`, `circle_members` and `circle_mornings` with row-level security. Every read policy asks `is_circle_member(circle_id)`, a `security definer` helper, so a signed-in user sees only the circles they are in, and the members and mornings of those. Circles are created and joined only through two `security definer` functions, `create_circle(name)` and `join_circle(code)`: the client never has select access to codes it does not know, a wrong code just fails, and nothing can list codes. Members can insert and edit only their own mornings, delete only their own membership; only the owner can delete the circle (cascading to members and mornings). `new_invite_code()` is revoked from clients; it is only reached through the column default inside `create_circle`.
 
 Setup: run `migration-9.sql` in the Supabase SQL Editor (safe to re-run) and deploy `delete-account`. The migration was executed against a local PostgreSQL 16 with a stand-in `auth.uid()` and the earlier migrations, and its policies checked as three different users; it has not been run on the live project yet.
+## Premium preview (plan.html, route.html)
+
+Everything that could one day be paid for, built now as free features behind a "Premium preview" label, with a waitlist. Nothing here can be charged for until the Cornell Lab gives written permission for commercial use of the eBird API, so every page says so and every percentage is labelled an estimate. The two pages are listed by the hub through `data/pages.js` (group `plan`); the nav is not changed.
+
+**Plan a morning** (`plan.html`): odds for this morning, a target-bird planner for the week, migration windows, a hotspot head-to-head, and calendar-aware free mornings. **Hotspots along your route** (`route.html`): eBird hotspots within a few minutes of a drive, on a map, with a brief for the far end. Both carry the waitlist card.
+
+### The estimates (js/odds.js, `DAYBIRD_ODDS`)
+
+Heuristics, not a model fitted to data; they use only what the brief already has (the daily `data/brief.json`, or a live `DB.loadBrief()` when an eBird key is saved) plus one small Open-Meteo request. Nothing shown is ever above 95% or below 3%. The same text is in the "How we estimate this" fold on the page.
+
+- **Chance of 15+ species at a spot.** `perDay = min(species over 3 days ÷ 3, 40)`; `base = clamp(0.5 + (perDay − 15) ÷ 20, 0, 1)` (15 a day is even odds, every 4 species moves it 20 points); `scale = clamp(score ÷ 70, 0.3, 1.3)` (70 is the GO threshold); weather penalty: rain ≥ 60% ×0.6 (≥ 40% ×0.8), wind ≥ 18 mph ×0.7 (≥ 12 ×0.85); `p = clamp(base × scale × penalty, 0.03, 0.95)`.
+- **Chance of seeing one species.** `base = 0.55` if it was reported within the brief's radius in the last 3 days, else `0.08`; the same scale and weather penalty; times a **seasonal factor** for its bird group and month from the hand-written `SEASON` table at the top of `js/odds.js` (warblers 1.2 in May and 0.1 in January, winter finches the other way; groups without a row are 1.0 all year).
+- **Target-bird planner.** One Open-Meteo request for 7 daily fields (`temperature_2m_max/min, precipitation_probability_max, wind_speed_10m_max, wind_direction_10m_dominant, sunrise`, same units as the brief). Each day becomes a `wx` object (dawn temperature = the daily low, wind = 70% of the daily max, rain = the day's max probability) scored with `DAYBIRD_BRIEF.score()`, then multiplied into the species odds; the best three mornings are shown with the odds, the hour to be out (sunrise + 30 min; raptors 10 AM; owls sunrise − 60; waterfowl sunrise + 60) and the trait hint from `data/traits.js` as the ID tip. "Add to calendar" downloads a one-event `.ics` with a floating local time. Because these are daily fields, the brief on the morning itself will be sharper; the page says so.
+- **Migration windows.** `data/windows.js` is a hand-written table of ~25 peak windows for northern New England (one table for all of New England; the coast runs a week or two earlier in spring, the far north later). "Open now" and "Opening in the next 14 days" come from today's date; windows that wrap the new year work. Watching a window is saved in localStorage, and in `profiles.life.watch` when signed in.
+- **Hotspot head-to-head.** Up to three of today's spots: species over 3 days, straight-line distance from the saved place (haversine; "distance unknown" when the spot has no coordinates, which is the case for a `brief.json` written before the engine switch), and the 15+ odds above. The best is the highest odds, then the closest, with a one-sentence reason.
+- **Route detour.** Straight-line distance from the hotspot to the nearest vertex of the route, there and back at 50 km/h, shown as "~N min". A rough number, not directions.
+- **Free mornings.** A morning is free when no calendar block overlaps 6:30–8:30 in the place's time zone (from Open-Meteo's `timezone`).
+
+### The route finder and OSRM
+
+`route.html` asks the **public OSRM demo server** (`https://router.project-osrm.org/route/v1/driving/…?overview=full&geometries=geojson`) for the drive. That server is run by the OSRM project for demos and light use only, with no uptime promise and no permission for heavy or commercial use; if Daybird gets real traffic, switch to a hosted OSRM, Google Routes or another routing API and keep that key in an edge function. The polyline is sampled about every 10 km (never more than 20 points), and each point goes to the `hotspots` function, which calls eBird `ref/hotspot/geo?dist=5` with the server-side key, dedupes by hotspot, and caches each rounded point in memory so a popular road costs eBird nothing the second time. The map is an inline SVG with a plain equirectangular projection fitted to the bounding box: no tiles, no key, no roads drawn. "Brief for the far end" fetches weather in the browser and sightings through the same function's `recent` route (`data/obs/geo/recent` and `/notable` within 25 km, 3 days), then runs `DAYBIRD_BRIEF.compose()` exactly as the Brief page does.
+
+### The calendar reader and its limits (freetime)
+
+The ICS address is sent to the `freetime` function when the button is tapped and is **not stored on the server**; the reply holds busy start and end times only, never titles or attendees. The address stays in the browser's localStorage so it need not be pasted again, and "Forget it" removes it. Limits, by design: https only (`webcal://` is read as https), no localhost, IP literals or `*.supabase.co`, 3 redirects, 15 s, **1 MB**; `VEVENT` with `DTSTART` and `DTEND` or `DURATION`; all-day (`VALUE=DATE`), UTC (`…Z`), `TZID=<IANA zone>` and floating times; `RRULE:FREQ=WEEKLY` with `INTERVAL`, `BYDAY`, `COUNT`, `UNTIL` and `EXDATE`; cancelled and "free" (`TRANSP:TRANSPARENT`) events skipped. Any other repeat rule (daily, monthly, yearly) is counted once on its first date and the reply says so; a non-IANA `TZID` (Outlook's "Eastern Standard Time") falls back to the place's zone with a note. Sign-in required; 60 reads per user per day in the `usage` table (kind `freetime`, cost 0).
+
+### Setup
+
+1. **Database.** Run `migration-8.sql` (the `waitlist` table, locked to the service role). The `usage` table from `migration-3.sql` must already exist.
+2. **Secrets.** `EBIRD_KEY` and `UNSUB_SECRET` are the ones send-brief already uses (the waitlist hashes addresses with the same key). Optional: `HOTSPOTS_PER_DAY` (30), `FREETIME_PER_DAY` (60), `WAITLIST_PER_DAY` (200 new addresses a day, site-wide).
+3. **Deploy three functions** from the dashboard like `bird-id`, each with "Verify JWT" **on**: `hotspots`, `freetime`, `waitlist`. The waitlist works signed out because the browser sends the anon key, which the gateway accepts; a signed-in user's id is recorded alongside.
+4. **Check** the `waitlist` table in the Table Editor after trying the card. It holds the HMAC of the address as the key, the plain address (so you can send the one launch email), the price picked (`3mo`, `5mo`, `30yr` or empty for "not sure"), the page, and the user id when signed in. One write per address per minute; a second answer updates the row.
+
+Tests: `node --test tests/premium-odds.test.mjs` (the estimates, day scoring, ics, sampling, windows, free mornings) and `deno test --allow-env --allow-read --allow-net=none --no-check tests/premium-functions.test.ts` (the three functions with every outside call stubbed).
+
+### What changes when Cornell answers
+
+- **Yes, with a commercial license:** drop the "Premium preview" banner (`PREMIUM.banner` in `js/premium.js`), gate the planner, route finder and calendar nudges behind a paid flag on the profile, and email the waitlist. Replace the heuristics with odds fitted to eBird frequency data (the `SEASON` table and the two formulas in `js/odds.js` are the only places to change; the page copy in the "How we estimate this" fold must change with them). Replace the OSRM demo server with a paid routing API.
+- **No:** keep the pages free, keep eBird attribution everywhere, and move anything that would be charged for onto data Daybird is allowed to sell (its own weather-based scores, the hand-written windows table, the calendar nudges without eBird data).
 
 ## Still faked
 
@@ -210,6 +249,14 @@ js/footer.js   legal links + safety line on every footer
 js/notice.js   the "what we store" sentence next to forms
 js/affiliate.js  labelled affiliate links (unused until the eBird licence is sorted)
 tests/         delete-account.test.ts (deno), legal-circles.ui.mjs (playwright)
+plan.html      premium preview: odds, target-bird planner, migration windows, head-to-head, free mornings
+route.html     premium preview: hotspots along a drive, SVG map, brief for the far end
+supabase/functions/  bird-id, send-brief, unsubscribe, hotspots, freetime, waitlist (edge functions)
+js/odds.js     the premium-preview estimates (odds, day scoring, ics, route sampling, windows, free mornings)
+js/premium.js  preview banner, waitlist card, place picker shared by plan.html and route.html
+data/windows.js  hand-written migration windows for northern New England
+data/pages.js    pages outside the main tabs, listed by the hub
+tests/           premium-odds.test.mjs (node --test), premium-functions.test.ts (deno test)
 scripts/build_brief.mjs  daily brief builder (GitHub Action)
 css/style.css
 data/mock.js     sample sightings/weather (fallback)

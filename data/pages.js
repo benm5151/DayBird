@@ -11,4 +11,6 @@ globalThis.DAYBIRD_PAGES = [
   { href: 'waiver.html', title: 'Guest waiver and host agreement', blurb: 'What guests and hosts agree to when a land pass is booked. Template, pending attorney review.', group: 'about' },
   { href: 'privacy.html', title: 'Privacy', blurb: 'What Daybird stores, who else sees it, and how to delete it.', group: 'about' },
   { href: 'terms.html', title: 'Terms', blurb: 'The plain-English rules for using Daybird. Not safety advice; eBird data is non-commercial.', group: 'about' },
+  { href: 'plan.html', title: 'Plan a morning', blurb: 'Odds for today, the best morning this week for a bird you want, migration windows and a hotspot head-to-head. Premium preview, free for now.', group: 'plan' },
+  { href: 'route.html', title: 'Hotspots along your route', blurb: 'Pick a start and an end and see the eBird hotspots within a few minutes of the road, on a map, with a brief for the far end. Premium preview.', group: 'plan' },
 ];
