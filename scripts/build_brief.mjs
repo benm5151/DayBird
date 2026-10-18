@@ -12,7 +12,7 @@ const B = globalThis.DAYBIRD_BRIEF;
 const LAT = 43.6423, LNG = -72.2518, DIST = 25, BACK = 3; // Lebanon, NH
 const PLACE = 'Lebanon, New Hampshire';
 const KEY = (process.env.EBIRD_KEY || '').trim();
-const SITE = 'https://benm5151.github.io/DayBird/';
+const SITE = 'https://daybird.org/';
 
 async function get(url, headers = {}) {
   const r = await fetch(url, { headers, signal: AbortSignal.timeout(30000) });
