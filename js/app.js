@@ -17,6 +17,9 @@ const DB = (() => {
     ebirdName: '',           // your eBird display name, exactly as it appears on your checklists
     ebirdRegions: 'US-NH,US-VT',
     migration: 0,            // 0 = unknown, 1..5 from BirdCast local dashboard
+    mode: 'any',             // where you'll be: any | porch | woods | water | commute | campus (see js/brief.js)
+    level: 'new',            // new | some | keen — how much jargon and how many ID tips the brief uses
+    placeLabel: 'Lebanon, New Hampshire',
     birdcastUrl: 'https://dashboard.birdcast.info/region/US-NH-009', // Grafton County
   };
   const settings = () => Object.assign({}, DEFAULTS, store.get('settings', {}));
@@ -49,46 +52,24 @@ const DB = (() => {
     ]);
     return { notable, recent, hotspots };
   }
+  const B = globalThis.DAYBIRD_BRIEF;
   async function weather(s) {
-    const u = `https://api.open-meteo.com/v1/forecast?latitude=${s.lat}&longitude=${s.lng}` +
-      `&hourly=temperature_2m,precipitation_probability,wind_speed_10m,wind_direction_10m,cloud_cover` +
-      `&daily=sunrise,sunset&timezone=auto&forecast_days=2&wind_speed_unit=mph&temperature_unit=fahrenheit`;
-    const w = await getJSON(u);
-    // morning window: 6–9am local today
-    const idx = w.hourly.time.map((t, i) => ({ t, i })).filter(x => /T0[6-9]:/.test(x.t)).slice(0, 4).map(x => x.i);
-    const avg = (arr) => idx.reduce((a, i) => a + arr[i], 0) / idx.length;
-    return {
-      temp: Math.round(avg(w.hourly.temperature_2m)),
-      wind: Math.round(avg(w.hourly.wind_speed_10m)),
-      windDir: Math.round(avg(w.hourly.wind_direction_10m)),
-      rain: Math.round(avg(w.hourly.precipitation_probability)),
-      cloud: Math.round(avg(w.hourly.cloud_cover)),
-      sunrise: w.daily.sunrise[0].slice(11, 16),
-    };
+    // The engine owns the URL and the parsing; the site only fetches. forceToday: the page is always "this morning".
+    return B.parseWeather(await getJSON(B.weatherUrl(s.lat, s.lng)), { forceToday: true });
   }
 
-  // ---------- the call ----------
-  function dirName(deg) { return ['N','NE','E','SE','S','SW','W','NW'][Math.round(deg / 45) % 8]; }
+  // ---------- the call (scoring lives in js/brief.js) ----------
+  const dirName = B.dirName;
   function makeCall(wx, mig, notableCount) {
-    let score = 50; const why = [];
-    if (wx.wind <= 8) { score += 15; why.push('calm winds'); } else if (wx.wind >= 18) { score -= 20; why.push('windy'); }
-    if (wx.rain <= 20) { score += 10; } else if (wx.rain >= 60) { score -= 25; why.push('rain likely'); }
-    if (mig >= 4) { score += 25; why.push('big overnight migration'); } else if (mig === 3) { score += 10; why.push('moderate migration'); } else if (mig === 1) { score -= 10; }
-    const d = dirName(wx.windDir);
-    const month = new Date().getMonth() + 1;
-    if (month >= 8 && month <= 11 && (d === 'N' || d === 'NW')) { score += 10; why.push('NW tailwind for fall migrants'); }
-    if (month >= 3 && month <= 6 && (d === 'S' || d === 'SW')) { score += 10; why.push('SW tailwind for spring migrants'); }
-    if (notableCount >= 3) { score += 10; why.push(`${notableCount} notable reports nearby`); }
-    const grade = score >= 70 ? 'go' : score >= 45 ? 'maybe' : 'stay';
-    const word = { go: 'GO', maybe: 'MAYBE', stay: 'STAY IN' }[grade];
-    return { score, grade, word, why };
+    const c = B.score({ wx, month: new Date().getMonth() + 1, notableCount, migration: mig });
+    return { score: c.score, grade: c.grade, word: c.word, why: B.whyTags(c, notableCount) };
   }
 
   // ---------- public API ----------
   async function loadBrief() {
     const s = settings();
-    let source = 'mock', sightings, wx, errors = [];
-    try { wx = await weather(s); } catch (e) { errors.push('weather: ' + e.message); }
+    let source = 'mock', sightings, wx, tomorrow = null, errors = [];
+    try { const w = await weather(s); wx = w.wx; tomorrow = w.tomorrow; } catch (e) { errors.push('weather: ' + e.message); }
     if (s.ebirdKey) {
       try { sightings = await liveSightings(s); source = 'live'; }
       catch (e) { errors.push('eBird: ' + e.message + ' (CORS or key problem — see README)'); }
@@ -96,10 +77,11 @@ const DB = (() => {
     if (!sightings || !wx) {
       // prefer the brief the GitHub Action committed this morning over the static sample
       let live = null; try { const r = await fetch('data/brief.json', { cache: 'no-store' }); if (r.ok) live = await r.json(); } catch {}
-      if (live && live.wx && !wx) { wx = live.wx; errors = errors.filter(e => !e.startsWith('weather')); }
+      if (live && live.wx && !wx) { wx = live.wx; tomorrow = live.tomorrow || null; errors = errors.filter(e => !e.startsWith('weather')); }
       if (live && !sightings && (live.spots || []).length) {
         sightings = { notable: live.notable || [], recent: [] };
         sightings._spots = live.spots;
+        sightings._recent = live.recent || (live.lookFor || []).flatMap(g => g.species || []);
         if (!s.ebirdKey) { errors.push(`Showing this morning's brief built at ${new Date(live.generated).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })}. Add your eBird key in Settings for live data.`); source = 'daily'; }
       }
       const mock = window.DAYBIRD_MOCK;
@@ -113,26 +95,22 @@ const DB = (() => {
     const spots = sightings._spots || Object.values(byLoc).sort((a, b) => b.species - a.species).slice(0, 5);
     const notable = (sightings.notable || []).slice(0, 8);
     const call = makeCall(wx, s.migration, notable.length);
+    const recentNames = sightings._recent || [...new Set((sightings.recent || []).map(o => o.comName))];
+    const brief = B.compose({ place: s.placeLabel || 'your area', date: new Date().toISOString().slice(0, 10), whenLabel: 'this morning', wx, tomorrow, notable, spots, recent: recentNames,
+      migration: s.migration, mode: s.mode, level: s.level, traits: globalThis.DAYBIRD_TRAITS });
     // call history: one entry per day, kept 60 days, with optional "was it right?" verdict
     const today = new Date().toISOString().slice(0, 10);
     const hist = store.get('calls', []).filter(h => h.date >= new Date(Date.now() - 60 * 864e5).toISOString().slice(0, 10));
     const idx = hist.findIndex(h => h.date === today);
     if (idx < 0) hist.unshift({ date: today, word: call.word, score: call.score, verdict: null });
     store.set('calls', hist);
-    return { s, source, wx, spots, notable, call, errors, history: hist, speciesCount: new Set((sightings.recent || []).map(o => o.comName)).size };
+    return { s, source, wx, spots, notable, call, brief, errors, history: hist, speciesCount: new Set((sightings.recent || []).map(o => o.comName)).size };
   }
   function gradeCall(date, verdict) {
     const h = store.get('calls', []); const e = h.find(x => x.date === date); if (e) e.verdict = verdict; store.set('calls', h); return h;
   }
   function briefText(b) {
-    const d = new Date().toLocaleDateString(undefined, { weekday: 'long', month: 'short', day: 'numeric' });
-    const lines = [`Daybird — ${d}: ${b.call.word}`,
-      `${b.wx.temp}°, wind ${b.wx.wind} mph ${dirName(b.wx.windDir)}, rain ${b.wx.rain}%, sunrise ${b.wx.sunrise}${b.s.migration ? `, migration ${b.s.migration}/5` : ''}`,
-      b.call.why.length ? b.call.why.join(', ') : ''];
-    if (b.spots.length) lines.push('', 'Where: ' + b.spots.map(x => `${x.name} (${x.species} spp)`).join('; '));
-    if (b.notable.length) lines.push('Notable: ' + b.notable.map(o => `${o.comName} @ ${o.locName}`).join('; '));
-    lines.push('', 'Full brief: ' + location.href.split('?')[0]);
-    return lines.filter(l => l !== undefined).join('\n');
+    return B.text(b.brief, { site: location.href.split('?')[0] });
   }
 
   // ---------- place picker (for "email me this brief") ----------

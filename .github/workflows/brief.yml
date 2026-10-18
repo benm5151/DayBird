@@ -10,13 +10,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-node@v4
         with:
-          python-version: "3.12"
+          node-version: "22"
       - name: Build brief
         env:
           EBIRD_KEY: ${{ secrets.EBIRD_KEY }}
-        run: python scripts/build_brief.py
+        run: node scripts/build_brief.mjs
       - name: Commit
         run: |
           git config user.name "daybird-bot"

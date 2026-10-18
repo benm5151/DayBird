@@ -30,6 +30,16 @@
     <label>eBird API key (stays in this browser; never commit it)</label><input id="ebirdKey" type="password" placeholder="get one at ebird.org/api/keygen">
     <label>eBird display name (exactly as shown on your checklists, e.g. "Benjamin Morris")</label><input id="ebirdName" placeholder="Benjamin Morris">
     <label>Regions to watch for your checklists (eBird codes, comma separated)</label><input id="ebirdRegions" placeholder="US-NH,US-VT">
+    <label>Where you'll usually be (changes what the brief tells you to look for)</label>
+    <select id="mode">
+      <option value="any">Anywhere</option><option value="porch">Porch or backyard</option><option value="woods">Walk in the woods</option>
+      <option value="water">Pond, river or lake</option><option value="commute">Commute or driving (for passengers)</option><option value="campus">Campus or town</option>
+    </select>
+    <label>How long have you been birding?</label>
+    <select id="level">
+      <option value="new">Brand new — plain words, fewer names</option><option value="some">I know the common birds</option><option value="keen">I keep a list</option>
+    </select>
+    <label>Place name shown on the brief</label><input id="placeLabel" placeholder="Lebanon, New Hampshire">
     <label>Location</label><button class="ghost small" id="geo" type="button">Use my current location</button>
     <label>Latitude</label><input id="lat" type="number" step="0.0001">
     <label>Longitude</label><input id="lng" type="number" step="0.0001">
@@ -52,11 +62,13 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script src="js/config.js"></script>
 <script src="js/cloud.js"></script>
+<script src="data/traits.js"></script>
+<script src="js/brief.js"></script>
 <script src="js/app.js"></script>
 <script>
-const fields = ['name','ebirdKey','ebirdName','ebirdRegions','lat','lng','dist','back','migration','birdcastUrl'];
+const fields = ['name','ebirdKey','ebirdName','ebirdRegions','lat','lng','dist','back','migration','birdcastUrl','mode','level','placeLabel'];
 const s = DB.settings();
-fields.forEach(f => document.getElementById(f).value = s[f]);
+fields.forEach(f => document.getElementById(f).value = s[f] == null ? '' : s[f]);
 document.getElementById('save').onclick = () => {
   const n = {};
   fields.forEach(f => { const v = document.getElementById(f).value; n[f] = ['lat','lng','dist','back','migration'].includes(f) ? +v : v.trim(); });
