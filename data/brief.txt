@@ -1,21 +1,21 @@
-GO — Get out there.  (score 80)
-NW tailwind for fall migrants · 4 notable reports nearby
+GO — Get out there.  (score 85)
+calm winds · 4 notable reports nearby
 
-41°F · wind 11 mph NW · rain 0% · sunrise 07:05
+26°F · wind 3 mph SE · rain 0% · sunrise 07:06
 Migration last night: https://dashboard.birdcast.info/region/US-NH-009
 
 Where to go (species reported, last 3 days):
-1. Wilder Dam--boat ramp — 20 species — https://ebird.org/hotspot/L687022
-2. Campbell Flats Road — 9 species — https://ebird.org/hotspot/L3553748
-3. Gina 3 Powers St, Lebanon — 6 species — https://ebird.org/hotspot/L18571723
-4. Simon Pearce - Windsor US-VT 43.51721, -72.40171 — 6 species — https://ebird.org/hotspot/L47800014
-5. Pompy Farm Oxbow — 6 species — https://ebird.org/hotspot/L8092679
+1. Campbell Flats Road — 34 species — https://ebird.org/hotspot/L3553748
+2. Wilder Dam--boat ramp — 14 species — https://ebird.org/hotspot/L687022
+3. Connecticut River--North End of River Rd., Plainfield — 6 species — https://ebird.org/hotspot/L2715773
+4. Rodney Palmer Environmental Study Area, Cornish — 5 species — https://ebird.org/hotspot/L16120213
+5. Connecticut River Cartop Boat Access Cornish NH US-NH 43.47894, -72.38165 — 3 species — https://ebird.org/hotspot/L21589021
 
 Notable nearby:
+- Rose-breasted Grosbeak ×1 — Church Street, Norwich, 2026-10-17 10:22 — https://ebird.org/checklist/S403060347
+- Nashville Warbler ×1 — Trail to Leavitt Pond, Grantham, 2026-10-17 08:38 — https://ebird.org/checklist/S403052649
+- Gray Catbird ×1 — 163 Clay Hill Rd, Hartland US-VT 43.59699, -72.37893, 2026-10-17 07:55 — https://ebird.org/checklist/S403207309
 - Lesser Scaup ×3 — Wilder Dam Reservoir, Lebanon, 2026-10-15 16:36 — https://ebird.org/checklist/S402611032
-- Black-billed Cuckoo ×1 — Simon Pearce - Windsor US-VT 43.51721, -72.40171, 2026-10-15 09:12 — https://ebird.org/checklist/S402507344
-- Gray Catbird ×1 — Kate’s Yard Windsor US-VT 43.54108, -72.47920, 2026-10-15 07:07 — https://ebird.org/checklist/S402463389
-- Gray Catbird ×1 — 163 Clay Hill Rd, Hartland US-VT 43.59665, -72.37979, 2026-10-14 09:13 — https://ebird.org/checklist/S402254355
 
 Full brief and passes: https://benm5151.github.io/DayBird/
 Grade yesterday's call on the site so the accuracy score improves.

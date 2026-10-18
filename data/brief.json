@@ -1,49 +1,94 @@
 {
- "generated": "2026-10-17T09:09:52.790608-04:00",
- "date": "2026-10-17",
+ "generated": "2026-10-18T09:31:44.453851-04:00",
+ "date": "2026-10-18",
  "word": "GO",
  "grade": "go",
- "score": 80,
+ "score": 85,
  "headline": "Get out there.",
  "why": [
-  "NW tailwind for fall migrants",
+  "calm winds",
   "4 notable reports nearby"
  ],
  "wx": {
-  "temp": 41,
-  "wind": 11,
-  "windDir": 316,
+  "temp": 26,
+  "wind": 3,
+  "windDir": 120,
   "rain": 0,
-  "sunrise": "07:05"
+  "sunrise": "07:06"
  },
  "spots": [
   {
-   "name": "Wilder Dam--boat ramp",
-   "locId": "L687022",
-   "species": 20
-  },
-  {
    "name": "Campbell Flats Road",
    "locId": "L3553748",
-   "species": 9
+   "species": 34
   },
   {
-   "name": "Gina 3 Powers St, Lebanon",
-   "locId": "L18571723",
+   "name": "Wilder Dam--boat ramp",
+   "locId": "L687022",
+   "species": 14
+  },
+  {
+   "name": "Connecticut River--North End of River Rd., Plainfield",
+   "locId": "L2715773",
    "species": 6
   },
   {
-   "name": "Simon Pearce - Windsor US-VT 43.51721, -72.40171",
-   "locId": "L47800014",
-   "species": 6
+   "name": "Rodney Palmer Environmental Study Area, Cornish",
+   "locId": "L16120213",
+   "species": 5
   },
   {
-   "name": "Pompy Farm Oxbow",
-   "locId": "L8092679",
-   "species": 6
+   "name": "Connecticut River Cartop Boat Access Cornish NH US-NH 43.47894, -72.38165",
+   "locId": "L21589021",
+   "species": 3
   }
  ],
  "notable": [
+  {
+   "speciesCode": "robgro",
+   "comName": "Rose-breasted Grosbeak",
+   "sciName": "Pheucticus ludovicianus",
+   "locId": "L49885243",
+   "locName": "Church Street, Norwich",
+   "obsDt": "2026-10-17 10:22",
+   "howMany": 1,
+   "lat": 43.7160586,
+   "lng": -72.3012708,
+   "obsValid": false,
+   "obsReviewed": false,
+   "locationPrivate": true,
+   "subId": "S403060347"
+  },
+  {
+   "speciesCode": "naswar",
+   "comName": "Nashville Warbler",
+   "sciName": "Leiothlypis ruficapilla",
+   "locId": "L12544134",
+   "locName": "Trail to Leavitt Pond, Grantham",
+   "obsDt": "2026-10-17 08:38",
+   "howMany": 1,
+   "lat": 43.5672397,
+   "lng": -72.1516688,
+   "obsValid": true,
+   "obsReviewed": true,
+   "locationPrivate": false,
+   "subId": "S403052649"
+  },
+  {
+   "speciesCode": "grycat",
+   "comName": "Gray Catbird",
+   "sciName": "Dumetella carolinensis",
+   "locId": "L10983430",
+   "locName": "163 Clay Hill Rd, Hartland US-VT 43.59699, -72.37893",
+   "obsDt": "2026-10-17 07:55",
+   "howMany": 1,
+   "lat": 43.596994,
+   "lng": -72.378935,
+   "obsValid": false,
+   "obsReviewed": false,
+   "locationPrivate": true,
+   "subId": "S403207309"
+  },
   {
    "speciesCode": "lessca",
    "comName": "Lesser Scaup",
@@ -54,55 +99,10 @@
    "howMany": 3,
    "lat": 43.67184,
    "lng": -72.302414,
-   "obsValid": false,
-   "obsReviewed": false,
+   "obsValid": true,
+   "obsReviewed": true,
    "locationPrivate": false,
    "subId": "S402611032"
-  },
-  {
-   "speciesCode": "bkbcuc",
-   "comName": "Black-billed Cuckoo",
-   "sciName": "Coccyzus erythropthalmus",
-   "locId": "L47800014",
-   "locName": "Simon Pearce - Windsor US-VT 43.51721, -72.40171",
-   "obsDt": "2026-10-15 09:12",
-   "howMany": 1,
-   "lat": 43.517208,
-   "lng": -72.401711,
-   "obsValid": true,
-   "obsReviewed": true,
-   "locationPrivate": true,
-   "subId": "S402507344"
-  },
-  {
-   "speciesCode": "grycat",
-   "comName": "Gray Catbird",
-   "sciName": "Dumetella carolinensis",
-   "locId": "L55672753",
-   "locName": "Kate\u2019s Yard Windsor US-VT 43.54108, -72.47920",
-   "obsDt": "2026-10-15 07:07",
-   "howMany": 1,
-   "lat": 43.541083,
-   "lng": -72.479197,
-   "obsValid": true,
-   "obsReviewed": true,
-   "locationPrivate": true,
-   "subId": "S402463389"
-  },
-  {
-   "speciesCode": "grycat",
-   "comName": "Gray Catbird",
-   "sciName": "Dumetella carolinensis",
-   "locId": "L13910850",
-   "locName": "163 Clay Hill Rd, Hartland US-VT 43.59665, -72.37979",
-   "obsDt": "2026-10-14 09:13",
-   "howMany": 1,
-   "lat": 43.596654,
-   "lng": -72.379795,
-   "obsValid": true,
-   "obsReviewed": true,
-   "locationPrivate": true,
-   "subId": "S402254355"
   }
  ],
  "errors": []
