@@ -19,30 +19,40 @@
   <nav class="tabs">
     <a href="index.html">Brief</a>
     <a href="id.html">ID</a>
-    <a href="passes.html">Passes</a>
     <a href="feed.html">Feed</a>
     <a href="profile.html">Profile</a>
-    <a href="host.html">Host land</a>
+    <a href="more.html">More</a>
   </nav>
 
+  <!-- the front door: one screen that answers "should I go?" -->
+  <section class="door sky-maybe" id="door">
+    <p class="meta" id="date"></p>
+    <img class="mascot" id="mascot" src="art/mascot-maybe.svg" alt="" width="132" height="132">
+    <div class="big" id="callword">…</div>
+    <h1 id="headline">Loading the morning…</h1>
+    <p class="lead" id="sub"></p>
+    <p class="leave" id="leaveLine"></p>
+    <p id="wear" class="meta"></p>
+    <div class="share">
+      <button type="button" id="shareBtn">Share this morning</button>
+      <a class="btn ghost" id="youIn" href="sms:?&amp;body=">You in?</a>
+    </div>
+    <p class="meta" id="shareMsg" role="status" aria-live="polite"></p>
+  </section>
+
   <div id="banner"></div>
-  <p class="meta" id="date"></p>
-  <h1 id="headline">Loading the morning…</h1>
-  <p class="lead" id="sub"></p>
+
+  <details class="door-more" id="moreWrap">
+  <summary>More for this morning</summary>
 
   <div class="card">
-    <div class="call">
-      <div class="big" id="callword">…</div>
-      <div>
-        <div id="why" class="meta"></div>
-        <div class="stat" id="wx"></div>
-      </div>
-    </div>
+    <h3>Behind the call</h3>
+    <div id="why" class="meta"></div>
+    <div class="stat" id="wx"></div>
   </div>
 
   <div class="card" id="readcard">
     <h3>Today's read</h3>
-    <p id="wear" class="meta"></p>
     <p id="times" class="meta"></p>
     <div id="lookfor"></div>
     <div id="modetips"></div>
@@ -116,6 +126,7 @@
     <p class="tagline">Copies a plain-text version for the Facebook group or a text thread.</p>
     <button class="ghost" id="copyBtn">Copy brief</button> <span class="meta" id="copyMsg"></span>
   </div>
+  </details>
 
   <footer>Sightings via eBird (Cornell Lab of Ornithology). Weather via Open-Meteo. Migration rating is entered by hand from <a id="bcLink" href="#" target="_blank" rel="noopener">BirdCast</a>. <a href="about.html">About Daybird</a>. Prototype — not for commercial use without eBird permission.</footer>
 </div>
@@ -129,7 +140,14 @@
 <script src="data/traits.js"></script>
 <script src="js/brief.js"></script>
 <script src="js/app.js"></script>
+<script src="js/share.js"></script>
 <script>
+// "More for this morning" remembers whether you left it open (per browser). Set before the brief loads so it doesn't jump.
+(() => {
+  const more = document.getElementById('moreWrap');
+  try { more.open = JSON.parse(localStorage.getItem('daybird:moreOpen')) === true; } catch {}
+  more.addEventListener('toggle', () => { try { localStorage.setItem('daybird:moreOpen', JSON.stringify(more.open)); } catch {} });
+})();
 (async () => {
   await DB.ready;
   const b = await DB.loadBrief();
@@ -145,7 +163,12 @@
   $('callword').textContent = c.word; $('callword').className = 'big ' + c.grade;
   $('headline').textContent = { go: 'Get out there.', maybe: 'Worth a look.', stay: 'Coffee first.' }[c.grade];
   $('sub').textContent = b.brief.whyLine;
-  $('why').innerHTML = `<span class="pill ${c.grade}">score ${c.score}</span> <span class="pill info">migration ${b.s.migration ? b.s.migration + '/5' : 'not set'}</span>`;
+  // front door: sky and mascot follow the grade
+  $('door').className = 'door sky-' + c.grade;
+  $('mascot').src = `art/mascot-${c.grade}.svg`;
+  $('mascot').alt = { go: 'Daybird titmouse, alert and ready', maybe: 'Daybird titmouse, head cocked, unsure', stay: 'Daybird titmouse, tucked in with eyes closed' }[c.grade];
+  $('leaveLine').textContent = b.brief.firstSong ? `Leave by ${b.brief.leaveBy} · first song ${b.brief.firstSong}` : '';
+  $('why').innerHTML = `<span class="pill ${c.grade}">${c.word} · score ${c.score}</span> <span class="pill info">migration ${b.s.migration ? b.s.migration + '/5' : 'not set'}</span>`;
   $('wx').innerHTML = `
     <div><b>${b.wx.temp}°</b><span>6–9am</span></div>
     <div><b>${b.wx.wind} mph ${DB.dirName(b.wx.windDir)}</b><span>wind</span></div>
@@ -190,6 +213,17 @@
     const t = DB.briefText(b);
     try { await navigator.clipboard.writeText(t); $('copyMsg').textContent = 'Copied.'; }
     catch { prompt('Copy this:', t); }
+  };
+  // share: a picture of the morning (js/share.js draws it here, nothing leaves the browser) and a "You in?" text
+  const site = location.href.split('?')[0].split('#')[0];
+  $('youIn').href = DAYBIRD_SHARE.smsHref(b, site);
+  $('shareBtn').onclick = async () => {
+    $('shareBtn').disabled = true; $('shareMsg').textContent = 'Drawing…';
+    try {
+      const how = await DAYBIRD_SHARE.share(b, { site });
+      $('shareMsg').textContent = { shared: 'Shared.', downloaded: 'Saved a picture of this morning. Post it anywhere.', cancelled: '' }[how] || '';
+    } catch (e) { $('shareMsg').textContent = "Couldn't make the picture: " + e.message; }
+    $('shareBtn').disabled = false;
   };
 
   // ---- email this brief ----

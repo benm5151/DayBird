@@ -342,7 +342,10 @@ const DB = (() => {
 // nav highlight + sign-in widget
 document.addEventListener('DOMContentLoaded', async () => {
   const here = location.pathname.split('/').pop() || 'index.html';
-  document.querySelectorAll('nav.tabs a').forEach(a => { if (a.getAttribute('href') === here) a.classList.add('active'); });
+  const tabs = [...document.querySelectorAll('nav.tabs a')];
+  tabs.forEach(a => { if (a.getAttribute('href') === here) a.classList.add('active'); });
+  // pages that live under the More hub (passes, host, settings, about, builders' pages) light up the More tab
+  if (!tabs.some(a => a.classList.contains('active'))) { const m = tabs.find(a => a.getAttribute('href') === 'more.html'); if (m) m.classList.add('active'); }
 
   const head = document.querySelector('header.top'); if (!head) return;
   const box = document.createElement('div'); box.id = 'authbox'; box.style.cssText = 'display:flex;gap:8px;align-items:center;flex-wrap:wrap';

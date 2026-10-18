@@ -83,6 +83,35 @@ details.more{margin-top:14px;border-top:1px solid var(--line);padding-top:10px}
 details.more summary{cursor:pointer;font-weight:600;color:var(--brand)}
 @media (max-width:600px){h1{font-size:28px}.call .big{font-size:40px}}
 
+/* front door: the one screen that answers "should I go?" — sky color by grade, fixed colors in both themes */
+.door{border-radius:var(--radius);padding:18px 18px 16px;margin-bottom:12px;box-shadow:var(--shadow);text-align:center;color:#1F2A37;position:relative}
+.sky-go{background:linear-gradient(180deg,#FBD38D 0%,#F2A65A 62%,#E8833A 100%)}
+.sky-maybe{background:linear-gradient(180deg,#DCE3EA 0%,#B9C5D2 100%)}
+.sky-stay{background:linear-gradient(180deg,#1F2A37 0%,#2C3B50 100%);color:#F6F3EC}
+.door .meta{color:inherit;opacity:.78;font-size:14px;margin:0}
+.door .mascot{width:132px;height:132px;display:block;margin:4px auto 2px}
+.sky-stay .mascot{background:#F6F3EC;border-radius:50%}
+.door .big{font-family:var(--serif);font-size:64px;line-height:1;font-weight:700;letter-spacing:-.02em;color:inherit}
+.door h1{font-size:22px;margin:6px 0 2px;color:inherit}
+.door .lead{color:inherit;opacity:.92;font-size:17px;margin:0 auto 8px;max-width:520px}
+.door .leave{font-weight:600;margin:0 0 4px;font-size:16px}
+.door .share{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:12px}
+.door button,.door .btn{background:#1F2A37;border-color:#1F2A37;color:#F6F3EC}
+.door button.ghost,.door .btn.ghost{background:rgba(255,255,255,.35);color:#1F2A37;border-color:rgba(31,42,55,.4)}
+.sky-stay button,.sky-stay .btn{background:#F6F3EC;color:#1F2A37;border-color:#F6F3EC}
+.sky-stay button.ghost,.sky-stay .btn.ghost{background:rgba(255,255,255,.12);color:#F6F3EC;border-color:rgba(246,243,236,.5)}
+.door .share + .meta{margin-top:8px;min-height:1.2em}
+details.door-more>summary{list-style:none;cursor:pointer;text-align:center;font-weight:600;color:var(--brand);padding:12px;border:1px dashed var(--line);border-radius:var(--radius);margin-bottom:14px;user-select:none}
+details.door-more>summary::-webkit-details-marker{display:none}
+details.door-more>summary::after{content:" ▾";opacity:.6}
+details.door-more[open]>summary::after{content:" ▴"}
+@media (max-width:600px){.door{padding:14px 14px 14px}.door .mascot{width:112px;height:112px}.door .big{font-size:56px}.door .lead{font-size:16px}}
+/* hub page (more.html) */
+.hub a{display:block;text-decoration:none;color:inherit;padding:10px 0;border-top:1px solid var(--line)}
+.hub a:first-of-type{border-top:0}
+.hub a b{display:block}
+.hub a span{color:var(--muted);font-size:14px}
+
 /* phone: tabs become a fixed bottom bar */
 @media (max-width:600px){
   nav.tabs{position:fixed;left:0;right:0;bottom:0;background:var(--card);border-top:1px solid var(--line);border-bottom:0;margin:0;padding:4px 6px calc(4px + env(safe-area-inset-bottom));z-index:50;justify-content:space-around}
