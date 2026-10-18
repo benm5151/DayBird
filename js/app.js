@@ -254,7 +254,7 @@ const DB = (() => {
       allSpecies: species.map(s => s.name).sort(),
     };
     store.set('life', life);
-    if (online()) CLOUD.saveProfile({ life }).catch(() => {});
+    if (online()) CLOUD.saveProfile({ life: withLearned(life) }).catch(() => {});
     return life;
   }
   // ---- live sync: pull your recent checklists by region, merge new species into the life list ----
@@ -303,7 +303,7 @@ const DB = (() => {
     L.recentLifers = [...newSpecies.sort((a, b) => b.first.localeCompare(a.first)), ...L.recentLifers].slice(0, 10);
     L.lastSync = new Date().toISOString();
     store.set('life', L); store.set('syncedSubIds', seen.slice(-2000));
-    if (online()) CLOUD.saveProfile({ life: L }).catch(() => {});
+    if (online()) CLOUD.saveProfile({ life: withLearned(L) }).catch(() => {});
     return { newChecklists: mine.length, newSpecies, checked: regions };
   }
   const _nameCache = {};
@@ -333,10 +333,70 @@ const DB = (() => {
     store.set('profile', up);
   }
 
+  // ---------- learn and play (learn.html; the picking logic is js/learn.js) ----------
+  // One progress object in localStorage ('daybird:learned'). Signed in, a copy rides along in profiles.life.learned
+  // so it follows you between phone and laptop. Merging is a union: nothing you checked anywhere gets unchecked.
+  const LEARNED_EMPTY = () => ({ first10: {}, bingo: { cards: {}, history: [] }, challenges: {}, outside: [], paused: [], tracks: {}, quiz: {} });
+  function mergeLearned(a, b) {
+    if (Array.isArray(a) && Array.isArray(b)) return [...new Set([...a, ...b])];
+    if (a && b && typeof a === 'object' && typeof b === 'object' && !Array.isArray(a) && !Array.isArray(b)) {
+      const out = { ...a }; for (const k of Object.keys(b)) out[k] = k in out ? mergeLearned(out[k], b[k]) : b[k]; return out;
+    }
+    if (typeof a === 'boolean' || typeof b === 'boolean') return !!(a || b);
+    return a == null ? b : a;
+  }
+  const learned = () => mergeLearned(LEARNED_EMPTY(), store.get('learned', {}));
+  const withLearned = (life) => { const l = store.get('learned', null); if (l) (life = life || {}).learned = l; return life; };
+  function saveLearned(l) {
+    store.set('learned', l);
+    if (online()) CLOUD.saveProfile({ life: withLearned(store.get('life', null)) }).catch(() => {});
+    return l;
+  }
+  // Pull the cloud copy once (page load), union it with what this browser has, write both back.
+  async function loadLearned() {
+    if (!online()) return learned();
+    const p = await CLOUD.getProfile().catch(() => null);
+    const merged = mergeLearned(learned(), (p && p.life && p.life.learned) || {});
+    return saveLearned(merged);
+  }
+  // Local calendar date (a 9 PM tap must not land on tomorrow).
+  const today = () => { const d = new Date(); return new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 10); };
+  // STAY IN days neither count nor break the streak: the Brief page's call history plus anything learn.html recorded.
+  const pausedDays = (l) => [...new Set([...(l.paused || []), ...store.get('calls', []).filter(h => h.word === 'STAY IN').map(h => h.date)])];
+  const prevDay = (d) => { const t = new Date(`${d}T12:00:00Z`); t.setUTCDate(t.getUTCDate() - 1); return t.toISOString().slice(0, 10); };
+  const nextDay = (d) => { const t = new Date(`${d}T12:00:00Z`); t.setUTCDate(t.getUTCDate() + 1); return t.toISOString().slice(0, 10); };
+  // outside: days you went out. paused: STAY IN days, which neither count nor break. Today is not over, so an
+  // unmarked today does not end the run; an unmarked yesterday does.
+  function streakOf(outside, paused, day) {
+    const out = new Set(outside || []), pz = new Set((paused || []).filter(d => !out.has(d)));
+    let d = day, current = 0;
+    if (!out.has(d) && !pz.has(d)) d = prevDay(d);
+    while (out.has(d) || pz.has(d)) { if (out.has(d)) current++; d = prevDay(d); }
+    const days = [...new Set([...out, ...pz])].sort();
+    let best = 0, run = 0;
+    for (let i = 0; i < days.length; i++) {
+      if (i > 0 && days[i] !== nextDay(days[i - 1])) run = 0;
+      if (out.has(days[i])) run++;
+      best = Math.max(best, run);
+    }
+    return { current, best: Math.max(best, current), today: out.has(day) ? 'out' : pz.has(day) ? 'paused' : 'open', total: out.size };
+  }
+  const streak = (l = learned()) => streakOf(l.outside, pausedDays(l), today());
+  // "I went out this morning." Any page can call DB.markOutside(); returns the new streak.
+  function markOutside(date = today()) {
+    const l = learned(); if (!l.outside.includes(date)) { l.outside.push(date); l.outside.sort(); saveLearned(l); }
+    return streak(l);
+  }
+  function markPaused(date = today()) {
+    const l = learned(); if (!l.paused.includes(date)) { l.paused.push(date); l.paused.sort(); saveLearned(l); }
+    return streak(l);
+  }
+
   const ready = CLOUD.ready ? CLOUD.init() : Promise.resolve(null);
 
   return { ready, online, settings, saveSettings, loadBrief, gradeCall, briefText, findPlaces, briefPlace, saveBriefPlace, loadPasses, bookings, book, cancelBooking, addListing, loadFeed, post, deletePost, toggleLike,
-           fileToDataURL, importLifeList, syncFromEbird, lifeList, profile, saveProfile, esc, fmtDate, ago, dirName };
+           fileToDataURL, importLifeList, syncFromEbird, lifeList, profile, saveProfile, esc, fmtDate, ago, dirName,
+           learned, saveLearned, loadLearned, mergeLearned, streak, streakOf, markOutside, markPaused };
 })();
 
 // nav highlight + sign-in widget

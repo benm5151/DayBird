@@ -14,7 +14,7 @@ gh repo create daybird --public --source=. --push
 gh api -X POST repos/{owner}/daybird/pages -f build_type=legacy -f source[branch]=main -f source[path]=/
 ```
 
-Your site will be at `https://<your-username>.github.io/daybird/`.
+Your site will be at `https://<your-username>.github.io/daybird/`. Daybird's own is **https://day-bird.com** (the `CNAME` file tells GitHub Pages the custom domain; the DNS records live at the registrar).
 
 ## Live data
 
@@ -37,7 +37,7 @@ Weather comes from Open-Meteo (no key). If eBird returns a CORS error in the bro
 
 1. Create a free project at supabase.com.
 2. SQL Editor → paste `schema.sql` → Run. Creates profiles, posts, likes, listings, bookings, a public `photos` bucket, and row-level security.
-3. Authentication → URL Configuration → Site URL = your Pages URL (e.g. `https://benm5151.github.io/DayBird/`). Add it to Redirect URLs too.
+3. Authentication → URL Configuration → Site URL = your Pages URL (e.g. `https://day-bird.com/`). Add it to Redirect URLs too.
 4. Put the Project URL and anon key in `js/config.js`. The anon key is public by design; RLS decides who can write what.
 5. Run `migration-2.sql` the same way (comments, private listing locations, host bookings).
 
@@ -86,6 +86,26 @@ The Brief page opens on one screen: the mascot, the call (GO / MAYBE / STAY IN),
 **Mascot poses** are three hand-drawn SVGs in `art/` (each under 1 KB, `viewBox 0 0 200 200`, no raster), the same tufted titmouse as `mark.svg`: `mascot-go.svg` alert and upright, crest up, facing right; `mascot-maybe.svg` fluffed with its head cocked, crest half; `mascot-stay.svg` tucked, eyes closed, crest down, sitting low. On the navy STAY IN sky the bird sits on a cream disc so it still shows. The card's text uses the page's own font stacks (`--serif`, `--sans`), so the picture looks slightly different per device; that is by design.
 
 No setup: no migration, no secrets, no deploy beyond publishing the files. The card draws from the same `art/` files the page shows, so it needs the site served over http(s) (GitHub Pages is fine); opened from disk as `file://`, some browsers refuse to export a canvas that drew a local SVG.
+## Learn and play (learn.html)
+
+A page for newer birders, built from whatever is being reported nearby: it reads `data/brief.json`'s `recent` species list (what the daily GitHub Action wrote) and falls back to the sample list in `data/mock.js`, then picks from the hand-written trait table (`data/traits.js`). Nothing on it needs a key or a server; signed in, progress also rides along in `profiles.life.learned` so it follows you between devices. No migration, no new secrets.
+
+What is on it:
+
+- **Bird of the day** — one species a day from the reports (same bird all day). "Hear its song" links out to xeno-canto's search; "See photos" links to All About Birds. Nothing is embedded or hot-linked. The All About Birds slug is guessed from the name (`Black-capped_Chickadee`), so a few may 404.
+- **Mornings outside** — "I went out this morning" with a current and best streak. A STAY IN morning (from the Brief's call history or `brief.json`) pauses the streak rather than ending it, and the wording never scolds. Other pages can call `DB.markOutside()`; `DB.streak()` returns `{ current, best, today, total }`.
+- **Your first 10 birds** — the ten most learnable species from the reports (feeder, yard and edge birds first; tiny ones and two-plumage birds later; see `learnScore` in `js/learn.js`), each with its trait hint, size word, where to look, and Heard it / Saw it checks.
+- **What to look for this week** — the top five groups from `DAYBIRD_BRIEF.groups()` with the engine's own tip at your Settings level, plus the named birds behind each group.
+- **Seasonal bingo** — 25 squares, deterministic per month and rounded location (`YYYY-MM` + lat/lng to two decimals, hashed), so friends in the same town get the same card. Reported species fill first; the rest come from the **season rules** at the top of `js/learn.js` (`SEASON_RULES`, `SUMMER_ONLY`, `WINTER_ONLY`): each season names habitats and behaviors it prefers and species it skips. Blunt on purpose; edit the lists there. "Share card" draws the grid on a canvas and shares or downloads a PNG. Last month's card is retired into a one-line history on the first load of a new month.
+- **Learn five** — the challenges in `data/challenges.js` (five sparrows, five songs by Halloween, five ducks, five woodpeckers, five raptors in flight). Each picks its species from the trait table by group, behavior or habitat; mark any five and you get a small done card. Add or edit challenges in that file.
+- **Quick quiz** — five "which bird is …" questions built by the same `stayIn()` the Brief uses, scored; "Another five" gives a new set.
+- **Your first six months, in order** and five **specialty tracks** (Gulls, Waterfowl, Warblers, Raptors, Sparrows) in `data/tracks.js`: a why paragraph and ordered steps, each with the species it uses and a done check. All hand-written; edit the file.
+
+Hand-written and worth tuning: the season rules in `js/learn.js`, everything in `data/challenges.js` and `data/tracks.js`, and the "where to look" phrases (`WHERE` in `js/learn.js`). Approximate by design: the learnability score, the season skip lists, and the All About Birds slugs.
+
+Progress lives in localStorage under `daybird:learned` (`first10`, `bingo`, `challenges`, `outside`, `paused`, `tracks`, `quiz`). Merging with the cloud copy is a union, so nothing checked on one device gets unchecked by another. A profile whose `life` holds only `learned` is treated as "no life list yet" on the Profile page.
+
+Test: `node tests/learn.test.mjs` (Playwright, network stubbed; serves the repo, stubs `data/brief.json` with 40 species and with a 404, checks every section, the streak arithmetic and that every page still loads; screenshots go to `OUT` or `.test-out/`).
 
 ## Still faked
 
@@ -106,14 +126,20 @@ host.html      landowner listing form
 profile.html   life list stats + favorite bird
 settings.html  key + location + migration
 unsubscribe.html  opt-out page linked from emailed briefs
+learn.html     learn and play: first 10, weekly groups, bingo, challenges, quiz, streak, tracks
 supabase/functions/  bird-id, send-brief, unsubscribe (edge functions)
 js/brief.js    the brief engine (scoring + wording, shared everywhere)
-js/app.js      data layer
+js/app.js      data layer (incl. learn progress + streak)
 js/share.js    share card (canvas PNG) + "You in?" text
 art/           mascot poses (go, maybe, stay)
+js/learn.js    learn-and-play picking logic + season rules
 scripts/build_brief.mjs  daily brief builder (GitHub Action)
 css/style.css
 data/mock.js     sample sightings/weather (fallback)
 data/passes.js   sample listings
 data/feed.js     seed posts
+data/challenges.js  learn-five challenges (hand-written)
+data/tracks.js   six-month path + specialty tracks (hand-written)
+data/pages.js    pages beyond the main tabs (the hub lists these)
+tests/learn.test.mjs  Playwright checks for learn.html
 ```
