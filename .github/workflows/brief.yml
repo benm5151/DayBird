@@ -24,3 +24,14 @@ jobs:
           git add data/brief.json data/brief.txt
           git diff --cached --quiet || git commit -m "Morning brief $(date -u +%F)"
           git push
+      # Emails the brief to every confirmed subscriber (supabase/functions/send-daily). Needs two repository secrets:
+      # SUPABASE_URL (the project URL, e.g. https://xxxx.supabase.co) and DAILY_SECRET (the same value as the
+      # DAILY_SECRET edge-function secret). Skips quietly when they are not set, so the brief build above still runs.
+      - name: Email subscribers
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          DAILY_SECRET: ${{ secrets.DAILY_SECRET }}
+        run: |
+          if [ -z "$SUPABASE_URL" ] || [ -z "$DAILY_SECRET" ]; then echo "SUPABASE_URL or DAILY_SECRET secret not set; skipping the daily email"; exit 0; fi
+          curl --silent --show-error --fail --max-time 170 -X POST "${SUPABASE_URL%/}/functions/v1/send-daily" \
+            -H "x-daily-secret: ${DAILY_SECRET}" -H "content-type: application/json" --data '{}'

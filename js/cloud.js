@@ -169,6 +169,18 @@ const CLOUD = (() => {
     return data;
   }
 
-  return { ready, init, user, signIn, signOut, photoId, sendBrief, digest, ask, getProfile, saveProfile, uploadPhoto, listPosts, createPost, deletePost, addComment, deleteComment, toggleLike,
+  // ---- any edge function that needs the signed-in user's token (stats.html uses 'stats') ----
+  async function invoke(name, body = {}) {
+    const { data, error } = await sb.functions.invoke(name, { body });
+    if (error) {
+      let msg = error.message || String(error);
+      try { const ctx = error.context; if (ctx && ctx.json) { const j = await ctx.json(); if (j.error) msg = j.error; } } catch {}
+      if (/not found|404/i.test(msg)) msg = `${name} function is not deployed yet`;
+      throw new Error(msg);
+    }
+    return data;
+  }
+
+  return { ready, init, user, signIn, signOut, photoId, sendBrief, digest, ask, invoke, getProfile, saveProfile, uploadPhoto, listPosts, createPost, deletePost, addComment, deleteComment, toggleLike,
            listListings, createListing, deleteListing, privateLocations, hostBookings, cancelBooking, myBookings, book };
 })();

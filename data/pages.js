@@ -5,4 +5,6 @@ globalThis.DAYBIRD_PAGES = [
   { href: 'recap.html', title: 'Your month in birds', blurb: 'New lifers, your best morning, likely next lifers, and a card to share.', group: 'you' },
   { href: 'digest.html', title: 'This week in birds', blurb: 'Rare birds nearby, birding news and new research, summarized in plain words.', group: 'learn' },
   { href: 'ask.html', title: 'Ask Daybird', blurb: 'Questions about this morning\'s brief and your list, answered in a few sentences.', group: 'learn' },
+  { href: 'signup.html', title: 'Get the morning brief by email', blurb: 'Free, one email a morning', group: 'about' },
+  { href: 'stats.html', title: 'Reader stats', blurb: 'Subscribers, opens and clicks', group: 'you' },
 ];

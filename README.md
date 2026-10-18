@@ -126,6 +126,26 @@ Setup:
 4. **Try it.** Open `digest.html` (the first load of the week takes 10 to 20 seconds while the sources are fetched; the next loads are instant) and check the `digests` and `usage` tables. Sign in and ask a starter question on `ask.html`.
 
 Approximate or hand-written: the feed parser (regex over the XML, fine for well-formed feeds), the "likely next lifers" ranking (presence in this morning's nearby list, then feeder birds), the card layout (fixed positions tuned for 1080×1920), and the Claude prices in the functions (list prices, update if they change). eBird data in the digest is non-commercial use and is attributed on the page.
+## Subscribers and the daily email
+
+`signup.html` is a public page (no sign-in): email, a place, mode, level, an "only GO mornings" box and a consent box. It stores a *pending* row and emails a confirm link (double opt-in); `confirm.html?t=…` activates it. Every daily email links to `manage.html?e=…&t=…`, where the person can change their place, mode or GO-only setting, or unsubscribe for good; mail apps also get a one-click `List-Unsubscribe` header. Each morning, right after the GitHub Action builds the brief, it calls the `send-daily` function, which groups active subscribers into 0.25° cells, fetches weather and eBird once per cell, composes one brief per subscriber with their own place label, mode and level (the same `js/brief.js` engine as everywhere else, imported from `https://day-bird.com/js/brief.js`), and sends through Resend's batch endpoint (100 per call). GO-only subscribers are skipped on MAYBE and STAY IN mornings. A `daily_runs` row per day makes a second call the same morning a no-op. Links in the email go through the `track` function, which records clicks (host only) and redirects, and a 1×1 pixel records opens; `stats.html` (owner only) shows **readers this week** (distinct subscribers who opened or clicked at least one brief in the last seven days, which is the number to measure the 500-weekly-readers goal by), active subscribers, confirmations this week, sends/opens/clicks per day for 30 days, top clicked hosts, the GO-only share and unsubscribes. Both pages are listed in `data/pages.js`.
+
+What is stored: the real address has to live in `subscribers` (the send needs it), so that table has row-level security on and no policies at all; only the edge functions, with the service-role key, can read it. Everything else (`email_events`, `daily_runs`) refers to people by id. Coordinates are rounded to two decimals. Open and click events keep no IP address or user agent, and clicks keep only the link's host. Click redirects are allowlisted (ebird.org, birdcast.info, open-meteo.com, the site) and every tracking URL is signed, so nothing can be minted or edited.
+
+Setup (after the send-brief setup above; about 20 minutes):
+
+1. **Database.** Run `migration-5.sql` in the SQL Editor: `subscribers`, `daily_runs`, `email_events`, all locked to the service role.
+2. **Resend domain.** The daily send goes to strangers, so Resend's "only your own address" test mode is not enough: verify a sending domain at resend.com (a few DNS records) and set `FROM_EMAIL` to an address on it, e.g. `Daybird <brief@yourdomain.com>`. Until then only your own address receives anything, which is fine for the first test below.
+3. **Secrets** (Edge Functions → Secrets), on top of `EBIRD_KEY`, `RESEND_API_KEY` and `UNSUB_SECRET` from send-brief:
+   - `DAILY_SECRET`: any long random string (`openssl rand -hex 32`). The GitHub Action sends it in an `x-daily-secret` header; nothing else can trigger a send.
+   - `OWNER_USER_ID`: your user id from Authentication → Users. Only this account can open `stats.html`.
+   - `MAILING_ADDRESS`: a postal address for the email footer (anti-spam law wants one; a PO box is fine).
+   - Optional: `DAILY_MAX_EMAILS` (default 500), `DAILY_TIME_BUDGET_MS` (default 100000; the run stops starting new cells after this and writes down how many it skipped), `BATCH_PAUSE_MS` (default 600), `SUBSCRIBE_PER_DAY` (confirm emails per day, default 100), `SITE_URL` (default `https://day-bird.com/`; the confirm, manage and tracked site links are built from it).
+4. **GitHub repository secrets** (Settings → Secrets and variables → Actions): `SUPABASE_URL` (the project URL) and `DAILY_SECRET` (same value as above). Without them the new "Email subscribers" step in `.github/workflows/brief.yml` skips itself and the brief build is unchanged.
+5. **Deploy four functions** the same way as `bird-id`, in this order: `subscribe` ("Verify JWT" **off**), `track` ("Verify JWT" **off**), `send-daily` ("Verify JWT" **off**: the Action has no user token, the secret header is the check), then `stats` ("Verify JWT" **on**). Deploying the UI pages is just pushing to main.
+6. **Test with one subscriber.** Open `signup.html`, enter your own address (the one Resend's test mode delivers to), pick a place, tick consent, submit. Click the confirm link; `confirm.html` should say "You're in" and the row in Table Editor → subscribers should be `active`. Then trigger a send by hand: `curl -X POST "$SUPABASE_URL/functions/v1/send-daily" -H "x-daily-secret: $DAILY_SECRET"` (or run the workflow from the Actions tab). The response reports `sent`, `skipped` and `errors`; the email should land within a minute. Open it, click a hotspot link, then sign in on the site and open `stats.html`: one send, one open, one click. Call the curl a second time: `alreadyRan: true`, nothing sent. To test again the same day, delete today's row from `daily_runs`.
+
+Approximate or hand-written: the 0.25° cell (about 28 km) means two subscribers a few km apart can see slightly different "within 25 km" spot lists only if they fall either side of a cell edge; the email's call is the same for everyone in a cell. Opens undercount (Apple Mail and Gmail often block or pre-fetch pixels) and can also overcount when a mail app pre-fetches the pixel, which is why "readers this week" counts people with an open *or* a click rather than opens alone; clicks are the better signal. Subscribers are sent "this morning" at 09:40 UTC (5:40 AM EDT, 4:40 AM EST) whatever their time zone, so a subscriber out west gets it in the small hours. The migration rating is not in the email (BirdCast has no API). The stats function reads the whole `subscribers` and 30 days of `email_events` in 1000-row pages, which is fine at hundreds of readers and should become a SQL view or RPC before tens of thousands.
 
 ## Still faked
 
@@ -154,6 +174,10 @@ ask.html       Ask Daybird (chat about the brief and your list)
 data/pages.js  pages beyond the main tabs, for the hub
 supabase/functions/  bird-id, send-brief, unsubscribe, digest, ask (edge functions)
 migration-N.sql  database changes, run in order in the SQL Editor
+signup.html    subscribe to the daily brief by email (confirm.html, manage.html go with it)
+stats.html     reader stats, owner only
+supabase/functions/  bird-id, send-brief, unsubscribe, subscribe, send-daily, track, stats (edge functions)
+js/subscribe.js  shared bits for the subscriber pages
 js/brief.js    the brief engine (scoring + wording, shared everywhere)
 js/app.js      data layer (incl. learn progress + streak)
 js/share.js    share card (canvas PNG) + "You in?" text

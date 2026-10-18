@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Daybird — Reader stats</title>
+<link rel="stylesheet" href="css/style.css">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#1F2A37">
+<link rel="icon" href="icon.svg">
+<meta name="robots" content="noindex">
+<style>
+.tiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px;margin:0 0 14px}
+.tile{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:12px 14px;box-shadow:var(--shadow)}
+.tile b{display:block;font-family:var(--serif);font-size:30px;line-height:1.1}
+.tile span{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
+.tile.goal{border-color:var(--accent)}
+.tile.goal b{color:var(--accent)}
+#hosts .row .r{white-space:nowrap}
+@media (min-width:860px){.card.wide{grid-column:span 2}}
+.chart{margin:6px 0 14px}
+.chart h4{margin:0 0 2px;font-size:14px}
+.chart .meta{margin:0 0 4px}
+.chart svg{display:block;width:100%;height:auto;overflow:visible}
+.chart rect.bar{fill:var(--accent)}
+.chart rect.bar:hover{fill:var(--brand)}
+.chart text{font-family:var(--sans);font-size:10px;fill:var(--muted)}
+.chart line{stroke:var(--line);stroke-width:1}
+table.runs{width:100%;border-collapse:collapse;font-size:14px}
+table.runs td,table.runs th{text-align:left;padding:8px 6px;border-top:1px solid var(--line);vertical-align:top}
+table.runs th{color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:.04em;border-top:0}
+table.runs td:first-child{white-space:nowrap}
+table.runs td.err{color:var(--red);font-size:12px;white-space:pre-wrap}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <a class="brand" href="index.html"><img src="mark.svg" alt=""><span>Daybird<small>Reader stats</small></span></a>
+    <a class="btn ghost" href="settings.html">Settings</a>
+  </header>
+  <nav class="tabs">
+    <a href="index.html">Brief</a>
+    <a href="id.html">ID</a>
+    <a href="passes.html">Passes</a>
+    <a href="feed.html">Feed</a>
+    <a href="profile.html">Profile</a>
+    <a href="host.html">Host land</a>
+  </nav>
+
+  <h1>Reader stats</h1>
+  <p class="lead">Who gets the morning brief and who reads it. The goal for the quarter is 500 weekly readers: a reader is a subscriber who opened or clicked at least one brief in the last seven days.</p>
+  <div id="gate" class="card"><p class="meta" id="gateMsg">Checking sign-in…</p></div>
+
+  <div id="body" class="hidden">
+    <div class="tiles" id="tiles"></div>
+    <div class="card">
+      <h3>Last 30 days</h3>
+      <p class="tagline">Opens count people, not loads: one per subscriber per day. Clicks are every tap on an eBird, BirdCast or Daybird link. Open counts undercount: many mail apps block the pixel.</p>
+      <div id="charts"></div>
+    </div>
+    <div class="grid">
+      <div class="card"><h3>Most clicked</h3><p class="tagline">Where links in the email go, last 30 days.</p><div id="hosts"></div></div>
+      <div class="card wide"><h3>Recent runs</h3><p class="tagline">One row per morning the daily send ran.</p><div id="runs"></div></div>
+    </div>
+  </div>
+
+  <footer>Open and click events hold a subscriber id, the day, the kind of event and (for clicks) the link's host. No IP addresses or device details. <a href="signup.html">Signup page</a>.</footer>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="js/config.js"></script>
+<script src="js/cloud.js"></script>
+<script src="data/traits.js"></script>
+<script src="js/brief.js"></script>
+<script src="js/app.js"></script>
+<script>
+(async () => {
+  const $ = (id) => document.getElementById(id);
+  const esc = DB.esc;
+  await DB.ready;
+
+  // One thin-bar chart per measure (one hue, titled, so no legend is needed); hover any bar for the day's number.
+  function chart(title, note, days, key, W) {
+    const H = 90, padL = 28, padB = 16, n = days.length, max = Math.max(1, ...days.map((d) => d[key]));
+    const bw = (W - padL) / n, inner = Math.max(2, bw - 2), plotH = H - padB;
+    const y = (v) => plotH - (v / max) * plotH;
+    const bars = days.map((d, i) => {
+      const h = Math.max(d[key] ? 2 : 0, plotH - y(d[key]));
+      return `<rect class="bar" x="${(padL + i * bw + 1).toFixed(1)}" y="${(plotH - h).toFixed(1)}" width="${inner.toFixed(1)}" height="${h.toFixed(1)}" rx="1.5" data-date="${d.date}" data-v="${d[key]}"><title>${d.date}: ${d[key]} ${title.toLowerCase()}</title></rect>`;
+    }).join('');
+    const ticks = [0, Math.round(n / 2), n - 1].map((i) => `<text x="${(padL + i * bw + bw / 2).toFixed(1)}" y="${H - 3}" text-anchor="middle">${days[i].date.slice(5)}</text>`).join('');
+    const total = days.reduce((a, d) => a + d[key], 0);
+    return `<div class="chart"><h4>${esc(title)} <span class="meta">· ${total} in 30 days, peak ${max}</span></h4><p class="meta">${esc(note)}</p>
+<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(title)} per day for the last 30 days">
+<line x1="${padL}" y1="${plotH}" x2="${W}" y2="${plotH}"></line>
+<text x="${padL - 4}" y="9" text-anchor="end">${max}</text><text x="${padL - 4}" y="${plotH}" text-anchor="end">0</text>
+${bars}${ticks}</svg></div>`;
+  }
+
+  function render(s) {
+    const tile = (v, label, cls = '') => `<div class="tile${cls}"><b>${esc(v)}</b><span>${esc(label)}</span></div>`;
+    // weeklyReaders comes from the server (distinct subscribers with an open or click in the last 7 days); older
+    // stats payloads without it fall back to the best single day of openers this week.
+    const weeklyReaders = Number.isFinite(s.weeklyReaders) ? s.weeklyReaders : Math.max(0, ...s.days.slice(-7).map((d) => d.openers));
+    $('tiles').innerHTML = tile(weeklyReaders, 'readers this week (goal 500)', ' goal') + tile(s.active, 'active subscribers') + tile(s.confirmedThisWeek, 'confirmed this week')
+      + tile(s.goOnlyShare + '%', 'GO mornings only') + tile(s.unsubscribed, 'unsubscribed (all time)') + tile(s.pending, 'waiting to confirm');
+    // the SVG is drawn at the card's real width, so axis text stays readable on a phone (redrawn on resize)
+    const draw = () => { const W = Math.max(280, $('charts').clientWidth || 600); $('charts').innerHTML = chart('Sent', 'Briefs emailed each morning.', s.days, 'sent', W) + chart('Opens', 'Subscribers who opened that day\'s brief.', s.days, 'openers', W) + chart('Clicks', 'Taps on links in the brief.', s.days, 'clicks', W); };
+    draw(); let tm; window.onresize = () => { clearTimeout(tm); tm = setTimeout(draw, 150); };
+    $('hosts').innerHTML = s.hosts.map((h) => `<div class="row"><span class="l">${esc(h.host)}</span><span class="r">${h.n} click${h.n === 1 ? '' : 's'}</span></div>`).join('') || '<p class="meta">No clicks yet.</p>';
+    $('runs').innerHTML = s.runs.length ? `<table class="runs"><tr><th>Day</th><th>Sent</th><th>Skipped</th><th>Notes</th></tr>` + s.runs.map((r) => `<tr><td>${esc(r.date)}</td><td>${r.sent}</td><td>${r.skipped}</td><td class="${r.errors ? 'err' : 'meta'}">${esc(r.errors || (r.finished ? 'ok' : 'still running'))}</td></tr>`).join('') + '</table>' : '<p class="meta">The daily send has not run yet.</p>';
+  }
+
+  async function load() {
+    const u = CLOUD.user();
+    if (!CLOUD.ready) { $('gateMsg').textContent = 'Reader stats need the online connection, which is off here.'; return; }
+    if (!u) { $('gateMsg').textContent = 'Sign in (top right) to see reader stats. Only the site owner can open them.'; return; }
+    $('gateMsg').textContent = 'Loading…';
+    try {
+      const s = await CLOUD.invoke('stats', {});
+      $('gate').classList.add('hidden'); $('body').classList.remove('hidden');   // shown first, so the charts know their width
+      render(s);
+    } catch (e) { $('gateMsg').textContent = e.message; }
+  }
+  load();
+  document.addEventListener('daybird:auth', load);
+})();
+</script>
+</body>
+</html>
