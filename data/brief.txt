@@ -1,21 +1,34 @@
 GO — Get out there.  (score 85)
-calm winds · 4 notable reports nearby
+Calm and dry at sunrise, 34°. 3 unusual birds were reported nearby this week. Worth getting out.
 
-26°F · wind 3 mph SE · rain 0% · sunrise 07:06
-Migration last night: https://dashboard.birdcast.info/region/US-NH-009
+Lebanon, New Hampshire · Monday, Oct 19, 6–9 AM (this morning)
+34°F · wind 2 mph SE · rain 0% · sunrise 7:08 AM
+Wear: 34° at sunrise, 59° later: winter coat, gloves and a hat, a thermos, binoculars optional.
+First song around 6:28 AM; leave by 6:53 AM to catch sunrise.
 
-Where to go (species reported, last 3 days):
-1. Campbell Flats Road — 34 species — https://ebird.org/hotspot/L3553748
-2. Wilder Dam--boat ramp — 14 species — https://ebird.org/hotspot/L687022
-3. Connecticut River--North End of River Rd., Plainfield — 6 species — https://ebird.org/hotspot/L2715773
-4. Rodney Palmer Environmental Study Area, Cornish — 5 species — https://ebird.org/hotspot/L16120213
-5. Connecticut River Cartop Boat Access Cornish NH US-NH 43.47894, -72.38165 — 3 species — https://ebird.org/hotspot/L21589021
+Most likely: feeder birds (14 kinds reported), sparrows (13 kinds reported), waterfowl (11 kinds reported).
+- feeder birds: Chickadees, titmice and nuthatches lead the mixed flocks. Follow the chickadees.
+- sparrows: Little brown birds in the weeds and at the feeder. Look for stripes on the head.
+- waterfowl: Scan the water from one spot for a few minutes. Ducks come in groups; count the different kinds.
+
+Tip:
+- Start at the closest edge where trees meet open ground; that line is where the birds are.
+
+Good soaring day for hawks: sunny by midday, a 25° warm-up, dead calm. Thermals build late morning, so 10 AM to 2 PM beats dawn for hawks.
+
+Where to go (species reported in the last 3 days, within 25 km):
+1. Wilder Dam--boat ramp — 17 species — https://ebird.org/hotspot/L687022
+2. Deweys Mill Pond - Hartford (56 acres) — 17 species — https://ebird.org/hotspot/L751927
+3. Campbell Flats Road — 11 species — https://ebird.org/hotspot/L3553748
+4. 160 Barrister Dr, White River Junction US-VT 43.69469, -72.32255 — 4 species — https://ebird.org/hotspot/L65145269
+5. Lily Pond, White River Junction — 4 species — https://ebird.org/hotspot/L14872818
 
 Notable nearby:
-- Rose-breasted Grosbeak ×1 — Church Street, Norwich, 2026-10-17 10:22 — https://ebird.org/checklist/S403060347
+- Rose-breasted Grosbeak ×1 — Church Street, Norwich, 2026-10-17 10:22 — https://ebird.org/checklist/S403060973
 - Nashville Warbler ×1 — Trail to Leavitt Pond, Grantham, 2026-10-17 08:38 — https://ebird.org/checklist/S403052649
 - Gray Catbird ×1 — 163 Clay Hill Rd, Hartland US-VT 43.59699, -72.37893, 2026-10-17 07:55 — https://ebird.org/checklist/S403207309
-- Lesser Scaup ×3 — Wilder Dam Reservoir, Lebanon, 2026-10-15 16:36 — https://ebird.org/checklist/S402611032
 
-Full brief and passes: https://benm5151.github.io/DayBird/
+Migration last night: https://dashboard.birdcast.info/
+Full brief: https://day-bird.com/
+
 Grade yesterday's call on the site so the accuracy score improves.
