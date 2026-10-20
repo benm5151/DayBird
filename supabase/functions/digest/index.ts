@@ -157,7 +157,7 @@ export async function buildDigest(c: Cfg, v: { lat: number; lng: number; place: 
 async function fetchNotable(c: Cfg, lat: number, lng: number): Promise<Notable[]> {
   if (!c.ebirdKey) throw new Error("no EBIRD_KEY");
   const url = `https://api.ebird.org/v2/data/obs/geo/recent/notable?lat=${lat}&lng=${lng}&dist=${c.radiusKm}&back=7&detail=simple`;
-  const rows: any[] = await getJSON(url, { "X-eBirdApiToken": c.ebirdKey });
+  const rows: any[] = await getJSON(url, { "X-eBirdApiToken": c.ebirdKey, "User-Agent": "Daybird/1.0 (+https://day-bird.com; birding brief for newer birders)", "Accept": "application/json" });
   type Group = Notable & { placeCount: Map<string, number> };
   const by = new Map<string, Group>();
   for (const o of rows || []) {

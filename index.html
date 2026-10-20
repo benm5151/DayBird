@@ -9,6 +9,46 @@
 <meta name="theme-color" content="#1F2A37">
 <link rel="icon" href="icon.svg">
 <link rel="apple-touch-icon" href="icon.svg">
+<style>
+/* This week's birds: a list of birds (round photo, name, how many checklists), not a table */
+.week .tagline{margin:0 0 4px}
+.birds{list-style:none;margin:6px 0 0;padding:0}
+.birds li{border-top:1px solid var(--line)}
+.birds li:first-child{border-top:0}
+.bird{display:flex;align-items:center;gap:14px;width:100%;padding:9px 2px;background:none;border:0;color:inherit;font:inherit;font-weight:400;text-align:left;cursor:pointer;border-radius:12px}
+.bird:hover .who b{text-decoration:underline;text-decoration-color:var(--accent);text-decoration-thickness:2px}
+.bird:focus-visible{outline:3px solid var(--accent);outline-offset:-2px}
+.thumb{width:56px;height:56px;flex:none;border-radius:50%;overflow:hidden;background:#F6F3EC;box-shadow:inset 0 0 0 1.5px rgba(232,131,58,.85);display:grid;place-items:center;text-align:center;color:#1F2A37;font-family:var(--serif);font-size:8px;line-height:1.1;font-weight:700;padding:4px;overflow-wrap:anywhere;hyphens:manual}
+.thumb img{width:100%;height:100%;object-fit:cover;display:block}
+.thumb.has-photo{box-shadow:none;padding:0}
+.bird .who{flex:1;min-width:0}
+.bird .who b{display:block;font-family:var(--serif);font-size:18px;line-height:1.2;font-weight:700}
+.bird .how{display:block;color:var(--muted);font-size:13px;margin-top:1px}
+.bird .trend{flex:none;color:var(--accent);font-weight:600;font-size:13px;letter-spacing:.02em;text-transform:lowercase}
+.linkish{background:none;border:0;padding:0;color:var(--brand);font:inherit;font-weight:600;cursor:pointer;text-decoration:underline;text-decoration-color:var(--accent)}
+.week .foot{margin-top:10px}
+/* notable nearby: the same round thumb, one context line */
+.notable-row{display:flex;align-items:center;gap:12px;padding:9px 0;border-top:1px solid var(--line)}
+.notable-row:first-child{border-top:0}
+.notable-row .who{flex:1;min-width:0}
+.notable-row .who b{display:block;font-family:var(--serif);font-size:16px;line-height:1.2}
+.notable-row .ctx{display:block;color:var(--accent);font-size:13px;font-weight:600}
+.notable-row .where{display:block;color:var(--muted);font-size:13px}
+/* the bird sheet */
+dialog.sheet{border:0;border-radius:18px;padding:0;width:min(520px,calc(100% - 32px));background:var(--card);color:var(--ink);box-shadow:0 20px 60px rgba(0,0,0,.35);overflow:hidden}
+dialog.sheet::backdrop{background:rgba(31,42,55,.55)}
+.sheet .pic{aspect-ratio:4/3;background:#F6F3EC;display:grid;place-items:center;overflow:hidden;box-shadow:inset 0 -1px 0 var(--line)}
+.sheet .pic img{width:100%;height:100%;object-fit:cover;display:block}
+.sheet .pic .nm{font-family:var(--serif);font-size:30px;font-weight:700;color:#1F2A37;padding:24px;text-align:center}
+.sheet .body{padding:16px 18px 18px}
+.sheet h2{margin:0 0 6px;font-size:26px}
+.sheet .status{margin:0 0 8px;font-size:15px}
+.sheet .status-note{font-size:15px;margin:0 0 8px}
+.sheet .status-note:empty{display:none}
+.sheet .credit{font-size:12px;color:var(--muted);margin:0}
+.sheet .acts{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px;align-items:center}
+@media (max-width:600px){dialog.sheet{margin:auto 0 0;width:100%;max-width:none;border-radius:18px 18px 0 0}}
+</style>
 </head>
 <body>
 <div class="wrap">
@@ -41,6 +81,16 @@
   </section>
 
   <div id="banner"></div>
+
+  <!-- This week's birds: the species on the most eBird checklists in your county over the last ten days (data/expected, built daily) -->
+  <section class="card week" id="weekcard" aria-labelledby="weekTitle">
+    <h3 id="weekTitle">This week's birds</h3>
+    <p class="tagline" id="weekLine">Counting this week's checklists…</p>
+    <ol class="birds" id="weekList"></ol>
+    <p class="meta" id="weekMore" hidden><button type="button" class="linkish" id="weekMoreBtn">Show 15 more</button></p>
+    <p class="tagline foot" id="weekFoot">Tap a bird for the picture and the numbers. Checklists via eBird; photos from Wikimedia Commons, credited on each.</p>
+  </section>
+  <dialog class="sheet" id="birdSheet" aria-labelledby="birdSheetName"></dialog>
 
   <details class="door-more" id="moreWrap">
   <summary>More for this morning</summary>
@@ -100,20 +150,7 @@
     </div>
   </div>
 
-  <div class="card" id="passcard">
-    <h3>Open passes for the next GO day</h3>
-    <div id="passes"></div>
-    <a class="btn ghost" href="passes.html" style="margin-top:8px">See all passes</a>
-  </div>
-
   <div class="grid">
-    <div class="card">
-      <h3>Going out?</h3>
-      <p class="tagline">Post a roll call. Others can tap "I'm in" on the feed.</p>
-      <label>Where</label><select id="goSpot"></select>
-      <label>When</label><input id="goTime" value="7:00 AM">
-      <div style="margin-top:10px"><button id="goBtn">Post roll call</button></div>
-    </div>
     <div class="card">
       <h3>Track the call</h3>
       <div id="history"></div>
@@ -140,6 +177,8 @@
 <script src="data/traits.js"></script>
 <script src="js/brief.js"></script>
 <script src="js/app.js"></script>
+<script src="js/photos.js"></script>
+<script src="data/status.js"></script>
 <script src="js/share.js"></script>
 <script src="js/footer.js"></script>
 <script>
@@ -191,15 +230,97 @@
   }
 
   $('spots').innerHTML = b.spots.map(s => `<div class="row"><span class="l">${s.locId ? `<a href="https://ebird.org/hotspot/${s.locId}" target="_blank" rel="noopener">${DB.esc(s.name)}</a>` : DB.esc(s.name)}</span><span class="r">${s.species} species</span></div>`).join('') || '<p class="meta">No recent reports.</p>';
-  $('notable').innerHTML = b.notable.map(o => `<div class="row"><span class="l">${o.subId ? `<a href="https://ebird.org/checklist/${o.subId}" target="_blank" rel="noopener">${DB.esc(o.comName)}</a>` : DB.esc(o.comName)}${o.howMany ? ' ×' + o.howMany : ''}</span><span class="r">${DB.esc(o.locName)}<br>${DB.esc(o.obsDt || '')}</span></div>`).join('') || '<p class="meta">Nothing notable in range.</p>';
+  // ---- this week's birds (data/expected/{code}.json for the county around the set location) + notable nearby ----
+  // A round photo thumb per bird, lazy-loaded from Wikimedia by js/photos.js; the name on paper until (or unless) it arrives.
+  const P = globalThis.DAYBIRD_PHOTOS;
+  const thumbHtml = (name) => `<span class="thumb" data-thumb="${DB.esc(name)}" aria-hidden="true"><span>${DB.esc(name)}</span></span>`;
+  function fillThumbs(root) {
+    if (!P) return;
+    root.querySelectorAll('.thumb[data-thumb]:not(.asked)').forEach(el => {
+      el.classList.add('asked');
+      P.observe(el, el.dataset.thumb, p => {
+        if (!p || !p.thumb) return;
+        const img = new Image(); img.alt = ''; img.decoding = 'async';
+        img.onload = () => { el.innerHTML = ''; el.appendChild(img); el.classList.add('has-photo'); };   // only swap once it really loaded: never a broken image
+        img.src = p.thumb;
+      });
+    });
+  }
+  // Runs on its own so a slow fetch never holds up the rest of the page.
+  (async () => {
+  const st = DB.settings();
+  const region = await DB.regionFor(st.lat, st.lng);
+  const expected = region ? await DB.loadExpected(region.code) : null;
+  const expectedNames = new Set((expected ? expected.species : []).map(s => s.name));
+  const monthName = new Date().toLocaleDateString(undefined, { month: 'long' });
 
-  // roll call
-  $('goSpot').innerHTML = [...b.spots.map(x => x.name), 'Somewhere else'].map(n => `<option>${DB.esc(n)}</option>`).join('');
-  $('goBtn').onclick = async () => {
-    $('goBtn').disabled = true;
-    await DB.post(`Going out: ${$('goSpot').value} at ${$('goTime').value}. ${c.word} day (score ${c.score}). Join me?`, ['going']);
-    location.href = 'feed.html';
-  };
+  // notable nearby: thumb + one line of context against the county's top 80, keeping the checklist links
+  $('notable').innerHTML = b.notable.map(o => {
+    const nm = `${o.subId && DAYBIRD_BRIEF.safeId(o.subId) ? `<a href="https://ebird.org/checklist/${o.subId}" target="_blank" rel="noopener">${DB.esc(o.comName)}</a>` : DB.esc(o.comName)}${o.howMany ? ' ×' + DB.esc(o.howMany) : ''}`;
+    const ctx = expected ? (expectedNames.has(o.comName) ? 'Uncommon here, but around' : `Not usually here in ${monthName}`) : '';
+    return `<div class="notable-row">${thumbHtml(o.comName)}<span class="who"><b>${nm}</b>${ctx ? `<span class="ctx">${ctx}</span>` : ''}<span class="where">${DB.esc(o.locName)}${o.obsDt ? ` · ${DB.esc(o.obsDt)}` : ''}</span></span></div>`;
+  }).join('') || '<p class="meta">Nothing notable in range.</p>';
+  fillThumbs($('notable'));
+
+  // the week card: 15 rows, "Show 15 more" to 30; outside the counties (or before the first build) the brief's recent names instead
+  const SB = DAYBIRD_BRIEF;
+  let rows = [], withShares = false, shown = 15;
+  if (expected && expected.species.length) {
+    withShares = true;
+    rows = expected.species;
+    $('weekTitle').textContent = "This week's birds";
+    $('weekLine').textContent = SB.expectedLine(expected);
+  } else {
+    rows = [...new Set(b.recent || [])].map(name => ({ name }));
+    $('weekTitle').textContent = 'Reported near you lately';
+    $('weekLine').textContent = region ? `Daybird hasn't counted this week's checklists for ${region.name} yet.` : 'Daybird counts checklists for the Upper Valley so far.';
+  }
+  function renderWeek() {
+    const list = rows.slice(0, shown);
+    $('weekList').innerHTML = list.map(s => `<li><button type="button" class="bird" data-name="${DB.esc(s.name)}">${thumbHtml(s.name)}<span class="who"><b>${DB.esc(s.name)}</b>${withShares ? `<span class="how">${DB.esc(SB.shareWords(s.share))}</span>` : ''}</span>${withShares && s.trend && s.trend !== 'steady' ? `<span class="trend">${DB.esc(s.trend)}</span>` : ''}</button></li>`).join('')
+      || '<li><p class="meta" style="margin:6px 0">No bird reports to show yet.</p></li>';
+    fillThumbs($('weekList'));
+    const left = Math.min(15, Math.max(0, Math.min(rows.length, 30) - shown));
+    $('weekMore').hidden = left <= 0;
+    $('weekMoreBtn').textContent = `Show ${left} more`;
+  }
+  renderWeek();
+  $('weekMoreBtn').onclick = () => { shown = Math.min(30, rows.length); renderWeek(); };
+
+  // tap a bird: the sheet with the big photo, the numbers, and the links
+  const sheet = $('birdSheet');
+  async function openSheet(name) {
+    const sp = rows.find(s => s.name === name) || { name };
+    const status = withShares ? SB.statusSentence(sp, expected) : '';
+    const wikiFallback = 'https://en.wikipedia.org/wiki/' + encodeURIComponent(String(name).trim().replace(/\s+/g, '_'));
+    const draw = (p) => {
+      sheet.innerHTML = `
+        <div class="pic">${p && p.image ? `<img src="${DB.esc(p.image)}" alt="${DB.esc(name)}">` : `<div class="nm">${DB.esc(name)}</div>`}</div>
+        <div class="body">
+          <h2 id="birdSheetName">${DB.esc(name)}</h2>
+          ${status ? `<p class="status">${DB.esc(status)}</p>` : ''}
+          <div class="status-note" data-species="${DB.esc(name)}"></div>
+          <p class="credit">${p ? `Photo: ${DB.esc(p.artist || 'see Wikimedia Commons')}${p.license ? ` · ${DB.esc(p.license)}` : ''} · <a href="${DB.esc(p.page)}" target="_blank" rel="noopener">Wikimedia Commons</a>` : 'No free photo found for this one yet.'}</p>
+          <div class="acts">
+            <a class="btn ghost" href="${DB.esc((p && p.wiki) || wikiFallback)}" target="_blank" rel="noopener">Wikipedia</a>
+            <a class="btn ghost" href="bird.html?name=${encodeURIComponent(name)}">What it's up to this season</a>
+            <button type="button" class="ghost" id="sheetClose">Close</button>
+          </div>
+        </div>`;
+      // One-line hook for the season-status data another page owns: render its sentence when it knows this bird.
+      const S = globalThis.DAYBIRD_STATUS, note = sheet.querySelector('.status-note');
+      if (S && typeof S.now === 'function' && (typeof S.has !== 'function' || S.has(name))) { try { const t = S.now(name, new Date()); if (t) note.textContent = typeof t === 'string' ? t : (t.line || t.text || ''); } catch {} }
+      sheet.querySelector('#sheetClose').onclick = () => sheet.close();
+      const img = sheet.querySelector('.pic img'); if (img) img.onerror = () => { img.parentNode.innerHTML = `<div class="nm">${DB.esc(name)}</div>`; };
+    };
+    draw(P ? P.cached(name) : null);
+    if (!sheet.open) sheet.showModal();
+    if (P) { const p = await P.get(name); if (sheet.open && sheet.querySelector('#birdSheetName') && sheet.querySelector('#birdSheetName').textContent === name) draw(p); }
+  }
+  $('weekList').addEventListener('click', e => { const btn = e.target.closest('button.bird'); if (btn) openSheet(btn.dataset.name); });
+  sheet.addEventListener('click', e => { if (e.target === sheet) sheet.close(); });   // tap the backdrop to close
+  })().catch(e => { $('weekLine').textContent = "Couldn't load this week's birds."; console.warn('week card:', e); });
+
   // history + grading
   function renderHistory(h) {
     const graded = h.filter(x => x.verdict !== null), right = graded.filter(x => x.verdict === 'right').length;
@@ -286,8 +407,6 @@
     send({ to: 'other', email }, $('sendOther'));
   };
 
-  const passes = (await DB.loadPasses()).filter(p => p.price >= 0).slice(0, 3);
-  $('passes').innerHTML = passes.map(p => `<div class="row"><span class="l">${DB.esc(p.title)}</span><span class="r">${p.price ? '$' + p.price : 'Free'} · ${p.seats} seats</span></div>`).join('');
 
 })();
 </script>

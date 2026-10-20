@@ -208,7 +208,8 @@ const DB = (() => {
       img.onload = () => {
         const k = Math.min(1, max / Math.max(img.width, img.height));
         const c = document.createElement('canvas'); c.width = img.width * k; c.height = img.height * k;
-        c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+        const ctx = c.getContext('2d'); ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, c.width, c.height);   // JPEG has no transparency: white, not black, behind PNG drawings
+        ctx.drawImage(img, 0, 0, c.width, c.height);
         URL.revokeObjectURL(url); res(c.toDataURL('image/jpeg', 0.82));
       };
       img.onerror = rej; img.src = url;
@@ -265,6 +266,9 @@ const DB = (() => {
       byMonth: Array.from({ length: 12 }, (_, m) => species.filter(s => +s.first.slice(5, 7) === m + 1).length),
       allSpecies: species.map(s => s.name).sort(),
       months,
+      // First-seen date and place for every species, for lifelist.html (allSpecies holds names only and recentLifers
+      // only the last ten). Place names are clipped so a 500-species list stays around 30 KB.
+      firsts: Object.fromEntries(species.map(s => [s.name, { first: s.first, loc: String(s.loc || '').slice(0, 60).trim() }])),
     };
     store.set('life', life);
     if (online()) CLOUD.saveProfile({ life: withLearned(life) }).catch(() => {});
@@ -304,6 +308,7 @@ const DB = (() => {
         if (!have.has(name)) {
           have.add(name);
           newSpecies.push({ name, first: date, loc: l.loc?.name || cl.locId || '', sightings: 1 });
+          (L.firsts = L.firsts || {})[name] = { first: date, loc: String(l.loc?.name || cl.locId || '').slice(0, 60).trim() };   // for lifelist.html
           if (date) L.byMonth[+date.slice(5, 7) - 1]++;
           if (date.startsWith(String(new Date().getFullYear()))) L.thisYear++;
           if (date.length >= 7) { // keep the recap's month aggregates in step (lifer names and best day; species counts come from the CSV)
@@ -412,11 +417,75 @@ const DB = (() => {
     return streak(l);
   }
 
+  // ---------- own bird images (lifelist.html): your photo or drawing of a species, replacing the Wikimedia photo ----------
+  // Signed out: localStorage 'daybird:birdImages' = { species: { data, kind, caption } }, each image re-encoded small.
+  // Signed in: the file goes to the 'photos' bucket and a row to bird_images (migration 10); { species: { url, kind, caption } }.
+  // setBirdImage never throws: it returns { ok: true, image } or { ok: false, message } for the page to show.
+  const LOCAL_IMAGE_CAP = 3.5e6;   // characters of JSON, about 20 photos at 700 px
+  function shrinkDataURL(dataUrl, max = 700, quality = 0.8) {
+    return new Promise((res, rej) => {
+      const img = new Image();
+      img.onload = () => {
+        const k = Math.min(1, max / Math.max(img.width, img.height));
+        const c = document.createElement('canvas'); c.width = Math.max(1, Math.round(img.width * k)); c.height = Math.max(1, Math.round(img.height * k));
+        const ctx = c.getContext('2d'); ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, c.width, c.height); ctx.drawImage(img, 0, 0, c.width, c.height);
+        res(c.toDataURL('image/jpeg', quality));
+      };
+      img.onerror = () => rej(new Error('That file is not an image this browser can read.'));
+      img.src = dataUrl;
+    });
+  }
+  const localBirdImages = () => store.get('birdImages', {});
+  const cleanKind = (k) => (k === 'art' ? 'art' : 'photo');
+  async function birdImages() {
+    if (online()) return CLOUD.listBirdImages().catch(() => ({}));
+    return localBirdImages();
+  }
+  async function setBirdImage(species, { data, kind = 'photo', caption = '' } = {}) {
+    if (!species || !data) return { ok: false, message: 'Pick an image first.' };
+    const cap = String(caption || '').trim().slice(0, 120);
+    try {
+      if (online()) {
+        const url = await CLOUD.uploadPhoto(data, 'bird-' + String(species).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, ''));
+        await CLOUD.setBirdImage(species, { url, kind: cleanKind(kind), caption: cap });
+        const local = localBirdImages(); if (local[species]) { delete local[species]; store.set('birdImages', local); }   // now in the account
+        return { ok: true, image: { url, kind: cleanKind(kind), caption: cap } };
+      }
+      const small = await shrinkDataURL(data, 700, 0.8);
+      const all = localBirdImages();
+      const next = { ...all, [species]: { data: small, kind: cleanKind(kind), caption: cap } };
+      if (JSON.stringify(next).length > LOCAL_IMAGE_CAP) return { ok: false, message: 'This browser can hold about 20 photos. Sign in to keep more and have them follow you.' };
+      store.set('birdImages', next);
+      if (!store.get('birdImages', {})[species]) return { ok: false, message: 'This browser could not save the photo. Sign in to keep photos in your account instead.' };
+      return { ok: true, image: next[species] };
+    } catch (e) { return { ok: false, message: 'Could not save the image: ' + (e && e.message || e) }; }
+  }
+  async function removeBirdImage(species) {
+    const local = localBirdImages(); if (local[species]) { delete local[species]; store.set('birdImages', local); }
+    if (online()) await CLOUD.removeBirdImage(species).catch(() => {});
+  }
+
+  // ---------- "This week's birds" (index.html): the county list the GitHub Action builds daily ----------
+  // data/regions.json holds the Upper Valley county boxes; the engine's regionFor picks the one around a point (the
+  // engine's own copy of the boxes is the fallback when the file will not load). data/expected/{code}.json is the list.
+  let _regions = null;
+  function regions() {
+    return _regions || (_regions = fetch('data/regions.json').then(r => r.ok ? r.json() : null).then(j => (j && Array.isArray(j.regions) && j.regions.length) ? j.regions : B.REGIONS).catch(() => B.REGIONS));
+  }
+  async function regionFor(lat, lng) { return B.regionFor(lat, lng, await regions()); }
+  async function loadExpected(code) {
+    if (!/^[A-Z]{2}(-[A-Z0-9]+){1,2}$/.test(String(code || ''))) return null;
+    try { const r = await fetch(`data/expected/${code}.json`, { cache: 'no-store' }); if (!r.ok) return null; const j = await r.json(); return j && j.window && Array.isArray(j.species) ? j : null; }
+    catch { return null; }
+  }
+
   const ready = CLOUD.ready ? CLOUD.init() : Promise.resolve(null);
 
   return { ready, online, settings, saveSettings, loadBrief, gradeCall, briefText, findPlaces, briefPlace, saveBriefPlace, loadPasses, bookings, book, cancelBooking, addListing, loadFeed, post, deletePost, toggleLike,
            fileToDataURL, importLifeList, syncFromEbird, lifeList, profile, saveProfile, esc, fmtDate, ago, dirName,
-           learned, saveLearned, loadLearned, mergeLearned, streak, streakOf, markOutside, markPaused };
+           learned, saveLearned, loadLearned, mergeLearned, streak, streakOf, markOutside, markPaused,
+           birdImages, localBirdImages, setBirdImage, removeBirdImage,
+           regions, regionFor, loadExpected };
 })();
 
 // nav highlight + sign-in widget

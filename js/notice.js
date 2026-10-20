@@ -6,7 +6,7 @@
 (() => {
   const BASE = 'What we store: your sign-in email, display name, optional photos, your life-list summary, a location rounded to about a mile, your mode and level, and anything you post, list or book.';
   const VARIANTS = {
-    profile: 'What we store when you save: your display name, bio, favorite bird, the photos you add, and your life-list summary. Signed out, it stays in this browser only.',
+    profile: 'What we store when you save: your display name, bio, favorite bird, the photos you add, the photos you put on your birds, and your life-list summary. Signed out, it stays in this browser only.',
     listing: 'What we store when you publish: the listing (title, area, habitat, birds, price, dates, rules), the exact location and directions in a private table only you and bookers can read, and the time you accepted the host agreement.',
     booking: 'What we store when you book: the listing, date, seats and the time you accepted the guest waiver. The host sees your display name.',
     circle: 'What we store: the circle name, who is in it, and each morning line you post (date, call, spot, note). Only members can read any of it.',
