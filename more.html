@@ -43,12 +43,11 @@
 (() => {
   // The four pages that left the tab bar, plus whatever other builders registered in data/pages.js.
   const BUILTIN = [
-    { href: 'passes.html', title: 'Passes', blurb: 'Mornings on private land, a few seats at a time.', group: 'plan' },
-    { href: 'host.html', title: 'Host land', blurb: 'List your pond, pasture or ridge for a few birders on the good mornings.', group: 'plan' },
     { href: 'settings.html', title: 'Settings', blurb: 'Your location, eBird key, where you bird and how long you have birded.', group: 'you' },
     { href: 'about.html', title: 'About', blurb: 'What Daybird is and who makes it.', group: 'about' },
   ];
-  const GROUPS = { plan: 'Plan a morning', learn: 'Learn', you: 'You', about: 'About Daybird' };
+  const GROUPS = { learn: 'Learn', you: 'You', about: 'About Daybird', labs: 'Labs' };
+  const NOTES = { labs: 'Half-built things we are trying. They work, mostly; they are not the point yet.' };
   const extra = Array.isArray(globalThis.DAYBIRD_PAGES) ? globalThis.DAYBIRD_PAGES : [];
   const seen = new Set(BUILTIN.map(p => p.href));
   const pages = BUILTIN.concat(extra.filter(p => p && p.href && p.title && !seen.has(p.href) && seen.add(p.href)));
@@ -58,6 +57,7 @@
   document.getElementById('hub').innerHTML = order.filter(g => by[g]).map(g => `
     <div class="card hub" data-group="${g}">
       <h3>${GROUPS[g] || 'Other'}</h3>
+      ${NOTES[g] ? `<p class="tagline">${NOTES[g]}</p>` : ''}
       ${by[g].map(p => `<a href="${DB.esc(p.href)}"><b>${DB.esc(p.title)}</b>${p.blurb ? `<span>${DB.esc(p.blurb)}</span>` : ''}</a>`).join('')}
     </div>`).join('');
 })();
