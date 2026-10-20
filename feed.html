@@ -87,7 +87,7 @@
   if (DB.online()) $('foot').textContent = 'Shared feed. Be kind, report real birds, keep exact locations of sensitive species vague.';
 
   const L = await DB.lifeList(), P = await DB.profile();
-  if (L) $('mystats').innerHTML = `<div class="card"><div class="stat"><div><b>${L.total}</b><span>life list</span></div><div><b>${L.yearList}</b><span>this year</span></div><div><b>${DB.esc(L.recentLifers[0].name)}</b><span>latest lifer</span></div>${P.favorite ? `<div><b>${DB.esc(P.favorite)}</b><span>favorite</span></div>` : ''}</div><a class="meta" href="profile.html">Edit profile →</a></div>`;
+  if (L) $('mystats').innerHTML = `<div class="card"><div class="stat"><div><b>${L.total}</b><span>life list</span></div><div><b>${L.yearList}</b><span>this year</span></div>${L.recentLifers && L.recentLifers[0] ? `<div><b>${DB.esc(L.recentLifers[0].name)}</b><span>latest lifer</span></div>` : ''}${P.favorite ? `<div><b>${DB.esc(P.favorite)}</b><span>favorite</span></div>` : ''}</div><a class="meta" href="profile.html">Edit profile →</a></div>`;
   else $('mystats').innerHTML = `<p class="meta"><a href="profile.html">Import your eBird list</a> to show your life-list stats here.</p>`;
 
   let photo = null;
