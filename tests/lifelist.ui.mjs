@@ -1,6 +1,7 @@
 // Headless checks for lifelist.html ("Your birds") and js/lifelist.js. Every outside host is stubbed: Wikipedia summaries and
 // the Commons API answer from fixtures for six species, upload.wikimedia.org serves solid-color PNGs, the Supabase CDN
-// serves nothing (offline mode), and data/brief.json is replaced with a short `recent` list.
+// serves nothing (offline mode), and data/brief.json is replaced with a short `recent` list. The sticker button in the sheet
+// (js/stickers.js) gets one check here; tests/stickers.ui.mjs has the rest.
 // Run from the repo root (Playwright and sharp from /opt/npm-tools on the build box, or `npm i playwright sharp` anywhere):
 //   PLAYWRIGHT_DIR=/opt/npm-tools/node_modules/playwright SHARP_DIR=/opt/npm-tools/node_modules/sharp DAYBIRD_SHOTS=/tmp node tests/lifelist.ui.mjs
 import { createServer } from 'node:http';
@@ -252,6 +253,25 @@ async function step(name, fn) { try { await fn(); console.log('ok   ' + name); }
     assert.ok(near(px(20, 20), [246, 243, 236]), 'paper corner');
     assert.match(await page.textContent('dialog.sheet #shareMsg'), /Saved a picture/);
     await writeFile(join(OUT, 'lifelist-slide.png'), buf);
+    await page.click('dialog.sheet #closeSheet');
+  });
+  await step('make a sticker: the button and the note in the sheet, a 1024 PNG named by slug, transparent corners, the photo, the credit', async () => {
+    await page.click('#wall .tile[data-name="Blue Jay"]'); await page.waitForSelector('dialog.sheet[open]');
+    assert.deepEqual(await page.$$eval('dialog.sheet .acts > *', els => els.slice(0, 2).map(e => e.textContent.trim())), ['Share', 'Make a sticker']);
+    assert.match(await page.textContent('dialog.sheet .stickerNote'), /Save it to Photos, then in Messages tap \+, Stickers, \+ and pick it .* On Android, save it and send it as an image\./);
+    const [dl] = await Promise.all([page.waitForEvent('download'), page.click('dialog.sheet #stickerBird')]);
+    assert.equal(dl.suggestedFilename(), 'daybird-sticker-blue-jay.png');
+    const img = sharp(await readFile(await dl.path())).ensureAlpha(); const meta = await img.metadata();
+    assert.equal(meta.width, 1024); assert.equal(meta.height, 1024);
+    const { data, info } = await img.raw().toBuffer({ resolveWithObject: true });
+    const px = (x, y) => { const i = (y * info.width + x) * info.channels; return [data[i], data[i + 1], data[i + 2], data[i + 3]]; };
+    const near = (a, b, t = 8) => b.every((v, i) => Math.abs(a[i] - v) <= t);
+    for (const [x, y] of [[0, 0], [1023, 0], [0, 1023], [1023, 1023]]) assert.equal(px(x, y)[3], 0, `corner ${x},${y} transparent`);
+    assert.ok(near(px(512, 512), COLORS['Blue Jay']) && px(512, 512)[3] === 255, 'the photo fills the circle: ' + px(512, 512));
+    const spec = await page.evaluate(() => DAYBIRD_STICKERS.lastSpec);
+    assert.equal(spec.credit, 'Photo: Rhododendrites · CC BY-SA 4.0'); assert.equal(spec.photo, true);
+    assert.ok(near(px(512, spec.tab.y + 6), [255, 255, 255]), 'the tab is white');
+    await page.waitForFunction(() => /^Saved daybird-sticker-blue-jay\.png\./.test(document.querySelector('dialog.sheet #shareMsg').textContent));
     await page.click('dialog.sheet #closeSheet');
   });
   await step('phone screenshot', async () => {

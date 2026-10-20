@@ -77,6 +77,7 @@ dialog.sheet::backdrop{background:rgba(31,42,55,.55)}
 .sheet .acts{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px;align-items:center}
 .sheet .ownEdit{margin-top:12px;display:grid;gap:8px}
 .sheet .ownEdit .acts{margin-top:2px}
+.sheet .stickerNote{margin:10px 0 0;font-size:12px;line-height:1.45}
 @media (max-width:600px){dialog.sheet{margin:auto 0 0;width:100%;max-width:none;border-radius:18px 18px 0 0}}
 #migrate{margin:0 0 12px}
 </style>
@@ -98,7 +99,7 @@ dialog.sheet::backdrop{background:rgba(31,42,55,.55)}
   <div class="ll-head">
     <div>
       <h1>Your birds</h1>
-      <p class="lead">Every bird on your list, with a photo, and the next ones to find.</p>
+      <p class="lead">Every bird on your list, with a photo, and the next ones to find. Tap one to share it or make a sticker.</p>
     </div>
     <div class="count" id="count">…</div>
   </div>
@@ -145,6 +146,7 @@ dialog.sheet::backdrop{background:rgba(31,42,55,.55)}
 <script src="js/brief.js"></script>
 <script src="js/app.js"></script>
 <script src="js/footer.js"></script>
+<script src="js/stickers.js"></script>
 <script src="js/lifelist.js"></script>
 <script>
 (async () => {

@@ -11,6 +11,8 @@
      4. the name on paper with a thin amber ring
    Wikimedia lookups run as tiles scroll into view, at most MAX_INFLIGHT at a time, and are cached in localStorage
    ('daybird:photos', 30 days, misses included) so a return visit makes no requests. Every network failure is silent.
+   When js/stickers.js is loaded first (globalThis.DAYBIRD_STICKERS), the sheet of a bird on the list also offers
+   "Make a sticker": the same picture as a die-cut 1024 px PNG for iMessage, with a three-step note under the button.
 
    DAYBIRD_LIFELIST = { photos: { lookup, cached, request, cancel, fileName, thumbAt, sentence, stripHtml, clearCache, ownArt },
                         entries, order, sections, rank, unseen, hintOf, fmtMonth, fmtLong, drawSlide, slideBlob, share, mount } */
@@ -464,6 +466,7 @@ const DAYBIRD_LIFELIST = (() => {
       const n = kind === 'seen' && L ? rank(L, name) : null;
       const hint = hintOf(name);
       const editing = !!state.pending;
+      const stickers = globalThis.DAYBIRD_STICKERS || null;   // js/stickers.js, when the page loads it: "Make a sticker"
       sheet.innerHTML = `
         <div class="pic">${src ? `<img src="${esc(src)}" alt="${esc(name)}">` : `<span class="nm">${esc(name)}</span>`}</div>
         <div class="body">
@@ -483,10 +486,12 @@ const DAYBIRD_LIFELIST = (() => {
           </div>` : `
           <div class="acts">
             ${kind === 'seen' ? '<button type="button" id="shareBird">Share</button>' : ''}
+            ${kind === 'seen' && stickers ? '<button type="button" class="ghost" id="stickerBird">Make a sticker</button>' : ''}
             <a class="btn ghost" href="${esc(hasWiki && p.wiki ? p.wiki : 'https://en.wikipedia.org/wiki/' + encodeURIComponent(titleOf(name)))}" target="_blank" rel="noopener">Wikipedia</a>
             ${db && db.setBirdImage ? `<button type="button" class="ghost" id="ownPick">${o ? 'Replace' : 'Use my photo'}</button>${o ? '<button type="button" class="ghost" id="ownRemove">Remove</button>' : ''}` : ''}
             <button type="button" class="ghost" id="closeSheet">Close</button>
-          </div>`}
+          </div>
+          ${kind === 'seen' && stickers ? `<p class="meta stickerNote">Sticker: a PNG of this bird for iMessage. Save it to Photos, then in Messages tap +, Stickers, + and pick it (or long-press the bird in Photos and choose Add Sticker). On Android, save it and send it as an image.</p>` : ''}`}
           <input type="file" id="ownFile" accept="image/*" class="hidden" aria-hidden="true" tabindex="-1">
           <p class="meta" id="shareMsg" role="status" aria-live="polite">${esc(state.msg || '')}</p>
         </div>`;
@@ -505,6 +510,20 @@ const DAYBIRD_LIFELIST = (() => {
           say(({ shared: 'Shared.', downloaded: 'Saved a picture of this bird. Post it anywhere.', cancelled: '' })[r.how] + (r.how !== 'cancelled' && !r.photo && image ? ' The photo could not be copied into it, so the picture is text only.' : ''));
         } catch (err) { say("Couldn't make the picture: " + err.message); }
         sb.disabled = false;
+      };
+      // the sticker: the same picture as the sheet shows, drawn by js/stickers.js as a die-cut PNG; a drawing (kind 'art')
+      // goes in exactly like a photo, and only a Wikimedia photo carries a credit line
+      const st = $('stickerBird');
+      if (st) st.onclick = async () => {
+        st.disabled = true; say('Drawing the sticker…');
+        try {
+          const image = ownSrc(o) || (hasWiki ? (p.image || p.thumb) : null);
+          const credit = !o && hasWiki && !p.own ? ['Photo: ' + (p.artist || 'Wikimedia Commons'), p.license].filter(Boolean).join(' · ') : '';
+          const r = await stickers.exportSticker({ name, image, credit }, { navigator });
+          say(({ shared: 'Shared. Save Image puts it in Photos; then add it from Messages.', downloaded: `Saved ${r.name}. Get it onto your phone's Photos, then add it from Messages.`, cancelled: '' })[r.how]
+            + (r.how !== 'cancelled' && r.leftOut ? ' The photo could not be copied into it, so the sticker is the name on paper.' : ''));
+        } catch (err) { say("Couldn't make the sticker: " + err.message); }
+        st.disabled = false;
       };
       // own image: pick → preview + kind + caption → save; replace; remove
       const pick = $('ownPick'), file = $('ownFile');
