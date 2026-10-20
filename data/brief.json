@@ -1,40 +1,18 @@
 {
- "generated": "2026-10-20T00:36:01.925Z",
- "date": "2026-10-19",
+ "generated": "2026-10-20T14:28:17.867Z",
+ "date": "2026-10-20",
  "word": "GO",
  "grade": "go",
- "score": 85,
+ "score": 75,
  "headline": "Get out there.",
  "why": [
-  "calm winds",
-  "4 notable reports nearby"
+  "calm winds"
  ],
- "whyLine": "Calm and dry at sunrise, 34°. 4 unusual birds were reported nearby this week. Worth getting out.",
- "wear": "34° at sunrise, 66° later: winter coat, gloves and a hat, a thermos, binoculars optional.",
- "firstSong": "6:28 AM",
- "leaveBy": "6:53 AM",
+ "whyLine": "Calm and dry at sunrise, 32°. Worth getting out.",
+ "wear": "32° at sunrise, 59° later: winter coat, gloves and a hat, a thermos, binoculars optional.",
+ "firstSong": "6:29 AM",
+ "leaveBy": "6:54 AM",
  "lookFor": [
-  {
-   "key": "feeder birds",
-   "count": 13,
-   "species": [
-    "Northern Mockingbird",
-    "Northern Cardinal",
-    "Black-capped Chickadee",
-    "Tufted Titmouse",
-    "White-breasted Nuthatch",
-    "Carolina Wren",
-    "Blue Jay",
-    "Mourning Dove",
-    "Cedar Waxwing",
-    "Red-breasted Nuthatch",
-    "Rock Pigeon",
-    "Brown Creeper",
-    "Gray Catbird"
-   ],
-   "label": "feeder birds",
-   "tip": "Chickadees, titmice and nuthatches lead the mixed flocks. Follow the chickadees."
-  },
   {
    "key": "sparrows",
    "count": 13,
@@ -57,14 +35,35 @@
    "tip": "Little brown birds in the weeds and at the feeder. Look for stripes on the head."
   },
   {
+   "key": "feeder birds",
+   "count": 12,
+   "species": [
+    "Northern Mockingbird",
+    "Northern Cardinal",
+    "Black-capped Chickadee",
+    "Tufted Titmouse",
+    "White-breasted Nuthatch",
+    "Carolina Wren",
+    "Blue Jay",
+    "Mourning Dove",
+    "Cedar Waxwing",
+    "Red-breasted Nuthatch",
+    "Rock Pigeon",
+    "Brown Creeper"
+   ],
+   "label": "feeder birds",
+   "tip": "Chickadees, titmice and nuthatches lead the mixed flocks. Follow the chickadees."
+  },
+  {
    "key": "waterfowl",
-   "count": 11,
+   "count": 12,
    "species": [
     "Canada Goose",
     "Mallard",
     "Wood Duck",
     "Hooded Merganser",
     "Common Merganser",
+    "Common Loon",
     "Pied-billed Grebe",
     "American Black Duck",
     "American Wigeon",
@@ -76,30 +75,30 @@
    "tip": "Scan the water from one spot for a few minutes. Ducks come in groups; count the different kinds."
   }
  ],
- "groupsLine": "Most likely: feeder birds (13 kinds reported), sparrows (13 kinds reported), waterfowl (11 kinds reported).",
+ "groupsLine": "Most likely: sparrows (13 kinds reported), feeder birds (12 kinds reported), waterfowl (12 kinds reported).",
  "soaring": {
   "rating": "good",
   "why": [
    "sunny by midday",
-   "a 32° warm-up",
-   "dead calm"
+   "a 27° warm-up",
+   "a light breeze"
   ],
-  "line": "Good soaring day for hawks: sunny by midday, a 32° warm-up, dead calm. Thermals build late morning, so 10 AM to 2 PM beats dawn for hawks."
+  "line": "Good soaring day for hawks: sunny by midday, a 27° warm-up, a light breeze. Thermals build late morning, so 10 AM to 2 PM beats dawn for hawks."
  },
  "tomorrow": null,
  "wx": {
-  "temp": 34,
-  "wind": 2,
-  "windDir": 116,
+  "temp": 32,
+  "wind": 5,
+  "windDir": 213,
   "rain": 0,
-  "cloud": 58,
+  "cloud": 83,
   "cloudMid": 3,
-  "windMid": 1,
-  "high": 66,
-  "low": 32,
-  "sunrise": "07:08",
-  "sunset": "17:58",
-  "date": "2026-10-19"
+  "windMid": 9,
+  "high": 59,
+  "low": 30,
+  "sunrise": "07:09",
+  "sunset": "17:57",
+  "date": "2026-10-20"
  },
  "spots": [
   {
@@ -124,18 +123,18 @@
    "species": 11
   },
   {
-   "name": "117 Wentworth Way, White River Junction US-VT 43.64532, -72.32504",
-   "locId": "L39642583",
-   "lat": 43.645317,
-   "lng": -72.325039,
-   "species": 6
-  },
-  {
    "name": "Mascoma River behind CCBA",
    "locId": "L78797981",
    "lat": 43.646935,
    "lng": -72.24928,
    "species": 5
+  },
+  {
+   "name": "117 Wentworth Way, White River Junction US-VT 43.64532, -72.32504",
+   "locId": "L39642583",
+   "lat": 43.645317,
+   "lng": -72.325039,
+   "species": 4
   }
  ],
  "notable": [
@@ -148,36 +147,6 @@
    "locId": "L461502",
    "lat": 43.6961141,
    "lng": -72.3197365
-  },
-  {
-   "comName": "Rose-breasted Grosbeak",
-   "howMany": 1,
-   "locName": "Church Street, Norwich",
-   "obsDt": "2026-10-17 10:22",
-   "subId": "S403060973",
-   "locId": "L49885243",
-   "lat": 43.7160586,
-   "lng": -72.3012708
-  },
-  {
-   "comName": "Nashville Warbler",
-   "howMany": 1,
-   "locName": "Trail to Leavitt Pond, Grantham",
-   "obsDt": "2026-10-17 08:38",
-   "subId": "S403052649",
-   "locId": "L12544134",
-   "lat": 43.5672397,
-   "lng": -72.1516688
-  },
-  {
-   "comName": "Gray Catbird",
-   "howMany": 1,
-   "locName": "163 Clay Hill Rd, Hartland US-VT 43.59699, -72.37893",
-   "obsDt": "2026-10-17 07:55",
-   "subId": "S403207309",
-   "locId": "L10983430",
-   "lat": 43.596994,
-   "lng": -72.378935
   }
  ],
  "recent": [
@@ -221,6 +190,7 @@
   "Field Sparrow",
   "Turkey Vulture",
   "Purple Finch",
+  "Common Loon",
   "Bald Eagle",
   "Pileated Woodpecker",
   "European Starling",
@@ -260,15 +230,9 @@
   "Northern Shoveler",
   "Black Scoter",
   "Vesper Sparrow",
-  "Green-winged Teal",
-  "Rose-breasted Grosbeak",
-  "Gray Catbird",
-  "Nashville Warbler",
-  "Blue-headed Vireo",
-  "Tennessee Warbler",
-  "Wild Turkey"
+  "Green-winged Teal"
  ],
- "recentCount": 86,
+ "recentCount": 81,
  "errors": [],
  "engine": 2
 }
