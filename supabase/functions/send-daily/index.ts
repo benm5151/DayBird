@@ -103,6 +103,7 @@ async function sendAll(c: Cfg, subs: Sub[], date: string, started: number) {
 
   const cells = groupByCell(subs);
   let cellsDone = 0, budgetSkipped = 0;
+  expectedMemo.clear();   // a fresh copy of each county's "This week's birds" per run
   for (const cell of cells.values()) {
     if (overBudget()) { budgetSkipped += cell.subs.length; skipped += cell.subs.length; continue; }
     const data = await fetchCell(c, cell.lat, cell.lng);
@@ -110,7 +111,7 @@ async function sendAll(c: Cfg, subs: Sub[], date: string, started: number) {
     if (!data.w && !data.eb.spots.length && !data.eb.notable.length) { skipped += cell.subs.length; errors.push(`cell ${cell.lat},${cell.lng}: no data, ${cell.subs.length} skipped`); cellsDone++; continue; }
     for (const s of cell.subs) {
       if (attempted >= c.maxEmails) { skipped++; capped++; continue; }
-      const brief = B.compose({ place: s.place, date: data.w?.date || date, whenLabel: "this morning", wx: data.w?.wx || null, tomorrow: data.w?.tomorrow || null, ...data.eb, mode: s.mode, level: s.level, traits: TRAITS });
+      const brief = B.compose({ place: s.place, date: data.w?.date || date, whenLabel: "this morning", wx: data.w?.wx || null, tomorrow: data.w?.tomorrow || null, ...data.eb, expected: data.expected, mode: s.mode, level: s.level, traits: TRAITS });
       if (s.go_only && brief.call.grade !== "go") { skipped++; continue; }
       queued.push(await renderDaily(c, brief, s, date, data.errors.length > 0));
       attempted++;
@@ -391,8 +392,63 @@ async function sendAll(c: Cfg, subs: Sub[], date: string, started: number) {
     return { question: `Which bird is "${answer[5]}"?`, options: shuffled, answer: answer[0], feeder: 'Rainy mornings bring the feeder crowd in close; a quiet ten minutes at the window counts as birding.' };
   }
 
+  // ---------------------------------------------------------------- regions: "This week's birds"
+  // The Upper Valley counties Daybird counts checklists for. The same boxes live in data/regions.json ([south, west,
+  // north, east]); tests/expected.test.mjs fails if the two drift. Boxes overlap along the Connecticut River, so a point
+  // inside two goes to the county whose box center is nearer (longitude scaled by cos(lat)). A town right on the river
+  // can land in the county across the water; the birds there are much the same.
+  const REGIONS = [
+    { code: 'US-NH-009', name: 'Grafton County', bbox: [43.48, -72.34, 44.40, -71.40] },
+    { code: 'US-NH-019', name: 'Sullivan County', bbox: [43.09, -72.46, 43.59, -71.97] },
+    { code: 'US-VT-027', name: 'Windsor County', bbox: [43.19, -72.95, 43.99, -72.30] },
+    { code: 'US-VT-017', name: 'Orange County', bbox: [43.77, -72.82, 44.20, -72.03] },
+  ];
+  function regionFor(lat, lng, regions = REGIONS) {
+    lat = Number(lat); lng = Number(lng);
+    if (!Number.isFinite(lat) || !Number.isFinite(lng)) return null;
+    const hits = (regions || []).filter((r) => { const [s, w, n, e] = r.bbox || []; return lat >= s && lat <= n && lng >= w && lng <= e; });
+    if (!hits.length) return null;
+    const k = Math.cos(lat * Math.PI / 180);
+    const d = (r) => { const [s, w, n, e] = r.bbox; const dl = lat - (s + n) / 2, dg = (lng - (w + e) / 2) * k; return dl * dl + dg * dg; };
+    return hits.slice().sort((a, b) => d(a) - d(b))[0];
+  }
+  // share → "7 in 10" (rounded to tenths, never below 1 in 10; "almost every" from 0.9 up)
+  const tenths = (share) => Math.min(10, Math.max(1, Math.round((Number(share) || 0) * 10)));
+  const shareShort = (share) => (Number(share) >= 0.9 ? 'almost every' : `${tenths(share)} in 10`);
+  const shareWords = (share) => (Number(share) >= 0.9 ? 'on almost every checklist' : `on ${tenths(share)} in 10 checklists`);
+  const pct = (share) => `${Math.round((Number(share) || 0) * 100)}%`;
+  // "Oct 10–20", or "Sep 28–Oct 7" across a month boundary (dates are UTC calendar days)
+  function windowLabel(from, to) {
+    const f = (iso, o) => { const d = new Date(`${iso}T12:00:00Z`); return Number.isNaN(d.getTime()) ? '' : new Intl.DateTimeFormat('en-US', { timeZone: 'UTC', ...o }).format(d); };
+    if (!from || !to) return '';
+    const sameMonth = String(from).slice(0, 7) === String(to).slice(0, 7);
+    return sameMonth ? `${f(from, { month: 'short' })} ${f(from, { day: 'numeric' })}–${f(to, { day: 'numeric' })}` : `${f(from, { month: 'short', day: 'numeric' })}–${f(to, { month: 'short', day: 'numeric' })}`;
+  }
+  // "Grafton County, 41 checklists, Oct 10–20."
+  function expectedLine(exp) {
+    if (!exp || !exp.window) return '';
+    const n = exp.window.lists || 0;
+    return `${(exp.region && exp.region.name) || 'Your county'}, ${n} checklist${n === 1 ? '' : 's'}, ${windowLabel(exp.window.from, exp.window.to)}.`;
+  }
+  // "On 68% of 41 checklists in Grafton County over Oct 10–20, up from 40% the ten days before: arriving."
+  function statusSentence(sp, exp) {
+    if (!sp || !exp || !exp.window) return '';
+    const where = (exp.region && exp.region.name) || 'your county';
+    let s = `On ${pct(sp.share)} of ${exp.window.lists} checklists in ${where} over ${windowLabel(exp.window.from, exp.window.to)}`;
+    if (sp.prevShare == null || !sp.trend) return s + '.';
+    const before = sp.trend === 'new' ? 'not reported the ten days before' : sp.trend === 'arriving' ? `up from ${pct(sp.prevShare)} the ten days before` : sp.trend === 'tapering' ? `down from ${pct(sp.prevShare)} the ten days before` : `about the same as the ten days before (${pct(sp.prevShare)})`;
+    return `${s}, ${before}: ${sp.trend}.`;
+  }
+  // The shape compose keeps: the top `n` names with share and trend, plus the window line.
+  function expectedFor(exp, n = 10) {
+    if (!exp || !exp.window || !Array.isArray(exp.species) || !exp.species.length) return null;
+    return { region: { code: exp.region && exp.region.code, name: (exp.region && exp.region.name) || 'Your county' }, window: { from: exp.window.from, to: exp.window.to, lists: exp.window.lists || 0 },
+      species: exp.species.slice(0, n).map((s) => ({ name: String(s.name || ''), share: Number(s.share) || 0, trend: s.trend || null })), line: expectedLine(exp) };
+  }
+
   // ---------------------------------------------------------------- compose: one object with everything
-  // in: { place, date (YYYY-MM-DD), whenLabel, wx, tomorrow, notable, spots, recent, migration, mode, level, traits, seed }
+  // in: { place, date (YYYY-MM-DD), whenLabel, wx, tomorrow, notable, spots, recent, migration, mode, level, traits, seed,
+  //       expected (optional: a data/expected/{code}.json object → the top ten as b.expected) }
   function compose(i) {
     const date = i.date || (i.wx && i.wx.date) || new Date().toISOString().slice(0, 10);
     const month = Number(date.slice(5, 7));
@@ -419,6 +475,7 @@ async function sendAll(c: Cfg, subs: Sub[], date: string, started: number) {
       stayIn: call.grade === 'stay' ? stayIn(i.traits, i.seed || Number(date.replace(/-/g, ''))) : null,
       tomorrow: tomorrow && tomorrow.grade !== call.grade ? tomorrow : null,
       spots, notable, recentCount: recent.length, migration: i.migration || 0,
+      expected: expectedFor(i.expected, 10),
     };
   }
 
@@ -432,6 +489,11 @@ async function sendAll(c: Cfg, subs: Sub[], date: string, started: number) {
     if (b.wear) L.push(`Wear: ${b.wear}`);
     if (b.firstSong) L.push(`First song around ${b.firstSong}; leave by ${b.leaveBy} to catch sunrise.`);
     L.push('');
+    if (b.expected && b.expected.species.length) {
+      L.push(`This week's birds (${b.expected.line.replace(/\.$/, '')}):`);
+      b.expected.species.forEach((s) => L.push(`- ${s.name} — ${shareShort(s.share)}${s.trend && s.trend !== 'steady' ? `, ${s.trend}` : ''}`));
+      L.push('');
+    }
     if (b.groupsLine) { L.push(b.groupsLine); b.lookFor.forEach((g) => g.tip && L.push(`- ${g.label}: ${g.tip}`)); L.push(''); }
     if (b.modeTips && b.modeTips.length) { L.push(`${modeTitle(b.mode)}:`); b.modeTips.forEach((t) => L.push(`- ${t}`)); L.push(''); }
     if (b.soaring) L.push(b.soaring.line, '');
@@ -475,6 +537,8 @@ ${p(esc(b.whyLine), 'font-size:16px')}
 ${b.wxLine ? p(esc(b.wxLine), 'font-size:14px;margin:0 0 4px') : ''}
 ${b.wear ? p(`<b>Wear:</b> ${esc(b.wear)}`, 'font-size:14px;margin:0 0 4px') : ''}
 ${b.firstSong ? p(`First song around <b>${esc(b.firstSong)}</b>; leave by <b>${esc(b.leaveBy)}</b> to catch sunrise.`, 'font-size:14px') : ''}
+${b.expected && b.expected.species.length ? h("This week's birds") + `<p style="${F};font-size:12px;color:#5f6b63;margin:0 0 6px">${esc(b.expected.line)} The share of eBird checklists each bird was on.</p>` +
+  `<ul style="${F};font-size:15px;padding-left:20px;margin:0">${b.expected.species.map((s) => li(`<b>${esc(s.name)}</b> <span style="color:#5f6b63">— ${esc(shareShort(s.share))}</span>${s.trend && s.trend !== 'steady' ? ` <span style="color:#E8833A;font-size:13px">${esc(s.trend)}</span>` : ''}`)).join('')}</ul>` : ''}
 ${b.groupsLine ? h('What to look for') + p(esc(b.groupsLine)) + `<ul style="${F};font-size:14px;padding-left:20px;margin:0">${b.lookFor.map((g) => g.tip ? li(`<b>${esc(g.label)}:</b> ${esc(g.tip)}`) : '').join('')}</ul>` : ''}
 ${b.modeTips && b.modeTips.length ? h(modeTitle(b.mode)) + `<ul style="${F};font-size:14px;padding-left:20px;margin:0">${b.modeTips.map((t) => li(esc(t))).join('')}</ul>` : ''}
 ${b.soaring ? p(esc(b.soaring.line), 'font-size:14px;margin-top:12px') : ''}
@@ -493,7 +557,8 @@ ${o.footerHtml ? `<p style="${F};font-size:12px;color:#5f6b63;margin:14px 4px 0"
 </div></body></html>`;
   }
 
-  root.DAYBIRD_BRIEF = { VERSION, MODES, LEVELS, DIRS, dirName, modeTitle, groupOf, groups, weatherUrl, parseWeather, parseEbird, score, whyTags, whyLine, wearLine, firstSong, leaveBy, bestWindow, soaring, lookFor, groupsLine, stayIn, compose, text, emailHtml, esc, safeId, ampm, addMin };
+  root.DAYBIRD_BRIEF = { VERSION, MODES, LEVELS, DIRS, dirName, modeTitle, groupOf, groups, weatherUrl, parseWeather, parseEbird, score, whyTags, whyLine, wearLine, firstSong, leaveBy, bestWindow, soaring, lookFor, groupsLine, stayIn, compose, text, emailHtml, esc, safeId, ampm, addMin,
+    REGIONS, regionFor, tenths, shareShort, shareWords, pct, windowLabel, expectedLine, statusSentence, expectedFor };
 })(typeof globalThis !== 'undefined' ? globalThis : typeof window !== 'undefined' ? window : this);
 // --- data/traits.js
 // Field-mark trait table for common Northeast US birds. Hand-authored for the ID helper; not exhaustive.
@@ -641,7 +706,21 @@ async function fetchCell(c: Cfg, lat: number, lng: number) {
   if (nr.status === "rejected") errors.push(`ebird notable: ${nr.reason?.message || nr.reason}`);
   if (rr.status === "rejected") errors.push(`ebird recent: ${rr.reason?.message || rr.reason}`);
   const eb = B.parseEbird(nr.status === "fulfilled" ? nr.value : [], rr.status === "fulfilled" ? rr.value : []);
-  return { w: wr.status === "fulfilled" ? wr.value : null, eb, errors };
+  const expected = await expectedFor(c, lat, lng);
+  return { w: wr.status === "fulfilled" ? wr.value : null, eb, expected, errors };
+}
+// "This week's birds": the county list the GitHub Action publishes at data/expected/{code}.json (scripts/build_expected.mjs).
+// The county comes from the engine's regionFor; one fetch per county per run; on any failure the email simply goes out
+// without the block (not even a data note, since the brief itself is complete).
+const expectedMemo = new Map<string, Promise<any>>();
+export function expectedFor(c: Cfg, lat: number, lng: number): Promise<any> {
+  const region = B.regionFor(lat, lng);
+  if (!region) return Promise.resolve(null);
+  if (!expectedMemo.has(region.code)) {
+    expectedMemo.set(region.code, getJSON(`${c.site}data/expected/${region.code}.json`, { "Accept": "application/json" })
+      .then((j: any) => (j && j.window && Array.isArray(j.species) ? j : null)).catch(() => null));
+  }
+  return expectedMemo.get(region.code)!;
 }
 
 // ---------------------------------------------------------------- the email

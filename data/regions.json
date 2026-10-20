@@ -1,0 +1,9 @@
+{
+  "note": "Upper Valley counties for the 'This week's birds' list. bbox is [south, west, north, east] in degrees, drawn by hand around each county's town lines. Boxes overlap along the Connecticut River, so a point inside two boxes goes to the county whose box center is nearer (js/brief.js regionFor, DB.regionFor). The same boxes are copied into js/brief.js REGIONS; tests/expected.test.mjs fails if the two drift.",
+  "regions": [
+    { "code": "US-NH-009", "name": "Grafton County", "state": "NH", "bbox": [43.48, -72.34, 44.40, -71.40] },
+    { "code": "US-NH-019", "name": "Sullivan County", "state": "NH", "bbox": [43.09, -72.46, 43.59, -71.97] },
+    { "code": "US-VT-027", "name": "Windsor County", "state": "VT", "bbox": [43.19, -72.95, 43.99, -72.30] },
+    { "code": "US-VT-017", "name": "Orange County", "state": "VT", "bbox": [43.77, -72.82, 44.20, -72.03] }
+  ]
+}

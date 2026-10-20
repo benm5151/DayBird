@@ -465,12 +465,27 @@ const DB = (() => {
     if (online()) await CLOUD.removeBirdImage(species).catch(() => {});
   }
 
+  // ---------- "This week's birds" (index.html): the county list the GitHub Action builds daily ----------
+  // data/regions.json holds the Upper Valley county boxes; the engine's regionFor picks the one around a point (the
+  // engine's own copy of the boxes is the fallback when the file will not load). data/expected/{code}.json is the list.
+  let _regions = null;
+  function regions() {
+    return _regions || (_regions = fetch('data/regions.json').then(r => r.ok ? r.json() : null).then(j => (j && Array.isArray(j.regions) && j.regions.length) ? j.regions : B.REGIONS).catch(() => B.REGIONS));
+  }
+  async function regionFor(lat, lng) { return B.regionFor(lat, lng, await regions()); }
+  async function loadExpected(code) {
+    if (!/^[A-Z]{2}(-[A-Z0-9]+){1,2}$/.test(String(code || ''))) return null;
+    try { const r = await fetch(`data/expected/${code}.json`, { cache: 'no-store' }); if (!r.ok) return null; const j = await r.json(); return j && j.window && Array.isArray(j.species) ? j : null; }
+    catch { return null; }
+  }
+
   const ready = CLOUD.ready ? CLOUD.init() : Promise.resolve(null);
 
   return { ready, online, settings, saveSettings, loadBrief, gradeCall, briefText, findPlaces, briefPlace, saveBriefPlace, loadPasses, bookings, book, cancelBooking, addListing, loadFeed, post, deletePost, toggleLike,
            fileToDataURL, importLifeList, syncFromEbird, lifeList, profile, saveProfile, esc, fmtDate, ago, dirName,
            learned, saveLearned, loadLearned, mergeLearned, streak, streakOf, markOutside, markPaused,
-           birdImages, localBirdImages, setBirdImage, removeBirdImage };
+           birdImages, localBirdImages, setBirdImage, removeBirdImage,
+           regions, regionFor, loadExpected };
 })();
 
 // nav highlight + sign-in widget

@@ -17,11 +17,18 @@ jobs:
         env:
           EBIRD_KEY: ${{ secrets.EBIRD_KEY }}
         run: node scripts/build_brief.mjs
+      # "This week's birds": the species on the most checklists in each Upper Valley county over the last ten days
+      # (data/regions.json → data/expected/*.json). Reads only checklists it has not cached, so a run is a few hundred
+      # eBird calls at most. Prints one line and exits 0 without the key; never fails the brief commit.
+      - name: Build expected list
+        env:
+          EBIRD_KEY: ${{ secrets.EBIRD_KEY }}
+        run: node scripts/build_expected.mjs
       - name: Commit
         run: |
           git config user.name "daybird-bot"
           git config user.email "bot@daybird.local"
-          git add data/brief.json data/brief.txt
+          git add data/brief.json data/brief.txt data/expected
           git diff --cached --quiet || git commit -m "Morning brief $(date -u +%F)"
           # Another run (or a merge) may have pushed since checkout; replay our one commit on top rather than fail.
           git pull --rebase --autostash origin main

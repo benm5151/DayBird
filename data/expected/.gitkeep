@@ -1,0 +1,1 @@
+# Built daily by scripts/build_expected.mjs (GitHub Action). {code}.json is what the site and emails read; cache-{code}.json and taxonomy.json are the script's own memory.
