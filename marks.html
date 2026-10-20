@@ -1,0 +1,257 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Daybird — Why the bird doesn't match the book</title>
+<meta name="description" content="Species marks vs. odd individuals, young birds, males and females, molt and wear, and the three parts of a wing, on one screen, for newer birders.">
+<link rel="stylesheet" href="css/style.css">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#1F2A37">
+<link rel="icon" href="icon.svg">
+<link rel="apple-touch-icon" href="icon.svg">
+<style>
+.marks{display:grid;gap:14px;margin-top:4px}
+.mark{display:grid;grid-template-columns:1fr;gap:0;overflow:hidden;padding:0}
+.mark .pic{position:relative;aspect-ratio:4/3;background:#F6F3EC;color:#1F2A37;display:grid;place-items:center;overflow:hidden}
+.mark .pic img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block}
+.mark .pic .paper{font-family:var(--serif);font-size:22px;font-weight:700;text-align:center;padding:20px;line-height:1.15}
+.mark .pic.has-photo .paper{display:none}
+.mark .pic .credit{position:absolute;left:0;right:0;bottom:0;padding:22px 10px 7px;font-size:11px;line-height:1.3;color:#F6F3EC;background:linear-gradient(180deg,rgba(31,42,55,0),rgba(31,42,55,.78));display:none}
+.mark .pic.has-photo .credit{display:block}
+.mark .pic .credit a{color:inherit;text-decoration-color:rgba(246,243,236,.6)}
+.mark .pic.diagram{display:block;padding:10px;aspect-ratio:auto}
+.mark .body{padding:16px 18px 18px}
+.mark .n{font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);margin:0 0 2px}
+.mark h2{margin:0 0 8px;font-size:23px;line-height:1.15}
+.mark p{margin:0 0 10px;font-size:15px;line-height:1.5}
+.mark .take{margin:0;padding:10px 12px;border-left:3px solid var(--accent);background:var(--bg);border-radius:0 10px 10px 0;font-weight:600;font-size:15px}
+@media (min-width:700px){
+  .mark{grid-template-columns:minmax(0,2fr) minmax(0,3fr);align-items:stretch}
+  .mark .pic{aspect-ratio:auto;min-height:100%}
+  .mark .pic img{height:100%}
+  .mark:nth-child(even){grid-template-columns:minmax(0,3fr) minmax(0,2fr)}
+  .mark:nth-child(even) .pic{order:2}
+  .mark .pic.diagram{display:grid;place-items:center}
+}
+.caveat{font-size:13px;color:var(--muted);margin:14px 0 0}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <a class="brand" href="index.html"><img src="mark.svg" alt=""><span>Daybird<small>Field marks</small></span></a>
+    <a class="btn ghost" href="settings.html">Settings</a>
+  </header>
+  <nav class="tabs">
+    <a href="index.html">Brief</a>
+    <a href="id.html">ID</a>
+    <a href="feed.html">Feed</a>
+    <a href="profile.html">Profile</a>
+    <a href="more.html">More</a>
+  </nav>
+
+  <h1>Why the bird doesn't match the book</h1>
+  <p class="lead">The guide paints one tidy adult per species. Real birds come in two sexes, several ages, and a fresh and a worn version of each. Six things that explain most of the mismatches.</p>
+
+  <div class="marks" id="marks">
+    <section class="card mark" data-photo="White-throated Sparrow">
+      <div class="pic"><span class="paper">White-throated Sparrow</span><span class="credit"></span></div>
+      <div class="body">
+        <p class="n">1 of 6</p>
+        <h2>One mark for the species, or one odd bird?</h2>
+        <p>Field guides paint one bird per species, so when yours has a tan eyebrow instead of a white one it feels like a different bird, or a mistake. Usually it is neither. White-throated Sparrows come in two forms, tan-striped and white-striped, and both are normal adults; they even prefer to pair with the opposite form. The marks that define a species are the ones every individual carries: here, the white throat and the yellow spot in front of the eye. Crown color, how bright the yellow is, how heavy the streaking, those vary from bird to bird. Learn which marks belong to the species and which to the individual, and the odd bird stops being a puzzle.</p>
+        <p class="take">If the defining marks are there, it is that species, however scruffy the rest looks.</p>
+      </div>
+    </section>
+
+    <section class="card mark" data-photo="American Robin">
+      <div class="pic"><span class="paper">American Robin</span><span class="credit"></span></div>
+      <div class="body">
+        <p class="n">2 of 6</p>
+        <h2>Young birds look different</h2>
+        <p>A robin with a spotted breast is still a robin. For its first summer a young bird wears juvenile plumage: spots and streaks that help it hide, a shorter tail, and often a pale, swollen-looking corner to the mouth. By fall most have molted into something close to the adult, but some, like young hawks and gulls, take years. The guide shows you the finished adult; from June through September half the birds in your yard are not finished. When something looks almost like a robin, a cardinal or a bluebird but softer, spottier and clumsier, think young bird before you think rare bird.</p>
+        <p class="take">From June to September, a bird that looks almost right is probably a young one.</p>
+      </div>
+    </section>
+
+    <section class="card mark" data-photo="Northern Cardinal">
+      <div class="pic"><span class="paper">Northern Cardinal</span><span class="credit"></span></div>
+      <div class="body">
+        <p class="n">3 of 6</p>
+        <h2>Male and female</h2>
+        <p>The male cardinal is on the cover; the female is the brown bird beside him, with the same crest, the same red bill and a wash of red on the wings and tail. In many songbirds the sexes look different, and the guide's big picture is usually the male. The female tends to be duller for a good reason: she sits on the nest. Shape is the way through. A female cardinal has the cardinal's crest and heavy bill, a female Red-winged Blackbird has the blackbird's pointed bill and posture, and a female goldfinch has the goldfinch's stubby bill and bouncing flight. Match the shape first, then look for a faded version of the male's colors.</p>
+        <p class="take">Shape is the same in both sexes; color is not. Match the shape first.</p>
+      </div>
+    </section>
+
+    <section class="card mark" data-photo="European Starling">
+      <div class="pic"><span class="paper">European Starling</span><span class="credit"></span></div>
+      <div class="body">
+        <p class="n">4 of 6</p>
+        <h2>Fresh, worn, and in between</h2>
+        <p>A starling in October is covered in white spots and has a dark bill. The same bird in April is glossy purple-green with a yellow bill and no spots. Nothing was replaced in between; the pale tips of the fresh fall feathers simply wore away over the winter. Feathers wear and fade all year, then are replaced in a molt, usually once after nesting and, for some birds, partly again in spring. A molting bird can look patchy, with gaps in the wings or a half-and-half head, and a worn bird in July can look faded and ragged. Neither is sick, and neither is a different species.</p>
+        <p class="take">A bird can look like two different birds in one year and never change species.</p>
+      </div>
+    </section>
+
+    <section class="card mark" id="wing">
+      <div class="pic diagram"><svg viewBox="0 0 600 320" width="100%" role="img" aria-label="A spread wing seen from above: the long primaries at the wingtip, the shorter secondaries along the trailing edge toward the body, and three rows of small coverts over the base of both" font-family="ui-sans-serif,system-ui,sans-serif" style="background:#F6F3EC;border-radius:14px;display:block">
+<path d="M18 120 Q 0 190 18 262 L 54 262 L 54 120 Z" fill="#1F2A37" opacity=".12"/>
+<path d="M58 150 L88 150 L94 240 Q76 266 58 240 Z" fill="#F6F3EC" stroke="#1F2A37" stroke-width="1.6"/>
+<line x1="76" y1="156" x2="76" y2="254" stroke="#1F2A37" stroke-width=".9" opacity=".55"/>
+<path d="M86 150 L116 150 L122 238.8 Q104 264.8 86 238.8 Z" fill="#F6F3EC" stroke="#1F2A37" stroke-width="1.6"/>
+<line x1="104" y1="156" x2="104" y2="252.8" stroke="#1F2A37" stroke-width=".9" opacity=".55"/>
+<path d="M114 150 L144 150 L150 237.6 Q132 263.6 114 237.6 Z" fill="#F6F3EC" stroke="#1F2A37" stroke-width="1.6"/>
+<line x1="132" y1="156" x2="132" y2="251.6" stroke="#1F2A37" stroke-width=".9" opacity=".55"/>
+<path d="M142 150 L172 150 L178 236.4 Q160 262.4 142 236.4 Z" fill="#F6F3EC" stroke="#1F2A37" stroke-width="1.6"/>
+<line x1="160" y1="156" x2="160" y2="250.4" stroke="#1F2A37" stroke-width=".9" opacity=".55"/>
+<path d="M170 150 L200 150 L206 235.2 Q188 261.2 170 235.2 Z" fill="#F6F3EC" stroke="#1F2A37" stroke-width="1.6"/>
+<line x1="188" y1="156" x2="188" y2="249.2" stroke="#1F2A37" stroke-width=".9" opacity=".55"/>
+<path d="M198 150 L228 150 L234 234 Q216 260 198 234 Z" fill="#F6F3EC" stroke="#1F2A37" stroke-width="1.6"/>
+<line x1="216" y1="156" x2="216" y2="248" stroke="#1F2A37" stroke-width=".9" opacity=".55"/>
+<path d="M226 150 L256 150 L262 232.8 Q244 258.8 226 232.8 Z" fill="#F6F3EC" stroke="#1F2A37" stroke-width="1.6"/>
+<line x1="244" y1="156" x2="244" y2="246.8" stroke="#1F2A37" stroke-width=".9" opacity=".55"/>
+<path d="M254 150 L284 150 L290 231.6 Q272 257.6 254 231.6 Z" fill="#F6F3EC" stroke="#1F2A37" stroke-width="1.6"/>
+<line x1="272" y1="156" x2="272" y2="245.6" stroke="#1F2A37" stroke-width=".9" opacity=".55"/>
+<path d="M282 150 L312 150 L318 230.4 Q300 256.4 282 230.4 Z" fill="#F6F3EC" stroke="#1F2A37" stroke-width="1.6"/>
+<line x1="300" y1="156" x2="300" y2="244.4" stroke="#1F2A37" stroke-width=".9" opacity=".55"/>
+<path d="M310 150 L340 150 L346 229.2 Q328 255.2 310 229.2 Z" fill="#F6F3EC" stroke="#1F2A37" stroke-width="1.6"/>
+<line x1="328" y1="156" x2="328" y2="243.2" stroke="#1F2A37" stroke-width=".9" opacity=".55"/>
+<path d="M315.6 195.6 L381.6 271.6 Q415.6 297.7 394.5 260.4 L328.4 184.4 Z" fill="#F6F3EC" stroke="#1F2A37" stroke-width="1.6"/>
+<line x1="328.6" y1="197.5" x2="406.4" y2="287.2" stroke="#1F2A37" stroke-width=".9" opacity=".55"/>
+<path d="M327.6 189.3 L412.8 268.7 Q449.4 291.2 424.4 256.3 L339.2 176.9 Z" fill="#F6F3EC" stroke="#1F2A37" stroke-width="1.6"/>
+<line x1="340.8" y1="189.9" x2="439.1" y2="281.6" stroke="#1F2A37" stroke-width=".9" opacity=".55"/>
+<path d="M339.7 183 L442.6 261.7 Q481.1 280.5 452.9 248.2 L350.1 169.5 Z" fill="#F6F3EC" stroke="#1F2A37" stroke-width="1.6"/>
+<line x1="352.8" y1="182.3" x2="470" y2="272" stroke="#1F2A37" stroke-width=".9" opacity=".55"/>
+<path d="M351.8 176.5 L469.9 250.8 Q509.9 266 478.9 236.5 L360.9 162.1 Z" fill="#F6F3EC" stroke="#1F2A37" stroke-width="1.6"/>
+<line x1="364.8" y1="174.7" x2="498.1" y2="258.6" stroke="#1F2A37" stroke-width=".9" opacity=".55"/>
+<path d="M363.9 170 L493.7 236.6 Q535 248.2 501.5 221.5 L371.7 154.9 Z" fill="#F6F3EC" stroke="#1F2A37" stroke-width="1.6"/>
+<line x1="376.7" y1="167" x2="522.5" y2="241.8" stroke="#1F2A37" stroke-width=".9" opacity=".55"/>
+<path d="M376 163.4 L513.4 219.5 Q555.5 227.5 519.8 203.8 L382.4 147.7 Z" fill="#F6F3EC" stroke="#1F2A37" stroke-width="1.6"/>
+<line x1="388.5" y1="159.3" x2="542.6" y2="222.2" stroke="#1F2A37" stroke-width=".9" opacity=".55"/>
+<path d="M388.1 156.8 L528.3 200.2 Q571 204.6 533.4 184 L393.2 140.5 Z" fill="#F6F3EC" stroke="#1F2A37" stroke-width="1.6"/>
+<line x1="400.2" y1="151.6" x2="557.6" y2="200.4" stroke="#1F2A37" stroke-width=".9" opacity=".55"/>
+<path d="M400.3 150.1 L538 179.6 Q580.8 180 541.6 162.9 L403.9 133.5 Z" fill="#F6F3EC" stroke="#1F2A37" stroke-width="1.6"/>
+<line x1="411.9" y1="143.9" x2="567.2" y2="177.1" stroke="#1F2A37" stroke-width=".9" opacity=".55"/>
+<path d="M412.6 143.3 L542.2 158.3 Q584.9 154.7 544.2 141.4 L414.5 126.4 Z" fill="#F6F3EC" stroke="#1F2A37" stroke-width="1.6"/>
+<line x1="423.5" y1="136" x2="571" y2="153" stroke="#1F2A37" stroke-width=".9" opacity=".55"/>
+<path d="M424.9 136.5 L540.9 137.3 Q583 129.1 541.1 120.3 L425.1 119.5 Z" fill="#F6F3EC" stroke="#1F2A37" stroke-width="1.6"/>
+<line x1="435" y1="128.1" x2="569" y2="129" stroke="#1F2A37" stroke-width=".9" opacity=".55"/>
+<path d="M58 116 L82.4 116 L82.4 142 Q70.2 156 58 142 Z" fill="#F6F3EC" stroke="#1F2A37" stroke-width="1.3"/>
+<path d="M82.4 116 L106.9 116 L106.9 142 Q94.6 156 82.4 142 Z" fill="#F6F3EC" stroke="#1F2A37" stroke-width="1.3"/>
+<path d="M106.9 116 L131.3 116 L131.3 142 Q119.1 156 106.9 142 Z" fill="#F6F3EC" stroke="#1F2A37" stroke-width="1.3"/>
+<path d="M131.3 116 L155.7 116 L155.7 142 Q143.5 156 131.3 142 Z" fill="#F6F3EC" stroke="#1F2A37" stroke-width="1.3"/>
+<path d="M155.7 116 L180.1 116 L180.1 142 Q167.9 156 155.7 142 Z" fill="#F6F3EC" stroke="#1F2A37" stroke-width="1.3"/>
+<path d="M180.1 116 L204.6 116 L204.6 142 Q192.4 156 180.1 142 Z" fill="#F6F3EC" stroke="#1F2A37" stroke-width="1.3"/>
+<path d="M204.6 116 L229 116 L229 142 Q216.8 156 204.6 142 Z" fill="#F6F3EC" stroke="#1F2A37" stroke-width="1.3"/>
+<path d="M229 116 L253.4 116 L253.4 142 Q241.2 156 229 142 Z" fill="#F6F3EC" stroke="#1F2A37" stroke-width="1.3"/>
+<path d="M253.4 116 L277.9 116 L277.9 142 Q265.6 156 253.4 142 Z" fill="#F6F3EC" stroke="#1F2A37" stroke-width="1.3"/>
+<path d="M277.9 116 L302.3 116 L302.3 142 Q290.1 156 277.9 142 Z" fill="#F6F3EC" stroke="#1F2A37" stroke-width="1.3"/>
+<path d="M302.3 116 L326.7 116 L326.7 142 Q314.5 156 302.3 142 Z" fill="#F6F3EC" stroke="#1F2A37" stroke-width="1.3"/>
+<path d="M326.7 116 L351.1 116 L351.1 142 Q338.9 156 326.7 142 Z" fill="#F6F3EC" stroke="#1F2A37" stroke-width="1.3"/>
+<path d="M351.1 116 L375.6 116 L375.6 142 Q363.4 156 351.1 142 Z" fill="#F6F3EC" stroke="#1F2A37" stroke-width="1.3"/>
+<path d="M375.6 116 L400 116 L400 142 Q387.8 156 375.6 142 Z" fill="#F6F3EC" stroke="#1F2A37" stroke-width="1.3"/>
+<path d="M58 100 L76.9 100 L76.9 118 Q67.5 132 58 118 Z" fill="#F6F3EC" stroke="#1F2A37" stroke-width="1.3"/>
+<path d="M76.9 100 L95.9 100 L95.9 118 Q86.4 132 76.9 118 Z" fill="#F6F3EC" stroke="#1F2A37" stroke-width="1.3"/>
+<path d="M95.9 100 L114.8 100 L114.8 118 Q105.4 132 95.9 118 Z" fill="#F6F3EC" stroke="#1F2A37" stroke-width="1.3"/>
+<path d="M114.8 100 L133.8 100 L133.8 118 Q124.3 132 114.8 118 Z" fill="#F6F3EC" stroke="#1F2A37" stroke-width="1.3"/>
+<path d="M133.8 100 L152.7 100 L152.7 118 Q143.2 132 133.8 118 Z" fill="#F6F3EC" stroke="#1F2A37" stroke-width="1.3"/>
+<path d="M152.7 100 L171.6 100 L171.6 118 Q162.2 132 152.7 118 Z" fill="#F6F3EC" stroke="#1F2A37" stroke-width="1.3"/>
+<path d="M171.6 100 L190.6 100 L190.6 118 Q181.1 132 171.6 118 Z" fill="#F6F3EC" stroke="#1F2A37" stroke-width="1.3"/>
+<path d="M190.6 100 L209.5 100 L209.5 118 Q200.1 132 190.6 118 Z" fill="#F6F3EC" stroke="#1F2A37" stroke-width="1.3"/>
+<path d="M209.5 100 L228.5 100 L228.5 118 Q219 132 209.5 118 Z" fill="#F6F3EC" stroke="#1F2A37" stroke-width="1.3"/>
+<path d="M228.5 100 L247.4 100 L247.4 118 Q237.9 132 228.5 118 Z" fill="#F6F3EC" stroke="#1F2A37" stroke-width="1.3"/>
+<path d="M247.4 100 L266.4 100 L266.4 118 Q256.9 132 247.4 118 Z" fill="#F6F3EC" stroke="#1F2A37" stroke-width="1.3"/>
+<path d="M266.4 100 L285.3 100 L285.3 118 Q275.8 132 266.4 118 Z" fill="#F6F3EC" stroke="#1F2A37" stroke-width="1.3"/>
+<path d="M285.3 100 L304.2 100 L304.2 118 Q294.8 132 285.3 118 Z" fill="#F6F3EC" stroke="#1F2A37" stroke-width="1.3"/>
+<path d="M304.2 100 L323.2 100 L323.2 118 Q313.7 132 304.2 118 Z" fill="#F6F3EC" stroke="#1F2A37" stroke-width="1.3"/>
+<path d="M323.2 100 L342.1 100 L342.1 118 Q332.6 132 323.2 118 Z" fill="#F6F3EC" stroke="#1F2A37" stroke-width="1.3"/>
+<path d="M342.1 100 L361.1 100 L361.1 118 Q351.6 132 342.1 118 Z" fill="#F6F3EC" stroke="#1F2A37" stroke-width="1.3"/>
+<path d="M361.1 100 L380 100 L380 118 Q370.5 132 361.1 118 Z" fill="#F6F3EC" stroke="#1F2A37" stroke-width="1.3"/>
+<path d="M58 84 L73.1 84 L73.1 98 Q65.6 112 58 98 Z" fill="#F6F3EC" stroke="#1F2A37" stroke-width="1.3"/>
+<path d="M73.1 84 L88.2 84 L88.2 98 Q80.6 112 73.1 98 Z" fill="#F6F3EC" stroke="#1F2A37" stroke-width="1.3"/>
+<path d="M88.2 84 L103.3 84 L103.3 98 Q95.8 112 88.2 98 Z" fill="#F6F3EC" stroke="#1F2A37" stroke-width="1.3"/>
+<path d="M103.3 84 L118.4 84 L118.4 98 Q110.9 112 103.3 98 Z" fill="#F6F3EC" stroke="#1F2A37" stroke-width="1.3"/>
+<path d="M118.4 84 L133.5 84 L133.5 98 Q126 112 118.4 98 Z" fill="#F6F3EC" stroke="#1F2A37" stroke-width="1.3"/>
+<path d="M133.5 84 L148.6 84 L148.6 98 Q141.1 112 133.5 98 Z" fill="#F6F3EC" stroke="#1F2A37" stroke-width="1.3"/>
+<path d="M148.6 84 L163.7 84 L163.7 98 Q156.2 112 148.6 98 Z" fill="#F6F3EC" stroke="#1F2A37" stroke-width="1.3"/>
+<path d="M163.7 84 L178.8 84 L178.8 98 Q171.3 112 163.7 98 Z" fill="#F6F3EC" stroke="#1F2A37" stroke-width="1.3"/>
+<path d="M178.8 84 L193.9 84 L193.9 98 Q186.4 112 178.8 98 Z" fill="#F6F3EC" stroke="#1F2A37" stroke-width="1.3"/>
+<path d="M193.9 84 L209 84 L209 98 Q201.5 112 193.9 98 Z" fill="#F6F3EC" stroke="#1F2A37" stroke-width="1.3"/>
+<path d="M209 84 L224.1 84 L224.1 98 Q216.6 112 209 98 Z" fill="#F6F3EC" stroke="#1F2A37" stroke-width="1.3"/>
+<path d="M224.1 84 L239.2 84 L239.2 98 Q231.7 112 224.1 98 Z" fill="#F6F3EC" stroke="#1F2A37" stroke-width="1.3"/>
+<path d="M239.2 84 L254.3 84 L254.3 98 Q246.8 112 239.2 98 Z" fill="#F6F3EC" stroke="#1F2A37" stroke-width="1.3"/>
+<path d="M254.3 84 L269.4 84 L269.4 98 Q261.8 112 254.3 98 Z" fill="#F6F3EC" stroke="#1F2A37" stroke-width="1.3"/>
+<path d="M269.4 84 L284.5 84 L284.5 98 Q277 112 269.4 98 Z" fill="#F6F3EC" stroke="#1F2A37" stroke-width="1.3"/>
+<path d="M284.5 84 L299.6 84 L299.6 98 Q292.1 112 284.5 98 Z" fill="#F6F3EC" stroke="#1F2A37" stroke-width="1.3"/>
+<path d="M299.6 84 L314.7 84 L314.7 98 Q307.2 112 299.6 98 Z" fill="#F6F3EC" stroke="#1F2A37" stroke-width="1.3"/>
+<path d="M314.7 84 L329.8 84 L329.8 98 Q322.3 112 314.7 98 Z" fill="#F6F3EC" stroke="#1F2A37" stroke-width="1.3"/>
+<path d="M329.8 84 L344.9 84 L344.9 98 Q337.4 112 329.8 98 Z" fill="#F6F3EC" stroke="#1F2A37" stroke-width="1.3"/>
+<path d="M344.9 84 L360 84 L360 98 Q352.5 112 344.9 98 Z" fill="#F6F3EC" stroke="#1F2A37" stroke-width="1.3"/>
+<path d="M54 84 Q 250 66 425 108 Q 520 116 583 129" fill="none" stroke="#1F2A37" stroke-width="2.2"/>
+<line x1="500" y1="258" x2="468" y2="300" stroke="#E8833A" stroke-width="1.6"/><circle cx="500" cy="258" r="3.5" fill="#E8833A"/><text x="474" y="305" fill="#E8833A" font-weight="700" font-size="17" text-anchor="start">Primaries</text>
+<line x1="150" y1="262" x2="150" y2="300" stroke="#E8833A" stroke-width="1.6"/><circle cx="150" cy="262" r="3.5" fill="#E8833A"/><text x="150" y="316" fill="#E8833A" font-weight="700" font-size="17" text-anchor="middle">Secondaries</text>
+<line x1="240" y1="96" x2="300" y2="48" stroke="#E8833A" stroke-width="1.6"/><circle cx="240" cy="96" r="3.5" fill="#E8833A"/><text x="306" y="53" fill="#E8833A" font-weight="700" font-size="17" text-anchor="start">Coverts</text>
+<text x="36" y="52" fill="#1F2A37" opacity=".7" font-size="13">body</text>
+<text x="36" y="66" fill="#1F2A37" opacity=".7" font-size="13">this side</text>
+<text x="430" y="52" fill="#1F2A37" opacity=".7" font-size="13">wingtip</text>
+</svg></div>
+      <div class="body">
+        <p class="n">5 of 6</p>
+        <h2>The wing, in three parts</h2>
+        <p>Guides say primaries, secondaries and coverts as if everyone knew. On a spread wing, the primaries are the long outer feathers at the wingtip, the ones that look like fingers on a soaring hawk. The secondaries are the shorter inner flight feathers along the trailing edge, closer to the body. The coverts are the rows of small feathers covering the base of all of those; on a folded wing they are the shoulder and the bars across it. Wingbars are pale tips on the coverts. So "two white wingbars" means two pale lines across the folded wing, and "pale primary edges" means thin light lines along the wingtip.</p>
+        <p class="take">Primaries at the tip, secondaries toward the body, coverts over the base of both.</p>
+      </div>
+    </section>
+
+    <section class="card mark" data-photo="Blue Jay">
+      <div class="pic"><span class="paper">Blue Jay</span><span class="credit"></span></div>
+      <div class="body">
+        <p class="n">6 of 6</p>
+        <h2>Acting odd is normal</h2>
+        <p>A young bird on the lawn that will not fly away, fluffy, short-tailed, calling and calling, is almost always fine. Most songbirds leave the nest a few days before they can fly well and spend that time on the ground or in low branches while the parents feed them. The parents are nearby even when you cannot see them. The rule wildlife rehabilitators give: if it has feathers and is hopping, leave it, or lift it into a shrub if a cat is near; if it is naked and pink, put it back in the nest. Loud begging, strange posture, sitting still as you walk up: all normal for a fledgling in June and July.</p>
+        <p class="take">A feathered youngster on the ground is a normal part of summer, not an emergency.</p>
+      </div>
+    </section>
+  </div>
+
+  <p class="caveat">Written by Daybird from field guides; not yet checked by an expert birder. Spot an error? <a href="about.html">Tell us</a>.</p>
+  <p class="meta" style="margin-top:8px">Next: <a href="compare.html">Which sparrow is that?</a> puts the two or three you will actually see side by side.</p>
+
+  <footer>Photos via Wikimedia Commons, each credited where it appears. The wing diagram is Daybird's own, a generic shape, no species. <a href="about.html">About Daybird</a>.</footer>
+</div>
+
+<script src="data/tells.js"></script>
+<script src="data/status.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="js/config.js"></script>
+<script src="js/cloud.js"></script>
+<script src="data/traits.js"></script>
+<script src="js/brief.js"></script>
+<script src="js/app.js"></script>
+<script src="js/footer.js"></script>
+<script src="js/compare.js"></script>
+<script>
+// One credited photo per section from the shared Wikimedia fetcher in js/compare.js (cache 'daybird:photos').
+// The paper name stays until the picture loads; a failed load leaves the paper, never a broken image.
+(() => {
+  const P = DAYBIRD_COMPARE.photos;
+  for (const sec of document.querySelectorAll('.mark[data-photo]')) {
+    const name = sec.dataset.photo, pic = sec.querySelector('.pic');
+    const place = (p) => {
+      if (!p || !p.thumb) return;
+      const img = new Image(); img.alt = name; img.decoding = 'async';
+      img.onload = () => pic.classList.add('has-photo');
+      img.onerror = () => { img.remove(); pic.classList.remove('has-photo'); };
+      img.src = p.thumb;
+      pic.insertBefore(img, pic.firstChild);
+      pic.querySelector('.credit').innerHTML = P.creditHtml(p);
+    };
+    const hit = P.cached(name);
+    if (hit && !hit.none) place(hit); else if (!hit) P.request(name).then(place);
+  }
+})();
+</script>
+</body>
+</html>

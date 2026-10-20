@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Daybird — Bird</title>
+<meta name="description" content="What this bird is up to right now in the Upper Valley: here, arriving, peaking or leaving, and what it is doing in its life this month.">
+<link rel="stylesheet" href="css/style.css">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#1F2A37">
+<link rel="icon" href="icon.svg">
+<link rel="apple-touch-icon" href="icon.svg">
+<style>
+.bird{display:grid;grid-template-columns:1fr;gap:18px;margin-top:4px}
+@media (min-width:760px){.bird{grid-template-columns:minmax(0,5fr) minmax(0,7fr);gap:28px;align-items:start}}
+.bird .pic{position:relative;aspect-ratio:4/3;border-radius:18px;overflow:hidden;background:#F6F3EC;color:#1F2A37;display:grid;place-items:center;box-shadow:inset 0 0 0 1.5px rgba(232,131,58,.85)}
+.bird .pic img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block}
+.bird .pic .paper{font-family:var(--serif);font-size:30px;font-weight:700;text-align:center;padding:24px;line-height:1.1}
+.bird .pic.has-photo{box-shadow:var(--shadow)}
+.bird .pic.has-photo .paper{display:none}
+.bird .credit{font-size:12px;color:var(--muted);margin:8px 2px 0;min-height:1em}
+.bird .word{margin:0 0 2px;font-size:13px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--accent)}
+.bird h1{font-size:44px;margin:0 0 12px;line-height:1.02;letter-spacing:-.02em;overflow-wrap:anywhere}
+.months{display:grid;grid-template-columns:repeat(12,1fr);gap:4px;margin:0 0 16px;max-width:520px}
+.months div{height:30px;border-radius:7px;background:var(--line);display:grid;place-items:center;font-size:11px;font-weight:600;color:var(--muted);position:relative}
+.months div.on{background:var(--brand);color:var(--card)}
+.months div.now{box-shadow:0 0 0 2.5px var(--accent)}
+.months div.now::after{content:"";position:absolute;left:50%;bottom:-9px;width:5px;height:5px;border-radius:50%;background:var(--accent);transform:translateX(-50%)}
+.bird .now{font-size:20px;line-height:1.4;margin:0 0 14px}
+.bird .now b{color:var(--accent)}
+.bird .others{display:grid;gap:8px;margin:0 0 16px}
+.bird .others p{margin:0;font-size:14px;color:var(--muted);line-height:1.45}
+.bird .others b{color:var(--ink);text-transform:capitalize}
+.bird .tell{margin:0 0 14px}
+.bird .tell p{margin:4px 0 8px;font-size:16px}
+.bird .count{font-size:15px;margin:0 0 14px;padding:10px 14px;border-radius:10px;background:var(--blue-ink);color:var(--blue)}
+.bird .count:empty{display:none}
+.bird .links{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.bird .notyet{font-size:17px;color:var(--muted);margin:0 0 16px}
+.caveat{font-size:13px;color:var(--muted);margin:18px 0 0}
+.index{columns:2;column-gap:24px;margin:0;padding:0;list-style:none}
+.index li{padding:5px 0;break-inside:avoid}
+@media (min-width:600px){.index{columns:3}}
+@media (max-width:600px){.bird h1{font-size:36px}.bird .now{font-size:18px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <a class="brand" href="index.html"><img src="mark.svg" alt=""><span>Daybird<small>Right now</small></span></a>
+    <a class="btn ghost" href="settings.html">Settings</a>
+  </header>
+  <nav class="tabs">
+    <a href="index.html">Brief</a>
+    <a href="id.html">ID</a>
+    <a href="feed.html">Feed</a>
+    <a href="profile.html">Profile</a>
+    <a href="more.html">More</a>
+  </nav>
+
+  <div id="bird"></div>
+
+  <footer>Photos via Wikimedia Commons, credited where they appear. Local counts, where shown, via eBird (Cornell Lab of Ornithology). <a href="about.html">About Daybird</a>.</footer>
+</div>
+
+<script src="data/tells.js"></script>
+<script src="data/status.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="js/config.js"></script>
+<script src="js/cloud.js"></script>
+<script src="data/traits.js"></script>
+<script src="js/brief.js"></script>
+<script src="js/app.js"></script>
+<script src="js/footer.js"></script>
+<script src="js/compare.js"></script>
+<script src="js/bird.js"></script>
+</body>
+</html>

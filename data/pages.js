@@ -17,4 +17,6 @@ globalThis.DAYBIRD_PAGES = [
   { href: 'stickers.html', title: 'Your stickers', blurb: 'Your birds as die-cut stickers: print a sheet, or save one to Photos and use it in iMessage', group: 'labs' },
   { href: 'stories.html', title: 'Stories', blurb: 'Your morning, your lifers, as story-sized pictures for Instagram or wherever', group: 'you' },
   { href: 'lifelist.html', title: 'Your birds', blurb: 'Every bird on your list, with a photo, and the next ones to find', group: 'you' },
+  { href: 'compare.html', title: 'Which sparrow is that?', blurb: 'The two or three in each group you will actually see this week, and the one thing that tells them apart', group: 'learn' },
+  { href: 'marks.html', title: "Why the bird doesn't match the book", blurb: 'Species marks vs. odd individuals, young birds, molt and wing feathers, on one screen', group: 'learn' },
 ];
