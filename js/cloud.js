@@ -236,6 +236,32 @@ const CLOUD = (() => {
     return data;
   }
 
+  // ---- own bird images (migration 10; lifelist.html) ----
+  // One photo or drawing per species, the file in the 'photos' bucket under the user's folder and a row in bird_images.
+  // Rows are RLS-limited to the owner. Returns { species: { url, kind, caption } }.
+  async function listBirdImages() {
+    const { data, error } = await sb.from('bird_images').select('species,url,kind,caption').eq('user_id', _user.id);
+    if (error) throw error;
+    return Object.fromEntries((data || []).map(r => [r.species, { url: r.url, kind: r.kind || 'photo', caption: r.caption || '' }]));
+  }
+  // The storage path inside the bucket, from a public URL this app made (…/object/public/photos/<uid>/<file>).
+  const photoPath = (url) => { const m = /\/object\/public\/photos\/(.+)$/.exec(String(url || '')); return m ? decodeURIComponent(m[1]) : null; };
+  async function setBirdImage(species, { url, kind = 'photo', caption = '' }) {
+    const old = (await sb.from('bird_images').select('url').match({ user_id: _user.id, species }).maybeSingle()).data;
+    const row = { user_id: _user.id, species, url, kind: kind === 'art' ? 'art' : 'photo', caption: String(caption || '').slice(0, 120) || null, updated_at: new Date().toISOString() };
+    const { error } = await sb.from('bird_images').upsert(row, { onConflict: 'user_id,species' });
+    if (error) throw error;
+    const p = old && old.url !== url ? photoPath(old.url) : null;
+    if (p) await sb.storage.from('photos').remove([p]).catch(() => {});   // the replaced file; a failure here is harmless
+  }
+  async function removeBirdImage(species) {
+    const old = (await sb.from('bird_images').select('url').match({ user_id: _user.id, species }).maybeSingle()).data;
+    const { error } = await sb.from('bird_images').delete().match({ user_id: _user.id, species });
+    if (error) throw error;
+    const p = old ? photoPath(old.url) : null;
+    if (p) await sb.storage.from('photos').remove([p]).catch(() => {});
+  }
+
   // ---- any edge function that needs the signed-in user's token (stats.html uses 'stats') ----
   async function invoke(name, body = {}) {
     const { data, error } = await sb.functions.invoke(name, { body });
@@ -249,5 +275,6 @@ const CLOUD = (() => {
   }
 
   return { ready, init, user, signIn, signOut, photoId, sendBrief, digest, ask, invoke, getProfile, saveProfile, uploadPhoto, listPosts, createPost, deletePost, addComment, deleteComment, toggleLike,
-           listListings, createListing, deleteListing, privateLocations, hostBookings, cancelBooking, myBookings, book, deleteAccount, circles };
+           listListings, createListing, deleteListing, privateLocations, hostBookings, cancelBooking, myBookings, book, deleteAccount, circles,
+           listBirdImages, setBirdImage, removeBirdImage };
 })();

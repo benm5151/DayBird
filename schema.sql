@@ -74,3 +74,22 @@ insert into storage.buckets (id, name, public) values ('photos', 'photos', true)
 drop policy if exists "photos read"   on storage.objects; create policy "photos read"   on storage.objects for select using (bucket_id = 'photos');
 drop policy if exists "photos upload" on storage.objects; create policy "photos upload" on storage.objects for insert with check (bucket_id = 'photos' and auth.uid()::text = (storage.foldername(name))[1]);
 drop policy if exists "photos update" on storage.objects; create policy "photos update" on storage.objects for update using (bucket_id = 'photos' and auth.uid()::text = (storage.foldername(name))[1]);
+
+-- Own bird images (migration 10): one photo or drawing per user per species for lifelist.html. Only the owner reads or writes a row.
+create table if not exists public.bird_images (
+  user_id uuid not null references auth.users(id) on delete cascade,
+  species text not null,
+  url text not null,
+  kind text not null default 'photo' check (kind in ('photo', 'art')),
+  caption text,
+  created_at timestamptz default now(),
+  updated_at timestamptz default now(),
+  primary key (user_id, species)
+);
+alter table public.bird_images enable row level security;
+drop policy if exists "bird_images select own" on public.bird_images; create policy "bird_images select own" on public.bird_images for select using (auth.uid() = user_id);
+drop policy if exists "bird_images insert own" on public.bird_images; create policy "bird_images insert own" on public.bird_images for insert with check (auth.uid() = user_id);
+drop policy if exists "bird_images update own" on public.bird_images; create policy "bird_images update own" on public.bird_images for update using (auth.uid() = user_id) with check (auth.uid() = user_id);
+drop policy if exists "bird_images delete own" on public.bird_images; create policy "bird_images delete own" on public.bird_images for delete using (auth.uid() = user_id);
+-- owners may delete files in their own folder (replacing or removing a bird image)
+drop policy if exists "photos delete" on storage.objects; create policy "photos delete" on storage.objects for delete using (bucket_id = 'photos' and auth.uid()::text = (storage.foldername(name))[1]);
