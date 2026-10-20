@@ -23,6 +23,8 @@ jobs:
           git config user.email "bot@daybird.local"
           git add data/brief.json data/brief.txt
           git diff --cached --quiet || git commit -m "Morning brief $(date -u +%F)"
+          # Another run (or a merge) may have pushed since checkout; replay our one commit on top rather than fail.
+          git pull --rebase --autostash origin main
           git push
       # Emails the brief to every confirmed subscriber (supabase/functions/send-daily). Needs two repository secrets:
       # SUPABASE_URL (the project URL, e.g. https://xxxx.supabase.co) and DAILY_SECRET (the same value as the
@@ -33,5 +35,8 @@ jobs:
           DAILY_SECRET: ${{ secrets.DAILY_SECRET }}
         run: |
           if [ -z "$SUPABASE_URL" ] || [ -z "$DAILY_SECRET" ]; then echo "SUPABASE_URL or DAILY_SECRET secret not set; skipping the daily email"; exit 0; fi
-          curl --silent --show-error --fail --max-time 170 -X POST "${SUPABASE_URL%/}/functions/v1/send-daily" \
-            -H "x-daily-secret: ${DAILY_SECRET}" -H "content-type: application/json" --data '{}'
+          # Print the function's reply (it says what went wrong) and fail on anything but a 2xx.
+          code=$(curl --silent --show-error --max-time 170 -o reply.json -w '%{http_code}' -X POST "${SUPABASE_URL%/}/functions/v1/send-daily" \
+            -H "x-daily-secret: ${DAILY_SECRET}" -H "content-type: application/json" --data '{}')
+          echo "send-daily answered HTTP $code:"; cat reply.json; echo
+          case "$code" in 2*) exit 0 ;; *) exit 1 ;; esac
