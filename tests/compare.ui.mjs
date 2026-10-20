@@ -51,9 +51,10 @@ for (const n of Object.keys(COLORS)) SUMMARIES[n === 'Dark-eyed Junco' ? 'Dark-e
 const ARTIST = (n) => [`<a href="//commons.wikimedia.org/wiki/User:Test">Photographer of the ${n}</a>`, 'CC BY-SA 4.0'];
 
 // regions / expected fixtures. The default location (DB.settings) is Lebanon NH: 43.6423, -72.2518
-const REGIONS = [{ code: 'US-NH-009', name: 'Grafton County', bbox: [-72.4, 43.3, -71.5, 44.3] }, { code: 'US-VT-027', name: 'Windsor County', bbox: [-73.0, 43.3, -72.4, 43.9] }];
-const EXPECTED = { name: 'Grafton County', from: '2026-10-10', to: '2026-10-20', checklists: 41,
-  species: { 'Dark-eyed Junco': 0.80, 'White-throated Sparrow': 0.68, 'Song Sparrow': 0.20, 'House Sparrow': 0.05, 'Mallard': 0.4, 'Blue Jay': 0.9 } };
+const REGIONS = [{ code: 'US-NH-009', name: 'Grafton County', bbox: [43.3, -72.4, 44.3, -71.5] }, { code: 'US-VT-027', name: 'Windsor County', bbox: [43.3, -73.0, 43.9, -72.4] }];
+// The real shape scripts/build_expected.mjs writes (region object, window with lists, species array with share/lists).
+const EXPECTED = { generated: '2026-10-20T10:00:00Z', region: { code: 'US-NH-009', name: 'Grafton County' }, window: { from: '2026-10-10', to: '2026-10-20', lists: 41, locations: 17 }, prev: null,
+  species: [['Dark-eyed Junco', 0.80], ['White-throated Sparrow', 0.68], ['Song Sparrow', 0.20], ['House Sparrow', 0.05], ['Mallard', 0.4], ['Blue Jay', 0.9]].map(([name, share]) => ({ code: name.toLowerCase().replace(/[^a-z]/g, '').slice(0, 6), name, share, prevShare: null, trend: null, lists: Math.round(share * 41) })) };
 
 // ---- browser helpers
 const browser = await chromium.launch();

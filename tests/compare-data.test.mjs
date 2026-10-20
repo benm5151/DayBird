@@ -117,7 +117,7 @@ test('status.now: season lines and the status word from type and months', () => 
 
 test('compare: bounding boxes in the shapes regions.json might use', () => {
   const b = C._box;
-  assert.deepEqual(b([-72.6, 43.4, -71.9, 44.1]), { w: -72.6, s: 43.4, e: -71.9, n: 44.1 });
+  assert.deepEqual(b([43.4, -72.6, 44.1, -71.9]), { s: 43.4, w: -72.6, n: 44.1, e: -71.9 }); // Daybird order: south, west, north, east
   assert.deepEqual(b({ south: 43.4, west: -72.6, north: 44.1, east: -71.9 }), { s: 43.4, w: -72.6, n: 44.1, e: -71.9 });
   assert.deepEqual(b({ s: 43.4, w: -72.6, n: 44.1, e: -71.9 }), { s: 43.4, w: -72.6, n: 44.1, e: -71.9 });
   assert.deepEqual(b({ minLat: 43.4, minLng: -72.6, maxLat: 44.1, maxLng: -71.9 }), { s: 43.4, w: -72.6, n: 44.1, e: -71.9 });

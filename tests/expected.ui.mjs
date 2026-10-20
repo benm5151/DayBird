@@ -69,6 +69,9 @@ async function page(width = 1100, { settings = null, status = null, dark = false
     try { localStorage.setItem('daybird:moreOpen', 'true'); if (settings) localStorage.setItem('daybird:settings', JSON.stringify(settings)); } catch {}
     if (status) globalThis.DAYBIRD_STATUS = { has: (n) => n === 'Blue Jay', now: (n, d) => (n === 'Blue Jay' && d instanceof Date ? 'Jays are moving south in loose flocks this month; the ones at your feeder may be passing through.' : '') };
   }, { settings, status });
+  // The page now loads data/status.js (the real season notes); this suite tests the hook, so serve a stub (or nothing)
+  // in its place and keep the init-script DAYBIRD_STATUS above as the only one on the page.
+  await pg.route(/\/data\/status\.js(\?|$)/, (route) => route.fulfill({ contentType: 'text/javascript', body: '' }));
   await pg.route(/supabase\.co|jsdelivr|open-meteo\.com|ebird\.org|wikipedia\.org|wikimedia\.org/, async (route) => {
     const u = route.request().url();
     if (u.includes('api.open-meteo.com')) return route.fulfill({ json: WX() });

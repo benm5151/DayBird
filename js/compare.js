@@ -105,7 +105,8 @@ globalThis.DAYBIRD_COMPARE = (() => {
   })();
 
   // ================================================================ expected frequencies (feature-detected)
-  // data/regions.json: [{ code, name, bbox }] where bbox is [west, south, east, north] (GeoJSON order) or an object with
+  // data/regions.json: { regions: [{ code, name, bbox }] } where bbox is [south, west, north, east] (Daybird's order,
+  // the same as js/brief.js REGIONS) or an object with
   // south/west/north/east (or s/w/n/e, or minLat/minLng/maxLat/maxLng). data/expected/<code>.json: { name, from, to,
   // checklists, species: { "<eBird name>": 0.68 | { freq, n } } } (species may also be an array of { name, freq, n }).
   async function getJSONorNull(url) {
@@ -113,7 +114,7 @@ globalThis.DAYBIRD_COMPARE = (() => {
   }
   function box(b) {
     if (!b) return null;
-    if (Array.isArray(b) && b.length >= 4) return { w: +b[0], s: +b[1], e: +b[2], n: +b[3] };
+    if (Array.isArray(b) && b.length >= 4) return { s: +b[0], w: +b[1], n: +b[2], e: +b[3] };
     const k = (o, ...ks) => { for (const x of ks) if (o[x] != null) return +o[x]; return NaN; };
     const o = { s: k(b, 's', 'south', 'minLat', 'lat0'), w: k(b, 'w', 'west', 'minLng', 'minLon', 'lng0'), n: k(b, 'n', 'north', 'maxLat', 'lat1'), e: k(b, 'e', 'east', 'maxLng', 'maxLon', 'lng1') };
     if (Array.isArray(b.lat) && Array.isArray(b.lng)) { o.s = +b.lat[0]; o.n = +b.lat[1]; o.w = +b.lng[0]; o.e = +b.lng[1]; }
@@ -140,7 +141,7 @@ globalThis.DAYBIRD_COMPARE = (() => {
       const o = (v && typeof v === 'object') ? v : { freq: v };
       let f = +(o.freq ?? o.frequency ?? o.pct ?? o.rate ?? o.share ?? NaN);
       if (Number.isFinite(f) && f > 1) f = f / 100;
-      map[String(name)] = { freq: Number.isFinite(f) ? f : null, n: +(o.n ?? o.count ?? o.checklists ?? NaN) || null };
+      map[String(name)] = { freq: Number.isFinite(f) ? f : null, n: +(o.n ?? o.count ?? o.checklists ?? o.lists ?? NaN) || null };
     };
     const sp = ex.species || ex.expected || ex.birds || {};
     if (Array.isArray(sp)) sp.forEach(r => r && put(r.name || r.comName || r.species, r));
@@ -148,9 +149,9 @@ globalThis.DAYBIRD_COMPARE = (() => {
     const win = ex.window && typeof ex.window === 'object' ? ex.window : {};
     const from = ex.from || ex.start || win.from || win.start || '', to = ex.to || ex.end || win.to || win.end || '';
     return {
-      code, name: ex.name || ex.region || (region && region.name) || code,
+      code, name: ex.name || (ex.region && typeof ex.region === 'object' ? ex.region.name : ex.region) || (region && region.name) || code,
       from, to, window: windowLabel(from, to) || (typeof ex.period === 'string' ? ex.period : ''),
-      checklists: +(ex.checklists ?? ex.n ?? ex.total ?? ex.lists ?? NaN) || null,
+      checklists: +(ex.checklists ?? ex.n ?? ex.total ?? ex.lists ?? win.lists ?? win.checklists ?? NaN) || null,
       freq: (name) => (map[name] && map[name].freq != null) ? map[name].freq : null,
       n: (name) => (map[name] && map[name].n) || null,
       has: (name) => !!map[name],
