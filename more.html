@@ -50,7 +50,7 @@
   const NOTES = { labs: 'Half-built things we are trying. They work, mostly; they are not the point yet.' };
   const extra = Array.isArray(globalThis.DAYBIRD_PAGES) ? globalThis.DAYBIRD_PAGES : [];
   const seen = new Set(BUILTIN.map(p => p.href));
-  const pages = BUILTIN.concat(extra.filter(p => p && p.href && p.title && !seen.has(p.href) && seen.add(p.href)));
+  const pages = BUILTIN.concat(extra.filter(p => p && p.href && p.title && p.group !== 'parked' && !seen.has(p.href) && seen.add(p.href)));
   const by = {};
   for (const p of pages) { const g = GROUPS[p.group] ? p.group : 'other'; (by[g] = by[g] || []).push(p); }
   const order = Object.keys(GROUPS).concat('other');

@@ -102,13 +102,6 @@
 
   <div class="grid">
     <div class="card">
-      <h3>Going out?</h3>
-      <p class="tagline">Post a roll call. Others can tap "I'm in" on the feed.</p>
-      <label>Where</label><select id="goSpot"></select>
-      <label>When</label><input id="goTime" value="7:00 AM">
-      <div style="margin-top:10px"><button id="goBtn">Post roll call</button></div>
-    </div>
-    <div class="card">
       <h3>Track the call</h3>
       <div id="history"></div>
     </div>
@@ -187,13 +180,6 @@
   $('spots').innerHTML = b.spots.map(s => `<div class="row"><span class="l">${s.locId ? `<a href="https://ebird.org/hotspot/${s.locId}" target="_blank" rel="noopener">${DB.esc(s.name)}</a>` : DB.esc(s.name)}</span><span class="r">${s.species} species</span></div>`).join('') || '<p class="meta">No recent reports.</p>';
   $('notable').innerHTML = b.notable.map(o => `<div class="row"><span class="l">${o.subId ? `<a href="https://ebird.org/checklist/${o.subId}" target="_blank" rel="noopener">${DB.esc(o.comName)}</a>` : DB.esc(o.comName)}${o.howMany ? ' ×' + o.howMany : ''}</span><span class="r">${DB.esc(o.locName)}<br>${DB.esc(o.obsDt || '')}</span></div>`).join('') || '<p class="meta">Nothing notable in range.</p>';
 
-  // roll call
-  $('goSpot').innerHTML = [...b.spots.map(x => x.name), 'Somewhere else'].map(n => `<option>${DB.esc(n)}</option>`).join('');
-  $('goBtn').onclick = async () => {
-    $('goBtn').disabled = true;
-    await DB.post(`Going out: ${$('goSpot').value} at ${$('goTime').value}. ${c.word} day (score ${c.score}). Join me?`, ['going']);
-    location.href = 'feed.html';
-  };
   // history + grading
   function renderHistory(h) {
     const graded = h.filter(x => x.verdict !== null), right = graded.filter(x => x.verdict === 'right').length;
