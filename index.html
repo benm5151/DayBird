@@ -100,12 +100,6 @@
     </div>
   </div>
 
-  <div class="card" id="passcard">
-    <h3>Open passes for the next GO day</h3>
-    <div id="passes"></div>
-    <a class="btn ghost" href="passes.html" style="margin-top:8px">See all passes</a>
-  </div>
-
   <div class="grid">
     <div class="card">
       <h3>Going out?</h3>
@@ -286,8 +280,6 @@
     send({ to: 'other', email }, $('sendOther'));
   };
 
-  const passes = (await DB.loadPasses()).filter(p => p.price >= 0).slice(0, 3);
-  $('passes').innerHTML = passes.map(p => `<div class="row"><span class="l">${DB.esc(p.title)}</span><span class="r">${p.price ? '$' + p.price : 'Free'} · ${p.seats} seats</span></div>`).join('');
 
 })();
 </script>

@@ -629,7 +629,8 @@ async function getJSON(url: string, headers: Record<string, string> = {}) {
 }
 async function fetchCell(c: Cfg, lat: number, lng: number) {
   const errors: string[] = [];
-  const H = { "X-eBirdApiToken": c.ebirdKey };
+  // eBird answers 418 to requests with a bare runtime user agent (Deno's default), so say who we are.
+  const H = { "X-eBirdApiToken": c.ebirdKey, "User-Agent": "Daybird/1.0 (+https://day-bird.com; birding brief for newer birders)", "Accept": "application/json" };
   const q = `lat=${lat}&lng=${lng}&dist=${RADIUS_KM}&back=${BACK_DAYS}`;
   const [wr, nr, rr] = await Promise.allSettled([
     getJSON(B.weatherUrl(lat, lng)).then((w: unknown) => B.parseWeather(w, { forceToday: true })),   // the daily email is always "this morning"

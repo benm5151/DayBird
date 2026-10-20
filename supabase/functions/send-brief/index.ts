@@ -678,7 +678,8 @@ async function getJSON(url: string, headers: Record<string, string> = {}) {
 
 export async function buildBrief(lat: number, lng: number, place: string, ebirdKey: string, mode = "any", level = "new") {
   const errors: string[] = [];
-  const H = { "X-eBirdApiToken": ebirdKey };
+  // eBird answers 418 to requests with a bare runtime user agent (Deno's default), so say who we are.
+  const H = { "X-eBirdApiToken": ebirdKey, "User-Agent": "Daybird/1.0 (+https://day-bird.com; birding brief for newer birders)", "Accept": "application/json" };
   const q = `lat=${lat}&lng=${lng}&dist=${RADIUS_KM}&back=${BACK_DAYS}`;
   const [wr, nr, rr] = await Promise.allSettled([
     getJSON(B.weatherUrl(lat, lng)).then((w: unknown) => B.parseWeather(w)),
