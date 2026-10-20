@@ -35,5 +35,8 @@ jobs:
           DAILY_SECRET: ${{ secrets.DAILY_SECRET }}
         run: |
           if [ -z "$SUPABASE_URL" ] || [ -z "$DAILY_SECRET" ]; then echo "SUPABASE_URL or DAILY_SECRET secret not set; skipping the daily email"; exit 0; fi
-          curl --silent --show-error --fail --max-time 170 -X POST "${SUPABASE_URL%/}/functions/v1/send-daily" \
-            -H "x-daily-secret: ${DAILY_SECRET}" -H "content-type: application/json" --data '{}'
+          # Print the function's reply (it says what went wrong) and fail on anything but a 2xx.
+          code=$(curl --silent --show-error --max-time 170 -o reply.json -w '%{http_code}' -X POST "${SUPABASE_URL%/}/functions/v1/send-daily" \
+            -H "x-daily-secret: ${DAILY_SECRET}" -H "content-type: application/json" --data '{}')
+          echo "send-daily answered HTTP $code:"; cat reply.json; echo
+          case "$code" in 2*) exit 0 ;; *) exit 1 ;; esac
