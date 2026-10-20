@@ -137,7 +137,7 @@ async function recentFor(c: Cfg, lat: number, lng: number) {
 
 class EbirdError extends Error { status: number; constructor(status: number) { super(`eBird ${status}`); this.status = status; } }
 async function ebird(c: Cfg, path: string) {
-  const r = await fetch(`https://api.ebird.org/v2${path}`, { headers: { "X-eBirdApiToken": c.ebirdKey }, signal: AbortSignal.timeout(15000) });
+  const r = await fetch(`https://api.ebird.org/v2${path}`, { headers: { "X-eBirdApiToken": c.ebirdKey, "User-Agent": "Daybird/1.0 (+https://day-bird.com; birding brief for newer birders)", "Accept": "application/json" }, signal: AbortSignal.timeout(15000) });
   if (!r.ok) throw new EbirdError(r.status);
   return r.json();
 }
