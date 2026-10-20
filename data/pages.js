@@ -15,4 +15,5 @@ globalThis.DAYBIRD_PAGES = [
   { href: 'route.html', title: 'Hotspots along your route', blurb: 'Pick a start and an end and see the eBird hotspots within a few minutes of the road, on a map, with a brief for the far end. Premium preview.', group: 'labs' },
   { href: 'art.html', title: 'Our birds: the Daybird art', blurb: 'Twelve ink silhouettes, one amber mark each, and a card maker.', group: 'labs' },
   { href: 'stickers.html', title: 'Sticker sheet', blurb: 'Twelve 2.5-inch circles on a letter page, ready to print.', group: 'labs' },
+  { href: 'stories.html', title: 'Stories', blurb: 'Your morning, your lifers, as story-sized pictures for Instagram or wherever', group: 'you' },
 ];

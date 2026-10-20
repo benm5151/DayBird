@@ -223,6 +223,26 @@ What is in it:
 
 Tests: `node tests/validate-art.mjs` (no packages needed). The browser checks (twelve images load, the card button produces a 1080×1350 PNG with paper, ink and amber pixels, the download works, the photo card renders from a fixture image, the sticker page prints to one letter page, every page loads without an error) were run with Playwright during the build and are not in the repo because they depend on a locally installed Playwright and sharp.
 
+## Stories (stories.html)
+
+Phone-story pictures (1080×1920 PNG) of an outing or a new lifer, for Instagram, group chats, or wherever. Everything is drawn in the browser with the canvas API; nothing is uploaded. `stories.html` is listed under **You** on the More hub (`data/pages.js`).
+
+**Two ways to pick the outing.** *From my eBird* needs the eBird API key, your eBird display name and the regions from Settings: it lists your own checklists from the last 14 days (`product/lists/{region}?maxResults=200`, filtered by `userDisplayName`, the same approach as the profile page's sync), newest first, with place, date and species count. Picking one reads `product/checklist/view/{subId}` and resolves species codes to common names through `ref/taxonomy/ebird?species=…` (cached in `localStorage` as `daybird:taxon`, so each code is looked up once); subspecies groups collapse to the species, and spuhs, slashes, hybrids and domestics are dropped. eBird hands back the newest 200 checklists per region, so on a busy day an older checklist of yours can be missing: type it in instead. *Type it in* takes place, date, minutes and a species list one per line, with an optional "best bird" pick, and **Use my last sit** refills it from the last story made (`daybird:lastStory`). The chosen checklist is kept in `daybird:storyPick` so the page reopens on it, with no network call; the mode and source are remembered too.
+
+**The outing story** is three slides, four when the list is long: a *cover* (the day's sky from `data/brief.json` when the outing was today or yesterday, paper otherwise; the mascot pose for the call; the species count as the hero number with "species · 65 minutes"; the place; the date), a *highlight* (the best bird's name as the hero in big serif, the trait hint from `data/traits.js` as one line, an amber rule, a "lifer!" ribbon when the bird is not on the life list, the mascot small in a corner) and the *list* (every species in two columns, the highlight marked with an amber dot, "Sightings logged on eBird"). Up to 28 names fit a list slide at a readable size; longer lists continue on an "…and 17 more" slide rather than shrinking. The best bird is the user's pick, else the first bird that is not on the life list (when one exists), else the first bird that is not an everyday one (pigeon, starling, house sparrow, crow, mallard, goose, robin, chickadee, mourning dove, blue jay). Long place names ("Deweys Mill Pond - Hartford (56 acres)") shrink to fit and wrap to two lines; nothing overflows.
+
+**The lifer story** is one slide on navy: the titmouse on its moon, "Lifer #N" (N from the life list on the profile page: the newest lifer is `total`, a bird not on the list yet is `total + 1`; omitted when there is no list), the name huge, the place and date, and "148 species and counting". Pick from the ten most recent lifers or type one.
+
+**Sharing.** Each slide has Share and Download; **Share all** hands every slide to the system share sheet in one `navigator.share({ files })` call (phones). Where there is no share sheet, each slide downloads as `daybird-story-<date>-<n>.png` (lifers: `daybird-lifer-<slug>.png`), a beat apart so the browser does not block the second and third.
+
+**The art, on purpose.** Stories use the tufted titmouse only: `mark.svg` in a cream badge top left, and the three mascot poses in `art/`. The species silhouettes in `art/birds/` are drafts and do not appear here (the owner's call: not accurate enough yet for birders to take seriously), and there is no letter-in-a-circle fallback either; the bird's name in serif carries the slide. One color, one accent, so a Daybird story is recognizable in a feed. The page says so in one line.
+
+**Code.** `js/canvas-kit.js` (`DAYBIRD_KIT`) holds the drawing helpers the share pictures have in common: palette and sky gradients (the same stops as `.sky-go/.sky-maybe/.sky-stay`), font stacks from the page's CSS variables, word wrap, `fit()` (shrink a font until the text fits a width and a line count, then cut with an ellipsis), SVG-to-Image through a Blob URL, the mark badge, mascot, wordmark and eyebrow, and `toFile` / `download` / `shareFiles`. `js/share.js` and `js/birdcard.js` predate it and keep their own copies so `index.html` and `art.html` load nothing extra. `js/stories.js` (`DAYBIRD_STORIES`) has the data shaping (pure functions: `myLists`, `outingFromChecklist`, `outingFromForm`, `pickBest`, `plan`, `liferNumber`), the four slide drawings, `render` / `renderLifer` / `shareAll`, and the eBird fetches. Each rendered canvas carries a `_layout` object (the fitted sizes, lines and widths) that the tests read.
+
+No setup: no migration, no secrets, no edge function. Like the morning card, it needs the site served over http(s); some browsers refuse to export a canvas that drew a local SVG from `file://`. The card's type uses the device's own serif and sans (Iowan Old Style or Palatino on Apple devices, Georgia or DejaVu elsewhere), so a story looks a little different per phone; that is by design.
+
+Tests: `node --test tests/stories.test.mjs` (the pure functions: list filtering and dates, checklist parsing, the best-bird rule, slide planning and the lifer numbers; no packages needed) and `PLAYWRIGHT_DIR=… SHARP_DIR=… node tests/stories.ui.mjs` (Playwright with every host stubbed: the from-eBird flow with fixture checklists of 13 and 45 species, type-it-in with 1 and 45, lifer mode with a fake life list, share-all with and without `navigator.share`, a real download, the long place name kept inside the margins by a pixel scan of the PNG, 390 and 1100 px screenshots, and every page loaded once with no page error; with sharp it also verifies each PNG is 1080×1920 with ink and amber pixels).
+
 ## Still faked
 
 - Payments, host payouts, insurance, messaging, moderation.
@@ -245,6 +265,7 @@ unsubscribe.html  opt-out page linked from emailed briefs
 learn.html     learn and play: first 10, weekly groups, bingo, challenges, quiz, streak, tracks
 art.html       the art system: twelve silhouettes, callouts, card makers
 stickers.html  print-ready sticker sheet
+stories.html   phone-story pictures of an outing or a lifer (js/stories.js, js/canvas-kit.js)
 art/           bird SVGs, callouts, contact sheet
 supabase/functions/  bird-id, send-brief, unsubscribe (edge functions)
 recap.html     your month in birds + the share card

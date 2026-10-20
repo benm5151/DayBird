@@ -1,0 +1,305 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Daybird — Stories</title>
+<link rel="stylesheet" href="css/style.css">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#1F2A37">
+<link rel="icon" href="icon.svg">
+<link rel="apple-touch-icon" href="icon.svg">
+<style>
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:10px;overflow:hidden;margin:4px 0 10px}
+.seg button{border:0;border-radius:0;background:transparent;color:var(--ink);font-weight:500;padding:7px 12px}
+.seg button.on{background:var(--brand);color:#fff}
+@media (prefers-color-scheme:dark){.seg button.on{color:#141922}}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+textarea{min-height:150px;resize:vertical}
+.picks button{display:flex;justify-content:space-between;gap:10px;width:100%}
+.picks button small{color:var(--muted);font-weight:400;white-space:nowrap}
+.picks button.on{border-color:var(--accent);box-shadow:0 0 0 2px var(--accent-ink)}
+.strip{display:flex;gap:14px;overflow-x:auto;padding:6px 2px 10px;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch}
+.slide{flex:none;width:270px;scroll-snap-align:start}
+.slide canvas{display:block;width:270px;height:480px;border-radius:18px;box-shadow:var(--shadow);background:var(--card)}
+.slide .inline{margin-top:8px;justify-content:center}
+.slide .meta{text-align:center;margin:4px 0 0}
+#styleNote{margin-top:18px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <a class="brand" href="index.html"><img src="mark.svg" alt=""><span>Daybird<small>Stories</small></span></a>
+    <a class="btn ghost" href="settings.html">Settings</a>
+  </header>
+  <nav class="tabs">
+    <a href="index.html">Brief</a>
+    <a href="id.html">ID</a>
+    <a href="feed.html">Feed</a>
+    <a href="profile.html">Profile</a>
+    <a href="more.html">More</a>
+  </nav>
+
+  <h1>Stories</h1>
+  <p class="lead">Your morning, your lifers, as story-sized pictures for Instagram or wherever.</p>
+
+  <div class="seg" role="group" aria-label="Story type">
+    <button type="button" id="modeOuting" class="on">An outing</button>
+    <button type="button" id="modeLifer">A lifer</button>
+  </div>
+
+  <section id="outing">
+    <div class="card">
+      <div class="seg" role="group" aria-label="Where the outing comes from">
+        <button type="button" id="srcEbird" class="on">From my eBird</button>
+        <button type="button" id="srcTyped">Type it in</button>
+      </div>
+      <div id="ebirdPane">
+        <p class="tagline">Your own checklists from the last 14 days, in the regions set in Settings. eBird hands back the newest 200 checklists per region, so on a busy day an older one of yours can be missing; type it in instead.</p>
+        <p class="meta hidden" id="ebirdGate">Add your eBird API key and your eBird display name in <a href="settings.html">Settings</a> first.</p>
+        <div class="inline">
+          <button type="button" id="loadLists">Load my checklists</button>
+          <span class="meta" id="listsMsg" role="status" aria-live="polite"></span>
+        </div>
+        <div class="picks" id="lists"></div>
+      </div>
+      <div id="typedPane" class="hidden">
+        <label for="fPlace">Place</label>
+        <input id="fPlace" placeholder="Mink Brook, Hanover" autocomplete="off">
+        <div class="two">
+          <div><label for="fDate">Date</label><input id="fDate" type="date"></div>
+          <div><label for="fMinutes">Minutes out</label><input id="fMinutes" type="number" min="1" max="1440" inputmode="numeric" placeholder="60"></div>
+        </div>
+        <label for="fSpecies">Species, one per line</label>
+        <textarea id="fSpecies" placeholder="Black-capped Chickadee&#10;Tufted Titmouse&#10;Song Sparrow"></textarea>
+        <label for="fBest">Best bird</label>
+        <select id="fBest"><option value="">Let Daybird pick</option></select>
+        <div class="inline" style="margin-top:12px">
+          <button type="button" id="makeTyped">Make the story</button>
+          <button type="button" id="useLast" class="ghost">Use my last sit</button>
+          <span class="meta" id="typedMsg" role="status" aria-live="polite"></span>
+        </div>
+      </div>
+      <p class="tagline" style="margin-top:14px">What is stored: the checklist you pick and the last sit you type stay in this browser, so the page reopens on them. The pictures are drawn here and nothing is uploaded.</p>
+    </div>
+  </section>
+
+  <section id="lifer" class="hidden">
+    <div class="card">
+      <label for="lPick">A recent lifer</label>
+      <select id="lPick"><option value="">Type one below</option></select>
+      <label for="lName">Bird</label>
+      <input id="lName" list="lifeNames" placeholder="Savannah Sparrow" autocomplete="off">
+      <datalist id="lifeNames"></datalist>
+      <div class="two">
+        <div><label for="lDate">Date</label><input id="lDate" type="date"></div>
+        <div><label for="lPlace">Place</label><input id="lPlace" placeholder="Where you saw it" autocomplete="off"></div>
+      </div>
+      <div class="inline" style="margin-top:12px">
+        <button type="button" id="makeLifer">Make the story</button>
+        <span class="meta" id="liferMsg" role="status" aria-live="polite"></span>
+      </div>
+      <p class="tagline" id="liferNote" style="margin-top:14px"></p>
+    </div>
+  </section>
+
+  <section id="preview" class="hidden">
+    <h2 id="previewTitle">Your story</h2>
+    <p class="tagline" id="previewNote"></p>
+    <div class="strip" id="strip"></div>
+    <div class="inline" style="margin-top:6px">
+      <button type="button" id="shareAll">Share all</button>
+      <span class="meta" id="shareMsg" role="status" aria-live="polite"></span>
+    </div>
+  </section>
+
+  <p class="tagline" id="styleNote">Drawn with Daybird's draft art, the titmouse only. The look is deliberate: one color, one accent, so a Daybird story is recognizable in a feed.</p>
+
+  <footer>Sightings via eBird (Cornell Lab of Ornithology). Your checklists and life list stay in your browser unless you sign in. Daybird is a guide, not safety advice.</footer>
+</div>
+
+<script src="data/mock.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="js/config.js"></script>
+<script src="js/cloud.js"></script>
+<script src="data/traits.js"></script>
+<script src="js/brief.js"></script>
+<script src="js/app.js"></script>
+<script src="js/footer.js"></script>
+<script src="js/canvas-kit.js"></script>
+<script src="js/stories.js"></script>
+<script>
+(async () => {
+  await DB.ready;
+  const $ = (id) => document.getElementById(id), esc = DB.esc, S = DAYBIRD_STORIES, K = DAYBIRD_KIT;
+  const store = {
+    get(k, d) { try { const v = localStorage.getItem('daybird:' + k); return v == null ? d : JSON.parse(v); } catch { return d; } },
+    set(k, v) { try { localStorage.setItem('daybird:' + k, JSON.stringify(v)); } catch {} },
+  };
+  const L = await DB.lifeList();
+  const have = new Set((L && L.allSpecies) || []);
+  // today's or yesterday's call, for the cover's sky
+  let brief = null;
+  try { const r = await fetch('data/brief.json', { cache: 'no-store' }); if (r.ok) brief = await r.json(); } catch {}
+  const gradeFor = (date) => (brief && ['go', 'maybe', 'stay'].includes(brief.grade) && S.relation(date) !== 'other') ? brief.grade : null;
+
+  // ---------- modes and sources ----------
+  const setMode = (m) => {
+    $('modeOuting').classList.toggle('on', m === 'outing'); $('modeLifer').classList.toggle('on', m === 'lifer');
+    $('outing').classList.toggle('hidden', m !== 'outing'); $('lifer').classList.toggle('hidden', m !== 'lifer');
+    $('preview').classList.toggle('hidden', current.kind !== m);
+    store.set('storyMode', m);
+  };
+  const setSource = (s) => {
+    $('srcEbird').classList.toggle('on', s === 'ebird'); $('srcTyped').classList.toggle('on', s === 'typed');
+    $('ebirdPane').classList.toggle('hidden', s !== 'ebird'); $('typedPane').classList.toggle('hidden', s !== 'typed');
+    store.set('storySource', s);
+  };
+  $('modeOuting').onclick = () => setMode('outing'); $('modeLifer').onclick = () => setMode('lifer');
+  $('srcEbird').onclick = () => setSource('ebird'); $('srcTyped').onclick = () => setSource('typed');
+
+  // ---------- the preview strip ----------
+  const current = { kind: null, outing: null, lifer: null, best: null, canvases: [], names: [] };
+  async function showSlides(kind, canvases, names, title, note) {
+    current.kind = kind; current.canvases = canvases; current.names = names;
+    $('previewTitle').textContent = title; $('previewNote').textContent = note || '';
+    $('strip').innerHTML = '';
+    canvases.forEach((c, i) => {
+      const d = document.createElement('div'); d.className = 'slide';
+      c.setAttribute('aria-label', `Story slide ${i + 1} of ${canvases.length}`);
+      d.appendChild(c);
+      const row = document.createElement('div'); row.className = 'inline';
+      row.innerHTML = `<button type="button" class="small ghost" data-share="${i}">Share</button><button type="button" class="small ghost" data-dl="${i}">Download</button>`;
+      d.appendChild(row);
+      const m = document.createElement('p'); m.className = 'meta'; m.textContent = `${i + 1} of ${canvases.length}`; d.appendChild(m);
+      $('strip').appendChild(d);
+    });
+    $('shareAll').textContent = canvases.length > 1 ? `Share all ${canvases.length}` : 'Share';
+    $('shareMsg').textContent = '';
+    $('preview').classList.remove('hidden');
+    $('strip').scrollLeft = 0;
+  }
+  $('strip').addEventListener('click', async (e) => {
+    const b = e.target.closest('button'); if (!b) return;
+    const i = +(b.dataset.share ?? b.dataset.dl), c = current.canvases[i]; if (!c) return;
+    b.disabled = true;
+    try {
+      if ('share' in b.dataset) { const r = await S.shareAll([c], { name: () => current.names[i], title: 'My Daybird story' }); $('shareMsg').textContent = r === 'shared' ? 'Shared.' : r === 'downloaded' ? 'No share sheet here, so it downloaded.' : ''; }
+      else { K.download(await K.toBlob(c), current.names[i]); $('shareMsg').textContent = 'Saved to your downloads.'; }
+    } catch (err) { $('shareMsg').textContent = 'Could not share: ' + err.message; }
+    b.disabled = false;
+  });
+  $('shareAll').onclick = async () => {
+    if (!current.canvases.length) return;
+    $('shareAll').disabled = true;
+    try {
+      const text = current.kind === 'outing' && current.outing ? S.shareText(current.outing, current.best) : current.lifer ? `Lifer: ${current.lifer.name}. ${S.SITE}` : '';
+      const r = await S.shareAll(current.canvases, { name: (i) => current.names[i], title: 'My Daybird story', text });
+      $('shareMsg').textContent = r === 'shared' ? 'Shared.' : r === 'cancelled' ? '' : `No share sheet in this browser, so ${current.canvases.length === 1 ? 'it' : `all ${current.canvases.length}`} downloaded.`;
+    } catch (err) { $('shareMsg').textContent = 'Could not share: ' + err.message; }
+    $('shareAll').disabled = false;
+  };
+
+  // ---------- outing stories ----------
+  async function showOuting(outing, note) {
+    current.outing = outing;
+    const { best, slides } = await S.render(outing, { have, grade: gradeFor(outing.date), traits: globalThis.DAYBIRD_TRAITS });
+    current.best = best;
+    const n = outing.species.length;
+    await showSlides('outing', slides, slides.map((_, i) => S.fileName(outing, i)), `${n} species at ${outing.place}`, note || (best ? `Best bird: ${best}${S.isLifer(best, have) ? ', a lifer' : ''}. Pick another in "Type it in" if you'd rather.` : ''));
+    store.set('lastStory', { place: outing.place, date: outing.date, minutes: outing.minutes, species: outing.species, best: outing.best || '' });
+  }
+
+  // from my eBird
+  const s = DB.settings();
+  const hasKey = !!(s.ebirdKey && s.ebirdName);
+  $('ebirdGate').classList.toggle('hidden', hasKey); $('loadLists').disabled = !hasKey;
+  let rows = [];
+  function renderRows(pickedId) {
+    $('lists').innerHTML = rows.map(r => `<button type="button" data-sub="${esc(r.subId)}" class="${r.subId === pickedId ? 'on' : ''}"><span>${esc(r.place)}</span><small>${esc(S.shortDate(r.date))}${r.time ? ' ' + esc(S.ampm(r.time)) : ''}${r.numSpecies != null ? ` · ${r.numSpecies} species` : ''}</small></button>`).join('');
+  }
+  $('loadLists').onclick = async () => {
+    $('loadLists').disabled = true; $('listsMsg').textContent = '';
+    try {
+      rows = await S.fetchMyLists(DB.settings(), { onProgress: (m) => { $('listsMsg').textContent = m; } });
+      const pick = store.get('storyPick', null);
+      renderRows(pick && pick.row && pick.row.subId);
+      $('listsMsg').textContent = rows.length ? `${rows.length} checklist${rows.length === 1 ? '' : 's'} in the last 14 days. Tap one.` : 'No checklists of yours in the last 14 days in those regions. Check the display name in Settings, or type the outing in.';
+    } catch (e) { $('listsMsg').textContent = e.message; }
+    $('loadLists').disabled = false;
+  };
+  $('lists').addEventListener('click', async (e) => {
+    const b = e.target.closest('button[data-sub]'); if (!b) return;
+    const row = rows.find(r => r.subId === b.dataset.sub); if (!row) return;
+    [...$('lists').children].forEach(x => x.classList.toggle('on', x === b));
+    $('listsMsg').textContent = 'Reading the checklist…';
+    try {
+      const outing = await S.fetchOuting(row, DB.settings());
+      if (!outing.species.length) { $('listsMsg').textContent = 'That checklist has no species on it.'; return; }
+      store.set('storyPick', { row, outing });
+      $('listsMsg').textContent = '';
+      await showOuting(outing);
+      $('preview').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    } catch (err) { $('listsMsg').textContent = 'Could not read it: ' + err.message; }
+  });
+
+  // type it in
+  const fillBest = () => {
+    const o = S.outingFromForm({ species: $('fSpecies').value }), keep = $('fBest').value;
+    $('fBest').innerHTML = '<option value="">Let Daybird pick</option>' + o.species.map(n => `<option value="${esc(n)}">${esc(n)}</option>`).join('');
+    if (o.species.includes(keep)) $('fBest').value = keep;
+  };
+  $('fSpecies').addEventListener('input', fillBest);
+  $('fDate').value = S.localISO();
+  const prefill = (f) => { if (!f) return; $('fPlace').value = f.place || ''; $('fDate').value = f.date || S.localISO(); $('fMinutes').value = f.minutes || ''; $('fSpecies').value = (f.species || []).join('\n'); fillBest(); $('fBest').value = f.best || ''; };
+  $('useLast').onclick = () => { const f = store.get('lastStory', null); if (!f) { $('typedMsg').textContent = 'No sit saved yet. Make one story and it will be here.'; return; } prefill(f); $('typedMsg').textContent = `Filled in from ${f.place || 'your last sit'}.`; };
+  $('makeTyped').onclick = async () => {
+    const outing = S.outingFromForm({ place: $('fPlace').value, date: $('fDate').value, minutes: $('fMinutes').value, species: $('fSpecies').value, best: $('fBest').value });
+    if (!outing.species.length) { $('typedMsg').textContent = 'Add at least one species, one per line.'; return; }
+    $('makeTyped').disabled = true; $('typedMsg').textContent = '';
+    try { await showOuting(outing); $('preview').scrollIntoView({ behavior: 'smooth', block: 'start' }); }
+    catch (err) { $('typedMsg').textContent = 'Could not draw it: ' + err.message; }
+    $('makeTyped').disabled = false;
+  };
+
+  // ---------- lifer stories ----------
+  const recent = (L && L.recentLifers) || [];
+  $('lPick').innerHTML = '<option value="">Type one below</option>' + recent.map((x, i) => `<option value="${i}">${esc(x.name)}${x.first ? ' · ' + esc(x.first) : ''}${x.loc ? ' · ' + esc(x.loc) : ''}</option>`).join('');
+  $('lifeNames').innerHTML = ((L && L.allSpecies) || []).map(n => `<option value="${esc(n)}">`).join('');
+  $('lDate').value = S.localISO();
+  $('liferNote').textContent = L && L.total
+    ? `Your life list has ${L.total} species. "Lifer #N" counts from it; a bird not on the list yet is #${L.total + 1}. Nothing is stored from this form.`
+    : 'No life list yet, so the story skips the number and the running total. Import your eBird CSV or sync your checklists on the profile page to add them. Nothing is stored from this form.';
+  $('lPick').onchange = () => { const x = recent[+$('lPick').value]; if (!x) return; $('lName').value = x.name; $('lDate').value = x.first || S.localISO(); $('lPlace').value = x.loc || ''; };
+  if (recent.length) { $('lPick').value = '0'; $('lPick').onchange(); }
+  $('makeLifer').onclick = async () => {
+    const name = S.cleanName($('lName').value);
+    if (!name) { $('liferMsg').textContent = 'Type the bird first.'; return; }
+    $('makeLifer').disabled = true; $('liferMsg').textContent = '';
+    try {
+      const lifer = { name, date: S.isoDate($('lDate').value), place: $('lPlace').value.trim() };
+      const c = await S.renderLifer(lifer, { lifeList: L });
+      current.lifer = lifer;
+      const n = S.liferNumber(name, L);
+      await showSlides('lifer', [c], [S.liferFileName(lifer)], `Lifer: ${name}`, n ? `Lifer #${n} on your list.` : '');
+      $('preview').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    } catch (err) { $('liferMsg').textContent = 'Could not draw it: ' + err.message; }
+    $('makeLifer').disabled = false;
+  };
+
+  // ---------- reopen where you left off ----------
+  setSource(store.get('storySource', hasKey ? 'ebird' : 'typed'));
+  setMode(store.get('storyMode', 'outing'));
+  const pick = store.get('storyPick', null);
+  const last = store.get('lastStory', null);
+  if (last) prefill(last);
+  if (pick && pick.outing && pick.outing.species && pick.outing.species.length) {
+    try { await showOuting(pick.outing, `Your last pick, ${pick.row && pick.row.place ? pick.row.place : pick.outing.place}. Load my checklists to choose another.`); } catch {}
+  }
+  setMode(store.get('storyMode', 'outing'));
+  document.dispatchEvent(new Event('daybird:stories-ready'));
+})();
+</script>
+</body>
+</html>
