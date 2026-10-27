@@ -1,12 +1,12 @@
 GO — Get out there.  (score 75)
 Calm and dry at sunrise, 32°. Worth getting out.
 
-Lebanon, New Hampshire · Monday, Oct 26, 6–9 AM (this morning)
-32°F · wind 3 mph E · rain 0% · sunrise 7:17 AM
-Wear: 32° at sunrise, 67° later: winter coat, gloves and a hat, a thermos, binoculars optional.
-First song around 6:37 AM; leave by 7:02 AM to catch sunrise.
+Lebanon, New Hampshire · Tuesday, Oct 27, 6–9 AM (this morning)
+32°F · wind 2 mph W · rain 0% · sunrise 7:18 AM
+Wear: 32° at sunrise, 50° later: winter coat, gloves and a hat, a thermos, binoculars optional.
+First song around 6:38 AM; leave by 7:03 AM to catch sunrise.
 
-Most likely: feeder birds (13 kinds reported), waterfowl (12 kinds reported), sparrows (9 kinds reported).
+Most likely: feeder birds (13 kinds reported), waterfowl (10 kinds reported), sparrows (9 kinds reported).
 - feeder birds: Chickadees, titmice and nuthatches lead the mixed flocks. Follow the chickadees.
 - waterfowl: Scan the water from one spot for a few minutes. Ducks come in groups; count the different kinds.
 - sparrows: Little brown birds in the weeds and at the feeder. Look for stripes on the head.
@@ -14,17 +14,18 @@ Most likely: feeder birds (13 kinds reported), waterfowl (12 kinds reported), sp
 Tip:
 - Start at the closest edge where trees meet open ground; that line is where the birds are.
 
-Good soaring day for hawks: sunny by midday, a 35° warm-up, dead calm. Thermals build late morning, so 10 AM to 2 PM beats dawn for hawks.
+Good soaring day for hawks: sunny by midday, a 18° warm-up, a light breeze, a north-west push. Thermals build late morning, so 10 AM to 2 PM beats dawn for hawks.
 
 Where to go (species reported in the last 3 days, within 25 km):
-1. White River Junction (village) — 15 species — https://ebird.org/hotspot/L165371
-2. Windsor Grasslands WMA — 13 species — https://ebird.org/hotspot/L725081
-3. Woodhaven Neighborhood — 6 species — https://ebird.org/hotspot/L62405990
-4. Mascoma River behind CCBA — 5 species — https://ebird.org/hotspot/L78797981
-5. McDaniels Marsh WMA, Springfield — 4 species — https://ebird.org/hotspot/L3602040
+1. Vermont Center for Ecostudies Office — 11 species — https://ebird.org/hotspot/L461502
+2. Cole Pond Trail, Enfield US-NH 43.55328, -72.10366 — 8 species — https://ebird.org/hotspot/L79034276
+3. Campbell Flats Road — 7 species — https://ebird.org/hotspot/L3553748
+4. 163 Clay Hill Rd, Hartland US-VT 43.59632, -72.37933 — 6 species — https://ebird.org/hotspot/L12269107
+5. McDaniels Marsh WMA, Springfield — 5 species — https://ebird.org/hotspot/L3602040
 
 Notable nearby:
-Nothing notable in range.
+- Dickcissel ×1 — Sterling Springs (Private), White River Junction US-VT (43.6672,-72.3234), 2026-10-27 09:13 — https://ebird.org/checklist/S405826399
+- Yellow-bellied Sapsucker ×1 — Cole Pond Trail, Enfield US-NH 43.55328, -72.10366, 2026-10-26 10:55 — https://ebird.org/checklist/S405623894
 
 Migration last night: https://dashboard.birdcast.info/
 Full brief: https://day-bird.com/
