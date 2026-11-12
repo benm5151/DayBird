@@ -1,33 +1,34 @@
 {
- "generated": "2026-11-11T17:25:12.976Z",
- "date": "2026-11-11",
+ "generated": "2026-11-12T17:43:15.402Z",
+ "date": "2026-11-12",
  "word": "GO",
  "grade": "go",
  "score": 85,
  "headline": "Get out there.",
  "why": [
   "calm winds",
-  "NW tailwind for fall migrants"
+  "3 notable reports nearby"
  ],
- "whyLine": "Calm and dry at sunrise, 42°. Fall migrants are moving on the northwest wind. Worth getting out.",
- "wear": "42° at sunrise: warm jacket and a hat, a thermos, binoculars optional.",
- "firstSong": "5:58 AM",
- "leaveBy": "6:23 AM",
+ "whyLine": "Calm and dry at sunrise, 38°. 3 unusual birds were reported nearby this week. Worth getting out.",
+ "wear": "38° at sunrise: warm jacket and a hat, a thermos, binoculars optional.",
+ "firstSong": "5:59 AM",
+ "leaveBy": "6:24 AM",
  "lookFor": [
   {
    "key": "feeder birds",
-   "count": 12,
+   "count": 13,
    "species": [
     "Black-capped Chickadee",
     "Tufted Titmouse",
     "White-breasted Nuthatch",
-    "Mourning Dove",
-    "Blue Jay",
     "Northern Cardinal",
-    "Rock Pigeon",
+    "Blue Jay",
+    "Cedar Waxwing",
+    "Mourning Dove",
     "Red-breasted Nuthatch",
-    "Brown Creeper",
+    "Rock Pigeon",
     "Carolina Wren",
+    "Brown Creeper",
     "Bohemian Waxwing",
     "Northern Mockingbird"
    ],
@@ -36,61 +37,60 @@
   },
   {
    "key": "waterfowl",
-   "count": 10,
+   "count": 8,
    "species": [
-    "Hooded Merganser",
-    "Mallard",
     "Canada Goose",
+    "Mallard",
+    "Hooded Merganser",
     "Ring-necked Duck",
     "Bufflehead",
     "Common Goldeneye",
     "American Black Duck",
-    "Common Merganser",
-    "Black Scoter",
-    "Pied-billed Grebe"
+    "Common Merganser"
    ],
    "label": "waterfowl",
    "tip": "Scan the water from one spot for a few minutes. Ducks come in groups; count the different kinds."
   },
   {
    "key": "sparrows",
-   "count": 5,
+   "count": 7,
    "species": [
     "Dark-eyed Junco",
-    "White-throated Sparrow",
-    "House Sparrow",
+    "American Tree Sparrow",
     "Fox Sparrow",
-    "American Tree Sparrow"
+    "White-throated Sparrow",
+    "Savannah Sparrow",
+    "Song Sparrow",
+    "House Sparrow"
    ],
    "label": "sparrows",
    "tip": "Little brown birds in the weeds and at the feeder. Look for stripes on the head."
   }
  ],
- "groupsLine": "Most likely: feeder birds (12 kinds reported), waterfowl (10 kinds reported), sparrows (5 kinds reported).",
+ "groupsLine": "Most likely: feeder birds (13 kinds reported), waterfowl (8 kinds reported), sparrows (7 kinds reported).",
  "soaring": {
-  "rating": "good",
+  "rating": "poor",
   "why": [
-   "sunny by midday",
-   "a 8° warm-up",
-   "a light breeze",
-   "a north-west push"
+   "overcast",
+   "little warm-up",
+   "dead calm"
   ],
-  "line": "Good soaring day for hawks: sunny by midday, a 8° warm-up, a light breeze, a north-west push. Thermals build late morning, so 10 AM to 2 PM beats dawn for hawks."
+  "line": "Poor soaring day for hawks: overcast, little warm-up, dead calm."
  },
  "tomorrow": null,
  "wx": {
-  "temp": 42,
-  "wind": 6,
-  "windDir": 293,
-  "rain": 0,
-  "cloud": 1,
-  "cloudMid": 26,
-  "windMid": 8,
-  "high": 50,
+  "temp": 38,
+  "wind": 2,
+  "windDir": 57,
+  "rain": 12,
+  "cloud": 88,
+  "cloudMid": 100,
+  "windMid": 3,
+  "high": 42,
   "low": 36,
-  "sunrise": "06:38",
-  "sunset": "16:27",
-  "date": "2026-11-11"
+  "sunrise": "06:39",
+  "sunset": "16:26",
+  "date": "2026-11-12"
  },
  "spots": [
   {
@@ -98,21 +98,28 @@
    "locId": "L3553748",
    "lat": 43.7681138,
    "lng": -72.2433633,
-   "species": 14
-  },
-  {
-   "name": "I-89 Springfield Rest Area Northbound",
-   "locId": "L9687640",
-   "lat": 43.467581,
-   "lng": -72.101843,
-   "species": 6
+   "species": 10
   },
   {
    "name": "Simon Pearce - Windsor US-VT 43.51721, -72.40171",
    "locId": "L47800014",
    "lat": 43.517208,
    "lng": -72.401711,
+   "species": 10
+  },
+  {
+   "name": "112 Etna Road, Lebanon, New Hampshire, US (43.666, -72.24)",
+   "locId": "L79575182",
+   "lat": 43.6664203,
+   "lng": -72.2396277,
    "species": 6
+  },
+  {
+   "name": "Pompy Farm Oxbow",
+   "locId": "L8092679",
+   "lat": 43.7460881,
+   "lng": -72.2390352,
+   "species": 4
   },
   {
    "name": "7 River Road, Plainfield, New Hampshire, US (43.59, -72.343)",
@@ -120,73 +127,95 @@
    "lat": 43.590101,
    "lng": -72.3426872,
    "species": 4
-  },
-  {
-   "name": "163 Clay Hill Rd, Hartland US-VT (43.5938,-72.3811)",
-   "locId": "L17454648",
-   "lat": 43.593774,
-   "lng": -72.381062,
-   "species": 3
   }
  ],
- "notable": [],
+ "notable": [
+  {
+   "comName": "Common Eider",
+   "howMany": 1,
+   "locName": "Wilder Dam--boat ramp",
+   "obsDt": "2026-11-12 11:25",
+   "subId": "S410006165",
+   "locId": "L687022",
+   "lat": 43.6744694,
+   "lng": -72.3030036
+  },
+  {
+   "comName": "Bonaparte's Gull",
+   "howMany": 1,
+   "locName": "Wilder Dam--boat ramp",
+   "obsDt": "2026-11-12 11:25",
+   "subId": "S410006165",
+   "locId": "L687022",
+   "lat": 43.6744694,
+   "lng": -72.3030036
+  },
+  {
+   "comName": "Common Eider",
+   "howMany": 1,
+   "locName": "Wilder Dam Reservoir, Lebanon",
+   "obsDt": "2026-11-12 10:45",
+   "subId": "S410003660",
+   "locId": "L167093",
+   "lat": 43.67184,
+   "lng": -72.302414
+  }
+ ],
  "recent": [
-  "Great Horned Owl",
   "Black-capped Chickadee",
   "Tufted Titmouse",
   "White-breasted Nuthatch",
   "American Robin",
-  "American Goldfinch",
   "Dark-eyed Junco",
-  "Hooded Merganser",
-  "Mourning Dove",
-  "Downy Woodpecker",
-  "Blue Jay",
-  "American Crow",
-  "Common Raven",
-  "Horned Lark",
-  "European Starling",
-  "White-throated Sparrow",
-  "Red-winged Blackbird",
-  "Rusty Blackbird",
   "Northern Cardinal",
+  "Blue Jay",
+  "European Starling",
+  "Cedar Waxwing",
+  "American Tree Sparrow",
+  "Mourning Dove",
   "Red-bellied Woodpecker",
-  "Rock Pigeon",
-  "House Finch",
   "Pileated Woodpecker",
-  "House Sparrow",
-  "Red-breasted Nuthatch",
-  "Brown Creeper",
-  "Carolina Wren",
-  "Mallard",
+  "Common Raven",
+  "American Goldfinch",
+  "Bald Eagle",
   "Red-tailed Hawk",
-  "Bohemian Waxwing",
+  "American Crow",
+  "Downy Woodpecker",
+  "Hairy Woodpecker",
+  "Red-breasted Nuthatch",
+  "Rock Pigeon",
+  "Canada Goose",
+  "Mallard",
   "American Pipit",
   "Fox Sparrow",
-  "Canada Goose",
+  "White-throated Sparrow",
+  "Savannah Sparrow",
+  "Song Sparrow",
+  "Carolina Wren",
+  "Eastern Bluebird",
+  "House Finch",
+  "Great Horned Owl",
+  "Hooded Merganser",
+  "Horned Lark",
+  "Red-winged Blackbird",
+  "Rusty Blackbird",
+  "House Sparrow",
+  "Brown Creeper",
+  "Bohemian Waxwing",
   "Ring-necked Duck",
   "Northern Mockingbird",
   "Bufflehead",
   "Common Goldeneye",
-  "Hairy Woodpecker",
   "Red-shouldered Hawk",
   "Purple Finch",
-  "Eastern Bluebird",
   "Ruby-crowned Kinglet",
   "American Black Duck",
   "Common Merganser",
   "Golden-crowned Kinglet",
   "Common Grackle",
-  "Wild Turkey",
-  "American Tree Sparrow",
-  "Bald Eagle",
-  "Belted Kingfisher",
-  "Black Scoter",
-  "Great Blue Heron",
-  "Pied-billed Grebe",
-  "Ruffed Grouse"
+  "Wild Turkey"
  ],
- "recentCount": 54,
+ "recentCount": 52,
  "errors": [],
  "engine": 2
 }
