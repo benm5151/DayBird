@@ -1,32 +1,30 @@
-GO — Get out there.  (score 75)
-Calm and dry at sunrise, 30°. Worth getting out.
+MAYBE — Worth a look.  (score 60)
+No weather data for the morning, so this is a guess from the bird reports alone. 3 unusual birds were reported nearby this week. Pick the closest spot and give it an hour.
 
-Lebanon, New Hampshire · Thursday, Nov 19, 6–9 AM (this morning)
-30°F · wind 2 mph S · rain 0% · sunrise 6:48 AM
-Wear: 30° at sunrise, 57° later: winter coat, gloves and a hat, a thermos, binoculars optional.
-First song around 6:08 AM; leave by 6:33 AM to catch sunrise.
+Lebanon, New Hampshire · Friday, Nov 20, 6–9 AM (this morning)
 
-Most likely: waterfowl (11 kinds reported), feeder birds (9 kinds reported), sparrows (5 kinds reported).
-- waterfowl: Scan the water from one spot for a few minutes. Ducks come in groups; count the different kinds.
+Most likely: feeder birds (12 kinds reported), waterfowl (10 kinds reported), sparrows (5 kinds reported).
 - feeder birds: Chickadees, titmice and nuthatches lead the mixed flocks. Follow the chickadees.
+- waterfowl: Scan the water from one spot for a few minutes. Ducks come in groups; count the different kinds.
 - sparrows: Little brown birds in the weeds and at the feeder. Look for stripes on the head.
 
 Tip:
 - Start at the closest edge where trees meet open ground; that line is where the birds are.
 
-Fair soaring day for hawks: overcast, a 27° warm-up, dead calm. Thermals build late morning, so 10 AM to 2 PM beats dawn for hawks.
-
 Where to go (species reported in the last 3 days, within 25 km):
-1. Trail to Leavitt Pond, Grantham — 9 species — https://ebird.org/hotspot/L12544134
-2. Simon Pearce - Windsor US-VT 43.51721, -72.40171 — 6 species — https://ebird.org/hotspot/L47800014
-3. Northeast Corner Farm, Norwich — 6 species — https://ebird.org/hotspot/L70360755
-4. Wilder Dam--boat ramp — 6 species — https://ebird.org/hotspot/L687022
-5. Gina 3 Powers St, Lebanon — 5 species — https://ebird.org/hotspot/L18571723
+1. Simon Pearce - Windsor US-VT 43.51721, -72.40171 — 7 species — https://ebird.org/hotspot/L47800014
+2. Campbell Flats Road — 7 species — https://ebird.org/hotspot/L3553748
+3. 163 Clay Hill Rd, Hartland US-VT 43.59538, -72.38111 — 6 species — https://ebird.org/hotspot/L16786624
+4. Pompy Farm Oxbow — 5 species — https://ebird.org/hotspot/L8092679
+5. Mascoma Lake, Enfield — 5 species — https://ebird.org/hotspot/L1257753
 
 Notable nearby:
+- Wilson's Snipe ×1 — Simon Pearce - Windsor US-VT 43.51721, -72.40171, 2026-11-20 08:56 — https://ebird.org/checklist/S411776655
+- Eastern Meadowlark ×1 — Lake Runnemede / Evarts Pond - (62 acres) - Paradise Park, 2026-11-20 08:32 — https://ebird.org/checklist/S411802755
 - White-winged Crossbill ×2 — Trail to Leavitt Pond, Grantham, 2026-11-18 11:50 — https://ebird.org/checklist/S411417351
 
 Migration last night: https://dashboard.birdcast.info/
 Full brief: https://day-bird.com/
+Data notes: weather: 429 from api.open-meteo.com
 
 Grade yesterday's call on the site so the accuracy score improves.

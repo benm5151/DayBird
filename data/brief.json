@@ -1,131 +1,133 @@
 {
- "generated": "2026-11-19T18:38:29.204Z",
- "date": "2026-11-19",
- "word": "GO",
- "grade": "go",
- "score": 75,
- "headline": "Get out there.",
+ "generated": "2026-11-20T17:59:04.806Z",
+ "date": "2026-11-20",
+ "word": "MAYBE",
+ "grade": "maybe",
+ "score": 60,
+ "headline": "Worth a look.",
  "why": [
-  "calm winds"
+  "no weather data",
+  "3 notable reports nearby"
  ],
- "whyLine": "Calm and dry at sunrise, 30°. Worth getting out.",
- "wear": "30° at sunrise, 57° later: winter coat, gloves and a hat, a thermos, binoculars optional.",
- "firstSong": "6:08 AM",
- "leaveBy": "6:33 AM",
+ "whyLine": "No weather data for the morning, so this is a guess from the bird reports alone. 3 unusual birds were reported nearby this week. Pick the closest spot and give it an hour.",
+ "wear": "",
+ "firstSong": "",
+ "leaveBy": "",
  "lookFor": [
   {
-   "key": "waterfowl",
-   "count": 11,
+   "key": "feeder birds",
+   "count": 12,
    "species": [
+    "Black-capped Chickadee",
+    "Tufted Titmouse",
+    "Northern Cardinal",
+    "Rock Pigeon",
+    "Blue Jay",
+    "White-breasted Nuthatch",
+    "Brown Creeper",
+    "Red-breasted Nuthatch",
+    "Carolina Wren",
+    "Cedar Waxwing",
+    "Mourning Dove",
+    "Northern Mockingbird"
+   ],
+   "label": "feeder birds",
+   "tip": "Chickadees, titmice and nuthatches lead the mixed flocks. Follow the chickadees."
+  },
+  {
+   "key": "waterfowl",
+   "count": 10,
+   "species": [
+    "Canada Goose",
     "Hooded Merganser",
     "Common Merganser",
     "Horned Grebe",
     "Mallard",
-    "Canada Goose",
     "Lesser Scaup",
     "American Black Duck",
     "Ring-necked Duck",
     "Common Loon",
-    "Greater Scaup",
-    "Wood Duck"
+    "Greater Scaup"
    ],
    "label": "waterfowl",
    "tip": "Scan the water from one spot for a few minutes. Ducks come in groups; count the different kinds."
-  },
-  {
-   "key": "feeder birds",
-   "count": 9,
-   "species": [
-    "Mourning Dove",
-    "Blue Jay",
-    "Black-capped Chickadee",
-    "White-breasted Nuthatch",
-    "Brown Creeper",
-    "Northern Cardinal",
-    "Tufted Titmouse",
-    "Northern Mockingbird",
-    "Rock Pigeon"
-   ],
-   "label": "feeder birds",
-   "tip": "Chickadees, titmice and nuthatches lead the mixed flocks. Follow the chickadees."
   },
   {
    "key": "sparrows",
    "count": 5,
    "species": [
     "Dark-eyed Junco",
-    "American Tree Sparrow",
-    "White-throated Sparrow",
     "Snow Bunting",
+    "White-throated Sparrow",
+    "American Tree Sparrow",
     "Song Sparrow"
    ],
    "label": "sparrows",
    "tip": "Little brown birds in the weeds and at the feeder. Look for stripes on the head."
   }
  ],
- "groupsLine": "Most likely: waterfowl (11 kinds reported), feeder birds (9 kinds reported), sparrows (5 kinds reported).",
- "soaring": {
-  "rating": "fair",
-  "why": [
-   "overcast",
-   "a 27° warm-up",
-   "dead calm"
-  ],
-  "line": "Fair soaring day for hawks: overcast, a 27° warm-up, dead calm. Thermals build late morning, so 10 AM to 2 PM beats dawn for hawks."
- },
+ "groupsLine": "Most likely: feeder birds (12 kinds reported), waterfowl (10 kinds reported), sparrows (5 kinds reported).",
+ "soaring": null,
  "tomorrow": null,
- "wx": {
-  "temp": 30,
-  "wind": 2,
-  "windDir": 181,
-  "rain": 0,
-  "cloud": 52,
-  "cloudMid": 70,
-  "windMid": 2,
-  "high": 57,
-  "low": 28,
-  "sunrise": "06:48",
-  "sunset": "16:20",
-  "date": "2026-11-19"
- },
+ "wx": null,
  "spots": [
-  {
-   "name": "Trail to Leavitt Pond, Grantham",
-   "locId": "L12544134",
-   "lat": 43.5672397,
-   "lng": -72.1516688,
-   "species": 9
-  },
   {
    "name": "Simon Pearce - Windsor US-VT 43.51721, -72.40171",
    "locId": "L47800014",
    "lat": 43.517208,
    "lng": -72.401711,
+   "species": 7
+  },
+  {
+   "name": "Campbell Flats Road",
+   "locId": "L3553748",
+   "lat": 43.7681138,
+   "lng": -72.2433633,
+   "species": 7
+  },
+  {
+   "name": "163 Clay Hill Rd, Hartland US-VT 43.59538, -72.38111",
+   "locId": "L16786624",
+   "lat": 43.595382,
+   "lng": -72.381115,
    "species": 6
   },
   {
-   "name": "Northeast Corner Farm, Norwich",
-   "locId": "L70360755",
-   "lat": 43.7716512,
-   "lng": -72.2099739,
-   "species": 6
+   "name": "Pompy Farm Oxbow",
+   "locId": "L8092679",
+   "lat": 43.7460881,
+   "lng": -72.2390352,
+   "species": 5
   },
   {
-   "name": "Wilder Dam--boat ramp",
-   "locId": "L687022",
-   "lat": 43.6744694,
-   "lng": -72.3030036,
-   "species": 6
-  },
-  {
-   "name": "Gina 3 Powers St, Lebanon",
-   "locId": "L18571723",
-   "lat": 43.643633,
-   "lng": -72.303705,
+   "name": "Mascoma Lake, Enfield",
+   "locId": "L1257753",
+   "lat": 43.6283719,
+   "lng": -72.1468735,
    "species": 5
   }
  ],
  "notable": [
+  {
+   "comName": "Wilson's Snipe",
+   "howMany": 1,
+   "locName": "Simon Pearce - Windsor US-VT 43.51721, -72.40171",
+   "obsDt": "2026-11-20 08:56",
+   "subId": "S411776655",
+   "locId": "L47800014",
+   "lat": 43.517208,
+   "lng": -72.401711
+  },
+  {
+   "comName": "Eastern Meadowlark",
+   "howMany": 1,
+   "locName": "Lake Runnemede / Evarts Pond - (62 acres) - Paradise Park",
+   "obsDt": "2026-11-20 08:32",
+   "subId": "S411802755",
+   "locId": "L752029",
+   "lat": 43.4844036,
+   "lng": -72.393348
+  },
   {
    "comName": "White-winged Crossbill",
    "howMany": 2,
@@ -138,50 +140,55 @@
   }
  ],
  "recent": [
-  "Mourning Dove",
-  "Dark-eyed Junco",
-  "Pileated Woodpecker",
-  "Blue Jay",
-  "Common Raven",
+  "American Crow",
   "Black-capped Chickadee",
-  "Golden-crowned Kinglet",
-  "White-breasted Nuthatch",
-  "Brown Creeper",
-  "White-winged Crossbill",
-  "American Tree Sparrow",
-  "Northern Cardinal",
-  "Red-bellied Woodpecker",
-  "Downy Woodpecker",
   "Tufted Titmouse",
   "House Finch",
-  "White-throated Sparrow",
-  "Hooded Merganser",
-  "Common Merganser",
-  "American Crow",
+  "Pileated Woodpecker",
+  "Dark-eyed Junco",
+  "Northern Cardinal",
+  "Red-shouldered Hawk",
+  "Rock Pigeon",
+  "Red-bellied Woodpecker",
+  "Blue Jay",
+  "Common Raven",
+  "White-breasted Nuthatch",
   "Eastern Bluebird",
-  "American Robin",
-  "American Goldfinch",
-  "Horned Grebe",
+  "Snow Bunting",
   "Red-tailed Hawk",
   "Hairy Woodpecker",
+  "Brown Creeper",
+  "American Goldfinch",
+  "White-throated Sparrow",
+  "Downy Woodpecker",
+  "Red-breasted Nuthatch",
+  "Carolina Wren",
+  "European Starling",
+  "American Robin",
+  "Purple Finch",
+  "Canada Goose",
+  "Cedar Waxwing",
+  "American Tree Sparrow",
+  "Song Sparrow",
+  "Mourning Dove",
+  "Golden-crowned Kinglet",
+  "White-winged Crossbill",
+  "Hooded Merganser",
+  "Common Merganser",
+  "Horned Grebe",
   "Mallard",
   "Northern Mockingbird",
-  "Canada Goose",
   "Lesser Scaup",
   "American Black Duck",
   "Ring-necked Duck",
   "Ring-billed Gull",
   "Common Loon",
   "Bald Eagle",
-  "Greater Scaup",
-  "Snow Bunting",
-  "Rock Pigeon",
-  "Red-winged Blackbird",
-  "Song Sparrow",
-  "Wood Duck",
-  "Cooper's Hawk"
+  "Greater Scaup"
  ],
- "recentCount": 42,
- "errors": [],
+ "recentCount": 45,
+ "errors": [
+  "weather: 429 from api.open-meteo.com"
+ ],
  "engine": 2
 }
