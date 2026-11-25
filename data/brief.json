@@ -1,18 +1,18 @@
 {
- "generated": "2026-11-24T20:19:17.531Z",
- "date": "2026-11-24",
+ "generated": "2026-11-25T19:33:40.976Z",
+ "date": "2026-11-25",
  "word": "GO",
  "grade": "go",
- "score": 80,
+ "score": 85,
  "headline": "Get out there.",
  "why": [
-  "NW tailwind for fall migrants",
-  "7 notable reports nearby"
+  "calm winds",
+  "4 notable reports nearby"
  ],
- "whyLine": "A 9 mph breeze and dry at sunrise, 32°. Fall migrants are moving on the northwest wind. 7 unusual birds were reported nearby this week. Worth getting out.",
- "wear": "32° at sunrise: winter coat, gloves and a hat, a thermos, binoculars optional.",
- "firstSong": "6:14 AM",
- "leaveBy": "6:39 AM",
+ "whyLine": "Calm and dry at sunrise, 19°. 4 unusual birds were reported nearby this week. Worth getting out.",
+ "wear": "19° at sunrise, 39° later: heavy coat, hat and gloves, a thermos, binoculars optional.",
+ "firstSong": "6:15 AM",
+ "leaveBy": "6:40 AM",
  "lookFor": [
   {
    "key": "feeder birds",
@@ -20,35 +20,33 @@
    "species": [
     "Blue Jay",
     "Black-capped Chickadee",
-    "Tufted Titmouse",
-    "Northern Cardinal",
-    "Mourning Dove",
     "White-breasted Nuthatch",
-    "Red-breasted Nuthatch",
     "Cedar Waxwing",
-    "Carolina Wren",
-    "Brown Creeper",
+    "Northern Cardinal",
+    "Rock Pigeon",
+    "Tufted Titmouse",
     "Northern Mockingbird",
-    "Rock Pigeon"
+    "Mourning Dove",
+    "Red-breasted Nuthatch",
+    "Carolina Wren",
+    "Brown Creeper"
    ],
    "label": "feeder birds",
    "tip": "Chickadees, titmice and nuthatches lead the mixed flocks. Follow the chickadees."
   },
   {
    "key": "waterfowl",
-   "count": 11,
+   "count": 9,
    "species": [
     "Canada Goose",
     "Mallard",
     "Hooded Merganser",
+    "Common Merganser",
     "Ring-necked Duck",
     "Greater Scaup",
     "American Coot",
     "Common Loon",
-    "American Black Duck",
-    "Common Merganser",
-    "Black Scoter",
-    "Lesser Scaup"
+    "American Black Duck"
    ],
    "label": "waterfowl",
    "tip": "Scan the water from one spot for a few minutes. Ducks come in groups; count the different kinds."
@@ -57,80 +55,89 @@
    "key": "sparrows",
    "count": 5,
    "species": [
-    "American Tree Sparrow",
     "Dark-eyed Junco",
-    "Song Sparrow",
     "White-throated Sparrow",
+    "American Tree Sparrow",
+    "Song Sparrow",
     "Fox Sparrow"
    ],
    "label": "sparrows",
    "tip": "Little brown birds in the weeds and at the feeder. Look for stripes on the head."
   }
  ],
- "groupsLine": "Most likely: feeder birds (12 kinds reported), waterfowl (11 kinds reported), sparrows (5 kinds reported).",
+ "groupsLine": "Most likely: feeder birds (12 kinds reported), waterfowl (9 kinds reported), sparrows (5 kinds reported).",
  "soaring": {
   "rating": "good",
   "why": [
    "sunny by midday",
-   "little warm-up",
-   "a light breeze",
-   "a north-west push"
+   "a 20° warm-up",
+   "dead calm"
   ],
-  "line": "Good soaring day for hawks: sunny by midday, little warm-up, a light breeze, a north-west push. Thermals build late morning, so 10 AM to 2 PM beats dawn for hawks."
+  "line": "Good soaring day for hawks: sunny by midday, a 20° warm-up, dead calm. Thermals build late morning, so 10 AM to 2 PM beats dawn for hawks."
  },
  "tomorrow": null,
  "wx": {
-  "temp": 32,
-  "wind": 9,
-  "windDir": 326,
+  "temp": 19,
+  "wind": 2,
+  "windDir": 224,
   "rain": 0,
-  "cloud": 26,
-  "cloudMid": 2,
-  "windMid": 13,
-  "high": 38,
-  "low": 24,
-  "sunrise": "06:54",
+  "cloud": 61,
+  "cloudMid": 12,
+  "windMid": 3,
+  "high": 39,
+  "low": 15,
+  "sunrise": "06:55",
   "sunset": "16:16",
-  "date": "2026-11-24"
+  "date": "2026-11-25"
  },
  "spots": [
-  {
-   "name": "Pompy Farm Oxbow",
-   "locId": "L8092679",
-   "lat": 43.7460881,
-   "lng": -72.2390352,
-   "species": 7
-  },
   {
    "name": "Simon Pearce - Windsor US-VT 43.51721, -72.40171",
    "locId": "L47800014",
    "lat": 43.517208,
    "lng": -72.401711,
+   "species": 15
+  },
+  {
+   "name": "Wilder Dam--boat ramp",
+   "locId": "L687022",
+   "lat": 43.6744694,
+   "lng": -72.3030036,
    "species": 6
   },
   {
-   "name": "Ompompanoosuc River flats",
-   "locId": "L166149",
-   "lat": 43.75693,
-   "lng": -72.23314,
+   "name": "Ledyard Bridge Area, Hanover",
+   "locId": "L68782519",
+   "lat": 43.702624,
+   "lng": -72.30187,
    "species": 5
   },
   {
-   "name": "163 Clay Hill Rd, Hartland US-VT (43.5938,-72.3811)",
-   "locId": "L17454648",
-   "lat": 43.593774,
-   "lng": -72.381062,
-   "species": 5
-  },
-  {
-   "name": "Simon Pearce",
-   "locId": "L2876751",
-   "lat": 43.516484,
-   "lng": -72.401556,
+   "name": "197 Main St, Enfield US-NH 43.63531, -72.15445 Mascoma Lake park",
+   "locId": "L79971035",
+   "lat": 43.63531,
+   "lng": -72.154448,
    "species": 3
+  },
+  {
+   "name": "Backyard, 2 Aldrich Ave, West Lebanon",
+   "locId": "L25632606",
+   "lat": 43.64204,
+   "lng": -72.307644,
+   "species": 2
   }
  ],
  "notable": [
+  {
+   "comName": "Northern Parula",
+   "howMany": 1,
+   "locName": "Woodstock River St",
+   "obsDt": "2026-11-24 16:15",
+   "subId": "S412934905",
+   "locId": "L3492665",
+   "lat": 43.62879,
+   "lng": -72.52098
+  },
   {
    "comName": "Fox Sparrow (Red)",
    "howMany": 1,
@@ -160,102 +167,56 @@
    "locId": "L1671774",
    "lat": 43.6386984,
    "lng": -72.1516272
-  },
-  {
-   "comName": "American Coot",
-   "howMany": 1,
-   "locName": "Mascoma Lake--Main St. Causeway, Enfield",
-   "obsDt": "2026-11-22 09:06",
-   "subId": "S412370398",
-   "locId": "L249182",
-   "lat": 43.6326191,
-   "lng": -72.1567638
-  },
-  {
-   "comName": "Hermit Thrush",
-   "howMany": 1,
-   "locName": "44 Britton Ln, Lyme",
-   "obsDt": "2026-11-22 08:08",
-   "subId": "S412495494",
-   "locId": "L16789757",
-   "lat": 43.818742,
-   "lng": -72.156535
-  },
-  {
-   "comName": "American Coot",
-   "howMany": 1,
-   "locName": "Mascoma Lake, Enfield",
-   "obsDt": "2026-11-22 07:57",
-   "subId": "S412339908",
-   "locId": "L1257753",
-   "lat": 43.6283719,
-   "lng": -72.1468735
-  },
-  {
-   "comName": "Fox Sparrow",
-   "howMany": 2,
-   "locName": "47 Huntley Street, Norwich, Vermont, US (43.719, -72.314)",
-   "obsDt": "2026-11-22 07:41",
-   "subId": "S412351977",
-   "locId": "L44429363",
-   "lat": 43.7194816,
-   "lng": -72.3138807
   }
  ],
  "recent": [
+  "Blue Jay",
+  "Black-capped Chickadee",
+  "White-breasted Nuthatch",
+  "Dark-eyed Junco",
   "Canada Goose",
   "Mallard",
   "Hooded Merganser",
-  "Blue Jay",
-  "Red-winged Blackbird",
-  "Black-capped Chickadee",
-  "Tufted Titmouse",
-  "Northern Cardinal",
-  "Common Raven",
-  "Mourning Dove",
-  "White-breasted Nuthatch",
-  "European Starling",
-  "Eastern Bluebird",
-  "House Finch",
-  "American Goldfinch",
-  "American Tree Sparrow",
-  "Dark-eyed Junco",
-  "Song Sparrow",
+  "Cooper's Hawk",
+  "Red-bellied Woodpecker",
+  "Common Merganser",
+  "Red-tailed Hawk",
   "American Crow",
+  "Common Raven",
+  "Eastern Bluebird",
+  "Cedar Waxwing",
+  "American Goldfinch",
+  "White-throated Sparrow",
+  "Northern Cardinal",
+  "Rock Pigeon",
+  "Tufted Titmouse",
+  "Northern Mockingbird",
+  "House Finch",
+  "American Tree Sparrow",
+  "Mourning Dove",
+  "Downy Woodpecker",
+  "Pileated Woodpecker",
   "Red-breasted Nuthatch",
   "American Robin",
+  "Red-winged Blackbird",
+  "European Starling",
+  "Song Sparrow",
   "Hairy Woodpecker",
   "Purple Finch",
-  "Red-tailed Hawk",
-  "Cedar Waxwing",
-  "White-throated Sparrow",
-  "Downy Woodpecker",
   "Bald Eagle",
   "Carolina Wren",
   "Brown Creeper",
   "Barred Owl",
-  "Red-bellied Woodpecker",
   "Fox Sparrow",
-  "Pileated Woodpecker",
-  "Northern Mockingbird",
-  "Rock Pigeon",
   "Yellow-rumped Warbler",
   "Ring-necked Duck",
   "Greater Scaup",
   "American Coot",
   "Ring-necked Pheasant",
   "Common Loon",
-  "American Black Duck",
-  "Common Merganser",
-  "Black Scoter",
-  "Wild Turkey",
-  "Ring-billed Gull",
-  "Sharp-shinned Hawk",
-  "Hermit Thrush",
-  "Lesser Scaup",
-  "Red-shouldered Hawk"
+  "American Black Duck"
  ],
- "recentCount": 51,
+ "recentCount": 45,
  "errors": [],
  "engine": 2
 }
