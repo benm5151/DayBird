@@ -1,6 +1,6 @@
 {
- "generated": "2026-11-26T19:15:26.061Z",
- "date": "2026-11-26",
+ "generated": "2026-11-27T19:09:21.198Z",
+ "date": "2026-11-27",
  "word": "GO",
  "grade": "go",
  "score": 75,
@@ -8,114 +8,117 @@
  "why": [
   "calm winds"
  ],
- "whyLine": "Calm and dry at sunrise, 21°. Worth getting out.",
- "wear": "21° at sunrise, 39° later: winter coat, gloves and a hat, a thermos, binoculars optional.",
- "firstSong": "6:16 AM",
- "leaveBy": "6:41 AM",
+ "whyLine": "Calm and dry at sunrise, 40°. Worth getting out.",
+ "wear": "40° at sunrise: warm jacket and a hat, a thermos, binoculars optional.",
+ "firstSong": "6:18 AM",
+ "leaveBy": "6:43 AM",
  "lookFor": [
   {
    "key": "feeder birds",
-   "count": 11,
+   "count": 12,
    "species": [
-    "Blue Jay",
     "Black-capped Chickadee",
-    "White-breasted Nuthatch",
+    "Cedar Waxwing",
     "Tufted Titmouse",
+    "White-breasted Nuthatch",
+    "Rock Pigeon",
+    "Brown Creeper",
+    "Blue Jay",
     "Carolina Wren",
     "Northern Cardinal",
-    "Cedar Waxwing",
-    "Rock Pigeon",
-    "Northern Mockingbird",
+    "Red-breasted Nuthatch",
     "Mourning Dove",
-    "Red-breasted Nuthatch"
+    "Northern Mockingbird"
    ],
    "label": "feeder birds",
    "tip": "Chickadees, titmice and nuthatches lead the mixed flocks. Follow the chickadees."
   },
   {
    "key": "sparrows",
-   "count": 4,
+   "count": 5,
    "species": [
-    "Song Sparrow",
     "Dark-eyed Junco",
     "White-throated Sparrow",
-    "American Tree Sparrow"
+    "Snow Bunting",
+    "American Tree Sparrow",
+    "Song Sparrow"
    ],
    "label": "sparrows",
    "tip": "Little brown birds in the weeds and at the feeder. Look for stripes on the head."
   },
   {
-   "key": "waterfowl",
-   "count": 4,
+   "key": "woodpeckers",
+   "count": 5,
    "species": [
-    "Hooded Merganser",
-    "Canada Goose",
-    "Mallard",
-    "Common Merganser"
+    "Red-bellied Woodpecker",
+    "Downy Woodpecker",
+    "Hairy Woodpecker",
+    "Northern Flicker",
+    "Pileated Woodpecker"
    ],
-   "label": "waterfowl",
-   "tip": "Scan the water from one spot for a few minutes. Ducks come in groups; count the different kinds."
+   "label": "woodpeckers",
+   "tip": "Listen for drumming and tapping, then look at the trunk."
   }
  ],
- "groupsLine": "Most likely: feeder birds (11 kinds reported), sparrows (4 kinds reported), waterfowl (4 kinds reported).",
+ "groupsLine": "Most likely: feeder birds (12 kinds reported), sparrows (5 kinds reported), woodpeckers (5 kinds reported).",
  "soaring": {
-  "rating": "fair",
+  "rating": "poor",
   "why": [
    "overcast",
-   "a 18° warm-up",
+   "little warm-up",
    "a light breeze"
   ],
-  "line": "Fair soaring day for hawks: overcast, a 18° warm-up, a light breeze. Thermals build late morning, so 10 AM to 2 PM beats dawn for hawks."
+  "line": "Poor soaring day for hawks: overcast, little warm-up, a light breeze."
  },
  "tomorrow": null,
  "wx": {
-  "temp": 21,
-  "wind": 2,
-  "windDir": 118,
-  "rain": 0,
-  "cloud": 100,
-  "cloudMid": 99,
-  "windMid": 5,
-  "high": 39,
-  "low": 18,
-  "sunrise": "06:56",
+  "temp": 40,
+  "wind": 6,
+  "windDir": 102,
+  "rain": 3,
+  "cloud": 77,
+  "cloudMid": 100,
+  "windMid": 9,
+  "high": 45,
+  "low": 37,
+  "sunrise": "06:58",
   "sunset": "16:15",
-  "date": "2026-11-26"
+  "date": "2026-11-27"
  },
  "spots": [
   {
-   "name": "Simon Pearce - Windsor US-VT 43.51721, -72.40171",
-   "locId": "L47800014",
-   "lat": 43.517208,
-   "lng": -72.401711,
-   "species": 10
+   "name": "White River Junction (village)",
+   "locId": "L165371",
+   "lat": 43.6463706,
+   "lng": -72.3266215,
+   "species": 7
   },
   {
-   "name": "Wilder Yard",
-   "locId": "L57377545",
-   "lat": 43.6749379,
-   "lng": -72.3104316,
-   "species": 6
+   "name": "George Ratcliffe Park, White River Junction US-VT (43.6431,-72.3159)",
+   "locId": "L40127467",
+   "lat": 43.643081,
+   "lng": -72.31591,
+   "species": 5
   },
   {
-   "name": "Ompompanoosuc River flats",
-   "locId": "L166149",
-   "lat": 43.75693,
-   "lng": -72.23314,
+   "name": "North Thetford/rte 5",
+   "locId": "L1548624",
+   "lat": 43.844204,
+   "lng": -72.1852817,
    "species": 4
   },
   {
-   "name": "Ledyard Bridge Area, Hanover",
-   "locId": "L68782519",
-   "lat": 43.702624,
-   "lng": -72.30187,
+   "name": "Lily Pond, White River Junction",
+   "locId": "L14872818",
+   "lat": 43.6451551,
+   "lng": -72.3235486,
    "species": 4
   },
   {
-   "name": "Wilder Dam--boat ramp",
-   "locId": "L687022",
-   "lat": 43.6744694,
-   "lng": -72.3030036,
+   "name": "Canaan Street Lake, Canaan",
+   "locId": "L13392749",
+   "lat": 43.667856,
+   "lng": -72.0367195,
    "species": 3
   }
  ],
@@ -132,43 +135,46 @@
   }
  ],
  "recent": [
-  "Hooded Merganser",
-  "House Finch",
-  "Song Sparrow",
-  "Red-winged Blackbird",
-  "Blue Jay",
-  "Black-capped Chickadee",
-  "White-breasted Nuthatch",
-  "Dark-eyed Junco",
+  "Canada Goose",
+  "Red-bellied Woodpecker",
   "American Crow",
+  "American Goldfinch",
+  "Black-capped Chickadee",
+  "Cedar Waxwing",
+  "Mallard",
   "Common Raven",
   "Tufted Titmouse",
-  "Carolina Wren",
-  "American Robin",
-  "Northern Cardinal",
-  "Canada Goose",
-  "Mallard",
-  "Cooper's Hawk",
-  "Red-bellied Woodpecker",
-  "Common Merganser",
-  "Red-tailed Hawk",
-  "Eastern Bluebird",
-  "Cedar Waxwing",
-  "American Goldfinch",
-  "White-throated Sparrow",
+  "White-breasted Nuthatch",
   "Rock Pigeon",
-  "Northern Mockingbird",
-  "American Tree Sparrow",
-  "Mourning Dove",
+  "Cooper's Hawk",
+  "Bald Eagle",
   "Downy Woodpecker",
   "Hairy Woodpecker",
+  "Brown Creeper",
+  "Dark-eyed Junco",
+  "Blue Jay",
+  "American Robin",
+  "Evening Grosbeak",
+  "Northern Flicker",
+  "Carolina Wren",
+  "House Finch",
+  "White-throated Sparrow",
+  "Northern Cardinal",
+  "Red-tailed Hawk",
+  "Hooded Merganser",
+  "European Starling",
+  "Eastern Bluebird",
   "Pileated Woodpecker",
   "Red-breasted Nuthatch",
-  "European Starling",
-  "Purple Finch",
-  "Bald Eagle"
+  "Snow Bunting",
+  "American Tree Sparrow",
+  "Mourning Dove",
+  "Song Sparrow",
+  "Red-winged Blackbird",
+  "Common Merganser",
+  "Northern Mockingbird"
  ],
- "recentCount": 35,
+ "recentCount": 38,
  "errors": [],
  "engine": 2
 }
